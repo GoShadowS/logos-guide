@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Иконка типа POI: elevator (32x32 viewBox) -->
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+  <g fill="none" stroke="#1A18E0" stroke-width="2.6" stroke-linejoin="round">
+    <rect x="11" y="5" width="26" height="38" rx="3"/><path d="M19 17l5-5 5 5M19 31l5 5 5-5"/>
+  </g>
+</svg>

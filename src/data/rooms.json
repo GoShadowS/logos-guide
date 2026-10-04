@@ -1,0 +1,1609 @@
+{
+  "_comment": "Аудитории и помещения единственного корпуса: координаты, размеры и двери сняты с реальных планов Map/map1lower.svg / Map/map2lower.svg (door — точка двери на границе помещения, обращённой к коридору).",
+  "rooms": [
+    {
+      "id": "main-1-cafeteria",
+      "buildingId": "main",
+      "floorId": "main-1",
+      "type": "cafeteria",
+      "x": 0.7,
+      "y": 0.7,
+      "w": 146.9,
+      "h": 154.4,
+      "door": {
+        "x": 92,
+        "y": 156
+      },
+      "name": {
+        "ru": "Столовая",
+        "en": "Cafeteria"
+      },
+      "description": {
+        "ru": "Обеденный зал на 120 посадочных мест: горячие завтраки и обеды, буфет. Самый большой зал первого этажа, отдельный выход во внутренний двор.",
+        "en": "Dining hall with 120 seats: hot breakfasts and lunches, buffet. The largest hall on floor 1 with a separate exit to the courtyard."
+      },
+      "aliases": [
+        "столовая",
+        "кафе",
+        "буфет",
+        "еда",
+        "обед",
+        "cafeteria",
+        "food",
+        "lunch",
+        "dining"
+      ],
+      "label": "Столовая"
+    },
+    {
+      "id": "main-1-115",
+      "buildingId": "main",
+      "floorId": "main-1",
+      "type": "classroom",
+      "x": 148.5,
+      "y": 95,
+      "w": 108,
+      "h": 59.5,
+      "door": {
+        "x": 230,
+        "y": 155
+      },
+      "name": {
+        "ru": "Аудитория 115",
+        "en": "Room 115"
+      },
+      "description": {
+        "ru": "Учебная аудитория № 115 (1 этаж второго корпуса). Занятия по расписанию — см. раздел «Расписание».",
+        "en": "Classroom No. 115 (floor 1, second building). Classes follow the timetable — see the Schedule section."
+      },
+      "aliases": [
+        "115",
+        "кабинет 115",
+        "аудитория 115",
+        "room 115"
+      ],
+      "number": "115",
+      "label": "115"
+    },
+    {
+      "id": "main-1-114",
+      "buildingId": "main",
+      "floorId": "main-1",
+      "type": "classroom",
+      "x": 256,
+      "y": 93.5,
+      "w": 85,
+      "h": 62.5,
+      "door": {
+        "x": 279,
+        "y": 156
+      },
+      "name": {
+        "ru": "Аудитория 114",
+        "en": "Room 114"
+      },
+      "description": {
+        "ru": "Учебная аудитория № 114 (1 этаж второго корпуса).",
+        "en": "Classroom No. 114 (floor 1, second building)."
+      },
+      "aliases": [
+        "114",
+        "кабинет 114",
+        "аудитория 114",
+        "room 114"
+      ],
+      "number": "114",
+      "label": "114"
+    },
+    {
+      "id": "main-1-study",
+      "buildingId": "main",
+      "floorId": "main-1",
+      "type": "hall",
+      "x": 339.9,
+      "y": 93.5,
+      "w": 185.6,
+      "h": 62.5,
+      "door": {
+        "x": 450,
+        "y": 156
+      },
+      "name": {
+        "ru": "Учебная часть",
+        "en": "Study area"
+      },
+      "description": {
+        "ru": "Открытая учебная зона: места для самоподготовки, проектные столы, зона ожидания. Помещение без внутренних перегородок.",
+        "en": "Open study area: self-study desks, project tables and a waiting zone. A room without internal partitions."
+      },
+      "aliases": [
+        "учебная часть",
+        "учебная зона",
+        "открытая зона",
+        "study area",
+        "study zone",
+        "open area"
+      ],
+      "label": "Учеб. часть"
+    },
+    {
+      "id": "main-1-checkpoint",
+      "buildingId": "main",
+      "floorId": "main-1",
+      "type": "security",
+      "x": 524,
+      "y": 93.5,
+      "w": 25,
+      "h": 62.5,
+      "door": {
+        "x": 536,
+        "y": 156
+      },
+      "name": {
+        "ru": "Проходная",
+        "en": "Checkpoint"
+      },
+      "description": {
+        "ru": "Проходная у входа во второй корпус: пропускной режим, пост охраны. На плане обозначена значком прохода (две фигуры и стрелки входа/выхода).",
+        "en": "Checkpoint at the second building entrance: access control and security post. Marked on the plan with a passage symbol (two figures and in/out arrows)."
+      },
+      "aliases": [
+        "проходная",
+        "пост охраны",
+        "охрана",
+        "пропускной пункт",
+        "checkpoint",
+        "security",
+        "gate"
+      ],
+      "label": "Проходная"
+    },
+    {
+      "id": "main-1-stairs-top",
+      "buildingId": "main",
+      "floorId": "main-1",
+      "type": "stairs",
+      "x": 547.8,
+      "y": 93,
+      "w": 61.9,
+      "h": 62.8,
+      "door": {
+        "x": 578,
+        "y": 156
+      },
+      "name": {
+        "ru": "Лестница",
+        "en": "Stairs"
+      },
+      "description": {
+        "ru": "Лестница, соединяющая 1 и 2 этажи. Выход к актовому залу и вестибюлю.",
+        "en": "Stairs connecting floors 1 and 2. Leads to the assembly hall and the vestibule."
+      },
+      "aliases": [
+        "лестница",
+        "stairs",
+        "лестница у актового зала",
+        "stairs near hall"
+      ],
+      "label": "Лестница"
+    },
+    {
+      "id": "main-1-acthall",
+      "buildingId": "main",
+      "floorId": "main-1",
+      "type": "hall",
+      "x": 609.7,
+      "y": 93,
+      "w": 147.4,
+      "h": 148.8,
+      "door": {
+        "x": 610.7,
+        "y": 200
+      },
+      "name": {
+        "ru": "Актовый зал",
+        "en": "Assembly hall"
+      },
+      "description": {
+        "ru": "Актовый зал на 250 мест: линейки, собрания, концерты и мероприятия.",
+        "en": "Assembly hall with 250 seats: assemblies, meetings, concerts and events."
+      },
+      "aliases": [
+        "актовый зал",
+        "акт зал",
+        "сборный зал",
+        "assembly hall",
+        "act hall",
+        "hall"
+      ],
+      "label": "Акт. зал"
+    },
+    {
+      "id": "main-1-119",
+      "buildingId": "main",
+      "floorId": "main-1",
+      "type": "classroom",
+      "x": 0,
+      "y": 179,
+      "w": 61.4,
+      "h": 74.4,
+      "door": {
+        "x": 61,
+        "y": 239
+      },
+      "name": {
+        "ru": "Аудитория 119",
+        "en": "Room 119"
+      },
+      "description": {
+        "ru": "Учебная аудитория № 119 (1 этаж второго корпуса). Преподаватель: Иванова М.П. (история).",
+        "en": "Classroom No. 119 (floor 1, second building). Teacher: M.P. Ivanova (history)."
+      },
+      "aliases": [
+        "119",
+        "кабинет 119",
+        "аудитория 119",
+        "кабинет истории",
+        "room 119"
+      ],
+      "number": "119",
+      "teacherId": "t-ivanova",
+      "label": "119"
+    },
+    {
+      "id": "main-1-elevator-1",
+      "buildingId": "main",
+      "floorId": "main-1",
+      "type": "elevator",
+      "x": 85.6,
+      "y": 178.9,
+      "w": 84,
+      "h": 32,
+      "door": {
+        "x": 86,
+        "y": 191
+      },
+      "name": {
+        "ru": "Лифт",
+        "en": "Elevator"
+      },
+      "description": {
+        "ru": "Пассажирский лифт у входа со стороны вертикального коридора.",
+        "en": "Passenger elevator by the vertical corridor."
+      },
+      "aliases": [
+        "лифт",
+        "elevator",
+        "лифт 1",
+        "lift 1"
+      ],
+      "label": "Лифт"
+    },
+    {
+      "id": "main-1-148",
+      "buildingId": "main",
+      "floorId": "main-1",
+      "type": "classroom",
+      "x": 167.9,
+      "y": 179,
+      "w": 77.2,
+      "h": 62.8,
+      "door": {
+        "x": 183,
+        "y": 180
+      },
+      "name": {
+        "ru": "Аудитория 148",
+        "en": "Room 148"
+      },
+      "description": {
+        "ru": "Учебная аудитория № 148 (1 этаж второго корпуса).",
+        "en": "Classroom No. 148 (floor 1, second building)."
+      },
+      "aliases": [
+        "148",
+        "кабинет 148",
+        "аудитория 148",
+        "room 148"
+      ],
+      "number": "148",
+      "label": "148"
+    },
+    {
+      "id": "main-1-120",
+      "buildingId": "main",
+      "floorId": "main-1",
+      "type": "lab",
+      "x": 243.7,
+      "y": 179,
+      "w": 74.4,
+      "h": 62.8,
+      "door": {
+        "x": 262,
+        "y": 180
+      },
+      "name": {
+        "ru": "Аудитория 120 — аэродинамика",
+        "en": "Room 120 — Aerodynamics"
+      },
+      "description": {
+        "ru": "Лаборатория № 120 (1 этаж второго корпуса): практические занятия по аэродинамике. Преподаватель: Петров С.А.",
+        "en": "Laboratory No. 120 (floor 1, second building): aerodynamics practicals. Teacher: S.A. Petrov."
+      },
+      "aliases": [
+        "120",
+        "кабинет 120",
+        "аэродинамика",
+        "авиа",
+        "room 120",
+        "aerodynamics"
+      ],
+      "number": "120",
+      "teacherId": "t-petrov",
+      "label": "120"
+    },
+    {
+      "id": "main-1-director",
+      "buildingId": "main",
+      "floorId": "main-1",
+      "type": "office",
+      "x": 336.5,
+      "y": 179.7,
+      "w": 113.4,
+      "h": 29.6,
+      "door": {
+        "x": 359,
+        "y": 180
+      },
+      "name": {
+        "ru": "Кабинет директора",
+        "en": "Director’s office"
+      },
+      "description": {
+        "ru": "Кабинет директора колледжа. Приём по рабочим дням, предварительная запись через приёмную.",
+        "en": "College director’s office. Reception on working days by appointment."
+      },
+      "aliases": [
+        "каб. директора",
+        "кабинет директора",
+        "директор",
+        "director",
+        "director office"
+      ],
+      "label": "Каб. дир."
+    },
+    {
+      "id": "main-1-stairs-mid",
+      "buildingId": "main",
+      "floorId": "main-1",
+      "type": "stairs",
+      "x": 317.6,
+      "y": 209.3,
+      "w": 132.3,
+      "h": 31.8,
+      "door": {
+        "x": 360,
+        "y": 210
+      },
+      "name": {
+        "ru": "Лестница",
+        "en": "Stairs"
+      },
+      "description": {
+        "ru": "Лестница, соединяющая 1 и 2 этажи; расположена в нише за кабинетом директора.",
+        "en": "Stairs connecting floors 1 and 2, located in the alcove behind the director’s office."
+      },
+      "aliases": [
+        "лестница",
+        "stairs",
+        "лестница у директора",
+        "stairs near director"
+      ],
+      "label": "Лестница"
+    },
+    {
+      "id": "main-1-wardrobe",
+      "buildingId": "main",
+      "floorId": "main-1",
+      "type": "wardrobe",
+      "x": 448.8,
+      "y": 179,
+      "w": 100,
+      "h": 62.8,
+      "door": {
+        "x": 506,
+        "y": 180
+      },
+      "name": {
+        "ru": "Гардероб",
+        "en": "Cloakroom"
+      },
+      "description": {
+        "ru": "Гардероб для учащихся и сотрудников: приём и выдача верхней одежды.",
+        "en": "Cloakroom for students and staff: outerwear drop-off and pick-up."
+      },
+      "aliases": [
+        "гардероб",
+        "раздевалка",
+        "cloakroom",
+        "wardrobe"
+      ],
+      "label": "Гардероб"
+    },
+    {
+      "id": "main-1-elevator-2",
+      "buildingId": "main",
+      "floorId": "main-1",
+      "type": "elevator",
+      "x": 85.6,
+      "y": 209.9,
+      "w": 84,
+      "h": 32,
+      "door": {
+        "x": 86,
+        "y": 223
+      },
+      "name": {
+        "ru": "Лифт",
+        "en": "Elevator"
+      },
+      "description": {
+        "ru": "Второй пассажирский лифт (у выхода из гардероба).",
+        "en": "Second passenger elevator (by the cloakroom exit)."
+      },
+      "aliases": [
+        "лифт",
+        "elevator",
+        "лифт 2",
+        "lift 2"
+      ],
+      "label": "Лифт"
+    },
+    {
+      "id": "main-1-vestibule",
+      "buildingId": "main",
+      "floorId": "main-1",
+      "type": "entrance",
+      "x": 547.8,
+      "y": 154.4,
+      "w": 61.9,
+      "h": 87.4,
+      "door": {
+        "x": 548,
+        "y": 196
+      },
+      "name": {
+        "ru": "Вестибюль",
+        "en": "Vestibule"
+      },
+      "description": {
+        "ru": "Вестибюль второго корпуса: входная группа, информация, проход на 1 этаж.",
+        "en": "Second building vestibule: entrance group, information desk, access to floor 1."
+      },
+      "aliases": [
+        "вестибюль",
+        "вход",
+        "вестибюль 2 корпус",
+        "vestibule",
+        "entrance hall",
+        "lobby"
+      ],
+      "label": "Вестибюль"
+    },
+    {
+      "id": "main-1-118",
+      "buildingId": "main",
+      "floorId": "main-1",
+      "type": "classroom",
+      "x": 0,
+      "y": 251.6,
+      "w": 61.4,
+      "h": 74.4,
+      "door": {
+        "x": 61,
+        "y": 280
+      },
+      "name": {
+        "ru": "Аудитория 118",
+        "en": "Room 118"
+      },
+      "description": {
+        "ru": "Учебная аудитория № 118 (1 этаж второго корпуса).",
+        "en": "Classroom No. 118 (floor 1, second building)."
+      },
+      "aliases": [
+        "118",
+        "кабинет 118",
+        "аудитория 118",
+        "room 118"
+      ],
+      "number": "118",
+      "label": "118"
+    },
+    {
+      "id": "main-1-lab-1",
+      "buildingId": "main",
+      "floorId": "main-1",
+      "type": "lab",
+      "x": 85.6,
+      "y": 239.5,
+      "w": 63.7,
+      "h": 68.4,
+      "door": {
+        "x": 86,
+        "y": 281
+      },
+      "name": {
+        "ru": "Лаборат.",
+        "en": "Laboratory"
+      },
+      "description": {
+        "ru": "Учебная лаборатория на 1 этаже второго корпуса (на плане выделена тёмным цветом).",
+        "en": "Teaching laboratory on floor 1 of the second building (dark colour on the plan)."
+      },
+      "aliases": [
+        "лаборатория",
+        "лаб",
+        "laboratory",
+        "lab"
+      ],
+      "label": "Лаборат."
+    },
+    {
+      "id": "main-1-139",
+      "buildingId": "main",
+      "floorId": "main-1",
+      "type": "classroom",
+      "x": 85.6,
+      "y": 306,
+      "w": 63.7,
+      "h": 69.8,
+      "door": {
+        "x": 86,
+        "y": 360
+      },
+      "name": {
+        "ru": "Аудитория 139",
+        "en": "Room 139"
+      },
+      "description": {
+        "ru": "Учебная аудитория № 139 (1 этаж второго корпуса).",
+        "en": "Classroom No. 139 (floor 1, second building)."
+      },
+      "aliases": [
+        "139",
+        "кабинет 139",
+        "аудитория 139",
+        "room 139"
+      ],
+      "number": "139",
+      "label": "139"
+    },
+    {
+      "id": "main-1-138",
+      "buildingId": "main",
+      "floorId": "main-1",
+      "type": "classroom",
+      "x": 85.6,
+      "y": 374.4,
+      "w": 63.7,
+      "h": 68.4,
+      "door": {
+        "x": 86,
+        "y": 427
+      },
+      "name": {
+        "ru": "Аудитория 138",
+        "en": "Room 138"
+      },
+      "description": {
+        "ru": "Учебная аудитория № 138 (1 этаж второго корпуса).",
+        "en": "Classroom No. 138 (floor 1, second building)."
+      },
+      "aliases": [
+        "138",
+        "кабинет 138",
+        "аудитория 138",
+        "room 138"
+      ],
+      "number": "138",
+      "label": "138"
+    },
+    {
+      "id": "main-1-stairs-left",
+      "buildingId": "main",
+      "floorId": "main-1",
+      "type": "stairs",
+      "x": 0,
+      "y": 322,
+      "w": 62,
+      "h": 64,
+      "door": {
+        "x": 61,
+        "y": 375
+      },
+      "name": {
+        "ru": "Лестница",
+        "en": "Stairs"
+      },
+      "description": {
+        "ru": "Лестница в левом крыле, соединяющая 1 и 2 этажи.",
+        "en": "Stairs in the left wing connecting floors 1 and 2."
+      },
+      "aliases": [
+        "лестница",
+        "stairs",
+        "лестница в левом крыле",
+        "left wing stairs"
+      ],
+      "label": "Лестница"
+    },
+    {
+      "id": "main-1-162",
+      "buildingId": "main",
+      "floorId": "main-1",
+      "type": "classroom",
+      "x": 0,
+      "y": 419,
+      "w": 61.9,
+      "h": 50.2,
+      "door": {
+        "x": 62,
+        "y": 436
+      },
+      "name": {
+        "ru": "Аудитория 162",
+        "en": "Room 162"
+      },
+      "description": {
+        "ru": "Учебная аудитория № 162 (1 этаж второго корпуса, левое крыло).",
+        "en": "Classroom No. 162 (floor 1, second building, left wing)."
+      },
+      "aliases": [
+        "162",
+        "кабинет 162",
+        "аудитория 162",
+        "room 162"
+      ],
+      "number": "162",
+      "label": "162"
+    },
+    {
+      "id": "main-1-toilet-1",
+      "buildingId": "main",
+      "floorId": "main-1",
+      "type": "toilet",
+      "x": 86,
+      "y": 456,
+      "w": 34,
+      "h": 13,
+      "door": {
+        "x": 105,
+        "y": 457
+      },
+      "name": {
+        "ru": "Туалет (мужской)",
+        "en": "Restroom (men)"
+      },
+      "description": {
+        "ru": "Санузел на 1 этаже со стороны вертикального коридора (на плане обозначен крестом).",
+        "en": "Restroom on floor 1 by the vertical corridor (marked with a cross on the plan)."
+      },
+      "aliases": [
+        "туалет",
+        "санузел",
+        "wc",
+        "toilet",
+        "restroom",
+        "men"
+      ],
+      "label": "Туалет"
+    },
+    {
+      "id": "main-1-toilet-2",
+      "buildingId": "main",
+      "floorId": "main-1",
+      "type": "toilet",
+      "x": 119,
+      "y": 442,
+      "w": 30,
+      "h": 27,
+      "door": {
+        "x": 120,
+        "y": 450
+      },
+      "name": {
+        "ru": "Туалет (женский)",
+        "en": "Restroom (women)"
+      },
+      "description": {
+        "ru": "Санузел на 1 этаже со стороны вертикального коридора (на плане обозначен крестом).",
+        "en": "Restroom on floor 1 by the vertical corridor (marked with a cross on the plan)."
+      },
+      "aliases": [
+        "туалет",
+        "санузел",
+        "wc",
+        "toilet",
+        "restroom",
+        "women"
+      ],
+      "label": "Туалет"
+    },
+    {
+      "id": "main-1-113",
+      "buildingId": "main",
+      "floorId": "main-1",
+      "type": "classroom",
+      "x": 0,
+      "y": 467.8,
+      "w": 149.3,
+      "h": 84.2,
+      "door": {
+        "x": 74,
+        "y": 468
+      },
+      "name": {
+        "ru": "Аудитория 113",
+        "en": "Room 113"
+      },
+      "description": {
+        "ru": "Учебная аудитория № 113 (1 этаж второго корпуса), левое крыло.",
+        "en": "Classroom No. 113 (floor 1, second building), left wing."
+      },
+      "aliases": [
+        "113",
+        "кабинет 113",
+        "аудитория 113",
+        "room 113"
+      ],
+      "number": "113",
+      "label": "113"
+    },
+    {
+      "id": "main-1-entrance",
+      "buildingId": "main",
+      "floorId": "main-1",
+      "type": "entrance",
+      "x": 547.8,
+      "y": 239.5,
+      "w": 61.9,
+      "h": 24.2,
+      "door": {
+        "x": 578,
+        "y": 240
+      },
+      "name": {
+        "ru": "Вход",
+        "en": "Entrance"
+      },
+      "description": {
+        "ru": "Главный вход во второй корпус со стороны внутреннего двора. Рядом пост охраны и гардероб.",
+        "en": "Main entrance to the second building from the inner courtyard. Security post and cloakroom nearby."
+      },
+      "aliases": [
+        "вход",
+        "главный вход",
+        "второй корпус",
+        "entrance",
+        "main entrance"
+      ],
+      "label": "Вход"
+    },
+    {
+      "id": "main-2-library",
+      "buildingId": "main",
+      "floorId": "main-2",
+      "type": "library",
+      "x": 1.5,
+      "y": 1.5,
+      "w": 142,
+      "h": 111,
+      "door": {
+        "x": 116,
+        "y": 113
+      },
+      "name": {
+        "ru": "Библиотека",
+        "en": "Library"
+      },
+      "description": {
+        "ru": "Библиотека колледжа: читальный зал, абонемент, учебная литература и электронные каталоги. Два выхода в хол библиотеки.",
+        "en": "College library: reading room, lending desk, course literature and electronic catalogues. Two exits to the library hall."
+      },
+      "aliases": [
+        "библиотека",
+        "читальный зал",
+        "library",
+        "reading room"
+      ],
+      "label": "Библиотека"
+    },
+    {
+      "id": "main-2-228",
+      "buildingId": "main",
+      "floorId": "main-2",
+      "type": "classroom",
+      "x": 145.5,
+      "y": 96.5,
+      "w": 111.5,
+      "h": 59.5,
+      "door": {
+        "x": 218,
+        "y": 157
+      },
+      "name": {
+        "ru": "Аудитория 228",
+        "en": "Room 228"
+      },
+      "description": {
+        "ru": "Учебная аудитория № 228 (2 этаж второго корпуса).",
+        "en": "Classroom No. 228 (floor 2, second building)."
+      },
+      "aliases": [
+        "228",
+        "кабинет 228",
+        "аудитория 228",
+        "room 228"
+      ],
+      "number": "228",
+      "label": "228"
+    },
+    {
+      "id": "main-2-230",
+      "buildingId": "main",
+      "floorId": "main-2",
+      "type": "classroom",
+      "x": 259,
+      "y": 96.5,
+      "w": 96.5,
+      "h": 59.5,
+      "door": {
+        "x": 318,
+        "y": 157
+      },
+      "name": {
+        "ru": "Аудитория 230",
+        "en": "Room 230"
+      },
+      "description": {
+        "ru": "Учебная аудитория № 230 (2 этаж второго корпуса). Преподаватель: Морозова Е.В. (информатика).",
+        "en": "Classroom No. 230 (floor 2, second building). Teacher: E.V. Morozova (computer science)."
+      },
+      "aliases": [
+        "230",
+        "кабинет 230",
+        "аудитория 230",
+        "room 230"
+      ],
+      "number": "230",
+      "teacherId": "t-morozova",
+      "label": "230"
+    },
+    {
+      "id": "main-2-lab-l1",
+      "buildingId": "main",
+      "floorId": "main-2",
+      "type": "lab",
+      "x": 358,
+      "y": 96.5,
+      "w": 66.5,
+      "h": 59.5,
+      "door": {
+        "x": 391,
+        "y": 157
+      },
+      "name": {
+        "ru": "Лаборатория Л",
+        "en": "Laboratory L"
+      },
+      "description": {
+        "ru": "Учебная лаборатория Л (2 этаж второго корпуса).",
+        "en": "Teaching laboratory L (floor 2, second building)."
+      },
+      "aliases": [
+        "л",
+        "лаборатория л",
+        "лаб л",
+        "laboratory l",
+        "lab l"
+      ],
+      "number": "Лаб. Л",
+      "label": "Лаб. Л"
+    },
+    {
+      "id": "main-2-209",
+      "buildingId": "main",
+      "floorId": "main-2",
+      "type": "classroom",
+      "x": 426.5,
+      "y": 96.5,
+      "w": 107.5,
+      "h": 59.5,
+      "door": {
+        "x": 460,
+        "y": 157
+      },
+      "name": {
+        "ru": "Аудитория 209",
+        "en": "Room 209"
+      },
+      "description": {
+        "ru": "Учебная аудитория № 209 (2 этаж второго корпуса). Преподаватель: Сидорова А.А. (математика).",
+        "en": "Classroom No. 209 (floor 2, second building). Teacher: A.A. Sidorova (mathematics)."
+      },
+      "aliases": [
+        "209",
+        "кабинет 209",
+        "аудитория 209",
+        "room 209"
+      ],
+      "number": "209",
+      "teacherId": "t-sidorova",
+      "label": "209"
+    },
+    {
+      "id": "main-2-checkpoint",
+      "buildingId": "main",
+      "floorId": "main-2",
+      "type": "security",
+      "x": 534.6,
+      "y": 94.8,
+      "w": 26.4,
+      "h": 62.7,
+      "door": {
+        "x": 548,
+        "y": 157
+      },
+      "name": {
+        "ru": "Проходная",
+        "en": "Checkpoint"
+      },
+      "description": {
+        "ru": "Проходная у входа во второй корпус: пропускной режим, пост охраны. На плане обозначена значком прохода (две фигуры и стрелки входа/выхода).",
+        "en": "Checkpoint at the second building entrance: access control and security post. Marked on the plan with a passage symbol (two figures and in/out arrows)."
+      },
+      "aliases": [
+        "проходная",
+        "пост охраны",
+        "охрана",
+        "пропускной пункт",
+        "checkpoint",
+        "security",
+        "gate"
+      ],
+      "label": "Проходная"
+    },
+    {
+      "id": "main-2-stairs-top",
+      "buildingId": "main",
+      "floorId": "main-2",
+      "type": "stairs",
+      "x": 560.8,
+      "y": 95.5,
+      "w": 49,
+      "h": 61.3,
+      "door": {
+        "x": 585,
+        "y": 157
+      },
+      "name": {
+        "ru": "Лестница",
+        "en": "Stairs"
+      },
+      "description": {
+        "ru": "Лестница, соединяющая 1 и 2 этажи. Выход к актовому залу.",
+        "en": "Stairs connecting floors 1 and 2. Leads to the assembly hall."
+      },
+      "aliases": [
+        "лестница",
+        "stairs",
+        "лестница у актового зала",
+        "stairs near hall"
+      ],
+      "label": "Лестница"
+    },
+    {
+      "id": "main-2-acthall",
+      "buildingId": "main",
+      "floorId": "main-2",
+      "type": "hall",
+      "x": 609.8,
+      "y": 94.8,
+      "w": 156.5,
+      "h": 150.3,
+      "door": {
+        "x": 610.8,
+        "y": 240
+      },
+      "name": {
+        "ru": "Актовый зал (2 этаж)",
+        "en": "Assembly hall (floor 2)"
+      },
+      "description": {
+        "ru": "Актовый зал: балконная часть и технические помещения второго этажа (на плане затемнён — зал двухсветный).",
+        "en": "Assembly hall: balcony level and floor 2 technical rooms (darkened on the plan — the hall is double-height)."
+      },
+      "aliases": [
+        "актовый зал",
+        "assembly hall",
+        "act hall",
+        "акт зал",
+        "hall"
+      ],
+      "label": "Акт. зал"
+    },
+    {
+      "id": "main-2-cctv",
+      "buildingId": "main",
+      "floorId": "main-2",
+      "type": "security",
+      "x": 609.8,
+      "y": 138.8,
+      "w": 22.2,
+      "h": 62.7,
+      "door": {
+        "x": 610.8,
+        "y": 170
+      },
+      "name": {
+        "ru": "Видеонаблюдение",
+        "en": "CCTV room"
+      },
+      "description": {
+        "ru": "Помещение видеонаблюдения у актового зала (на плане обозначено значком «глаз»).",
+        "en": "Video surveillance room next to the assembly hall (marked with an eye symbol on the plan)."
+      },
+      "aliases": [
+        "видеонаблюдение",
+        "наблюдение",
+        "глаз",
+        "cctv",
+        "surveillance",
+        "eye"
+      ],
+      "label": "Видеонабл."
+    },
+    {
+      "id": "main-2-236",
+      "buildingId": "main",
+      "floorId": "main-2",
+      "type": "classroom",
+      "x": 1.5,
+      "y": 183,
+      "w": 59,
+      "h": 96.5,
+      "door": {
+        "x": 61,
+        "y": 247
+      },
+      "name": {
+        "ru": "Аудитория 236 (213)",
+        "en": "Room 236 (213)"
+      },
+      "description": {
+        "ru": "Учебная аудитория № 236 (ранее 213) — 2 этаж второго корпуса.",
+        "en": "Classroom No. 236 (formerly 213) — floor 2, second building."
+      },
+      "aliases": [
+        "236",
+        "213",
+        "кабинет 236",
+        "аудитория 236",
+        "room 236",
+        "room 213"
+      ],
+      "number": "236",
+      "label": "236"
+    },
+    {
+      "id": "main-2-elevator-1",
+      "buildingId": "main",
+      "floorId": "main-2",
+      "type": "elevator",
+      "x": 88,
+      "y": 183,
+      "w": 59,
+      "h": 30,
+      "door": {
+        "x": 87,
+        "y": 193
+      },
+      "name": {
+        "ru": "Лифт",
+        "en": "Elevator"
+      },
+      "description": {
+        "ru": "Пассажирский лифт у входа со стороны вертикального коридора.",
+        "en": "Passenger elevator by the vertical corridor."
+      },
+      "aliases": [
+        "лифт",
+        "elevator",
+        "лифт 1",
+        "lift 1"
+      ],
+      "label": "Лифт"
+    },
+    {
+      "id": "main-2-tech-1",
+      "buildingId": "main",
+      "floorId": "main-2",
+      "type": "hall",
+      "x": 147.8,
+      "y": 182.2,
+      "w": 21.2,
+      "h": 62.7,
+      "door": {
+        "x": 158,
+        "y": 183
+      },
+      "name": {
+        "ru": "Техническое помещение",
+        "en": "Technical room"
+      },
+      "description": {
+        "ru": "Техническое помещение (электрощитовая, вентиляционная камера); на плане затемнено.",
+        "en": "Technical room (switchboard, ventilation chamber); darkened on the plan."
+      },
+      "aliases": [
+        "техническое",
+        "щитовая",
+        "technical",
+        "utility"
+      ],
+      "label": "Тех."
+    },
+    {
+      "id": "main-2-211",
+      "buildingId": "main",
+      "floorId": "main-2",
+      "type": "classroom",
+      "x": 170,
+      "y": 183,
+      "w": 151,
+      "h": 61,
+      "door": {
+        "x": 250,
+        "y": 182
+      },
+      "name": {
+        "ru": "Аудитория 211",
+        "en": "Room 211"
+      },
+      "description": {
+        "ru": "Учебная аудитория № 211 (2 этаж второго корпуса). Преподаватель: Кузнецов Д.С. (физика).",
+        "en": "Classroom No. 211 (floor 2, second building). Teacher: D.S. Kuznetsov (physics)."
+      },
+      "aliases": [
+        "211",
+        "кабинет 211",
+        "аудитория 211",
+        "room 211"
+      ],
+      "number": "211",
+      "teacherId": "t-kuznetsov",
+      "label": "211"
+    },
+    {
+      "id": "main-2-stairs-mid",
+      "buildingId": "main",
+      "floorId": "main-2",
+      "type": "stairs",
+      "x": 321.5,
+      "y": 182.2,
+      "w": 69.8,
+      "h": 62.7,
+      "door": {
+        "x": 357,
+        "y": 183
+      },
+      "name": {
+        "ru": "Лестница",
+        "en": "Stairs"
+      },
+      "description": {
+        "ru": "Лестница, соединяющая 1 и 2 этажи; расположена над нишей кабинета директора.",
+        "en": "Stairs connecting floors 1 and 2, located above the director’s office alcove."
+      },
+      "aliases": [
+        "лестница",
+        "stairs",
+        "лестница у директора",
+        "stairs near director"
+      ],
+      "label": "Лестница"
+    },
+    {
+      "id": "main-2-p1",
+      "buildingId": "main",
+      "floorId": "main-2",
+      "type": "classroom",
+      "x": 393.5,
+      "y": 183,
+      "w": 31,
+      "h": 61,
+      "door": {
+        "x": 409,
+        "y": 182
+      },
+      "name": {
+        "ru": "Кабинет П",
+        "en": "Room P"
+      },
+      "description": {
+        "ru": "Учебный кабинет П (2 этаж второго корпуса).",
+        "en": "Teaching room P (floor 2, second building)."
+      },
+      "aliases": [
+        "п",
+        "кабинет п",
+        "room p"
+      ],
+      "number": "Каб. П",
+      "label": "Каб. П"
+    },
+    {
+      "id": "main-2-217",
+      "buildingId": "main",
+      "floorId": "main-2",
+      "type": "classroom",
+      "x": 426.5,
+      "y": 183,
+      "w": 52,
+      "h": 61,
+      "door": {
+        "x": 440,
+        "y": 182
+      },
+      "name": {
+        "ru": "Аудитория 217",
+        "en": "Room 217"
+      },
+      "description": {
+        "ru": "Учебная аудитория № 217 (2 этаж второго корпуса).",
+        "en": "Classroom No. 217 (floor 2, second building)."
+      },
+      "aliases": [
+        "217",
+        "кабинет 217",
+        "аудитория 217",
+        "room 217"
+      ],
+      "number": "217",
+      "label": "217"
+    },
+    {
+      "id": "main-2-229",
+      "buildingId": "main",
+      "floorId": "main-2",
+      "type": "classroom",
+      "x": 480.5,
+      "y": 183,
+      "w": 30.5,
+      "h": 61,
+      "door": {
+        "x": 496,
+        "y": 182
+      },
+      "name": {
+        "ru": "Аудитория 229",
+        "en": "Room 229"
+      },
+      "description": {
+        "ru": "Учебная аудитория № 229 (2 этаж второго корпуса).",
+        "en": "Classroom No. 229 (floor 2, second building)."
+      },
+      "aliases": [
+        "229",
+        "кабинет 229",
+        "аудитория 229",
+        "room 229"
+      ],
+      "number": "229",
+      "label": "229"
+    },
+    {
+      "id": "main-2-222",
+      "buildingId": "main",
+      "floorId": "main-2",
+      "type": "classroom",
+      "x": 512.5,
+      "y": 183,
+      "w": 47.5,
+      "h": 61,
+      "door": {
+        "x": 527,
+        "y": 182
+      },
+      "name": {
+        "ru": "Аудитория 222",
+        "en": "Room 222"
+      },
+      "description": {
+        "ru": "Учебная аудитория № 222 (2 этаж второго корпуса).",
+        "en": "Classroom No. 222 (floor 2, second building)."
+      },
+      "aliases": [
+        "222",
+        "кабинет 222",
+        "аудитория 222",
+        "room 222"
+      ],
+      "number": "222",
+      "label": "222"
+    },
+    {
+      "id": "main-2-stairs-right",
+      "buildingId": "main",
+      "floorId": "main-2",
+      "type": "stairs",
+      "x": 561.5,
+      "y": 183,
+      "w": 47.5,
+      "h": 61,
+      "door": {
+        "x": 585,
+        "y": 183
+      },
+      "name": {
+        "ru": "Лестница (правое крыло)",
+        "en": "Stairs (right wing)"
+      },
+      "description": {
+        "ru": "Лестница в правом крыле, соединяющая 1 и 2 этажи.",
+        "en": "Stairs in the right wing connecting floors 1 and 2."
+      },
+      "aliases": [
+        "лестница",
+        "stairs",
+        "лестница в правом крыле",
+        "right wing stairs"
+      ],
+      "label": "Лестница"
+    },
+    {
+      "id": "main-2-elevator-2",
+      "buildingId": "main",
+      "floorId": "main-2",
+      "type": "elevator",
+      "x": 88,
+      "y": 214.5,
+      "w": 59,
+      "h": 29.5,
+      "door": {
+        "x": 87,
+        "y": 224
+      },
+      "name": {
+        "ru": "Лифт",
+        "en": "Elevator"
+      },
+      "description": {
+        "ru": "Второй пассажирский лифт (2 этаж).",
+        "en": "Second passenger elevator (floor 2)."
+      },
+      "aliases": [
+        "лифт",
+        "elevator",
+        "лифт 2",
+        "lift 2"
+      ],
+      "label": "Лифт"
+    },
+    {
+      "id": "main-2-202",
+      "buildingId": "main",
+      "floorId": "main-2",
+      "type": "lab",
+      "x": 87.5,
+      "y": 246,
+      "w": 59.5,
+      "h": 81.5,
+      "door": {
+        "x": 87,
+        "y": 263
+      },
+      "name": {
+        "ru": "Аудитория 202 — химия и биология",
+        "en": "Room 202 — Chemistry & Biology"
+      },
+      "description": {
+        "ru": "Лаборатория № 202 (2 этаж второго корпуса): химия и биология. Преподаватель: Золотарев В.В.",
+        "en": "Laboratory No. 202 (floor 2, second building): chemistry and biology. Teacher: V.V. Zolotarev."
+      },
+      "aliases": [
+        "202",
+        "кабинет 202",
+        "химия",
+        "биология",
+        "золотарев",
+        "сан саныч",
+        "сансаныч",
+        "room 202",
+        "chemistry",
+        "biology"
+      ],
+      "number": "202",
+      "teacherId": "t-zolotarev",
+      "label": "202"
+    },
+    {
+      "id": "main-2-tech-2",
+      "buildingId": "main",
+      "floorId": "main-2",
+      "type": "hall",
+      "x": 1.5,
+      "y": 281,
+      "w": 59,
+      "h": 49.5,
+      "door": {
+        "x": 61,
+        "y": 305
+      },
+      "name": {
+        "ru": "Техническое помещение",
+        "en": "Technical room"
+      },
+      "description": {
+        "ru": "Техническое помещение левого крыла (2 этаж); на плане затемнено.",
+        "en": "Left wing technical room (floor 2); darkened on the plan."
+      },
+      "aliases": [
+        "техническое",
+        "technical",
+        "utility"
+      ],
+      "label": "Тех."
+    },
+    {
+      "id": "main-2-lab-l2",
+      "buildingId": "main",
+      "floorId": "main-2",
+      "type": "lab",
+      "x": 87.5,
+      "y": 329.5,
+      "w": 59,
+      "h": 53,
+      "door": {
+        "x": 87,
+        "y": 355
+      },
+      "name": {
+        "ru": "Лаборатория Л",
+        "en": "Laboratory L"
+      },
+      "description": {
+        "ru": "Учебная лаборатория Л (2 этаж второго корпуса), левое крыло.",
+        "en": "Teaching laboratory L (floor 2, second building), left wing."
+      },
+      "aliases": [
+        "л",
+        "лаборатория л",
+        "лаб л",
+        "laboratory l",
+        "lab l"
+      ],
+      "number": "Лаб. Л",
+      "label": "Лаб. Л"
+    },
+    {
+      "id": "main-2-stairs-left",
+      "buildingId": "main",
+      "floorId": "main-2",
+      "type": "stairs",
+      "x": 1.5,
+      "y": 332,
+      "w": 59,
+      "h": 85,
+      "door": {
+        "x": 61,
+        "y": 375
+      },
+      "name": {
+        "ru": "Лестница",
+        "en": "Stairs"
+      },
+      "description": {
+        "ru": "Лестница в левом крыле, соединяющая 1 и 2 этажи.",
+        "en": "Stairs in the left wing connecting floors 1 and 2."
+      },
+      "aliases": [
+        "лестница",
+        "stairs",
+        "лестница в левом крыле",
+        "left wing stairs"
+      ],
+      "label": "Лестница"
+    },
+    {
+      "id": "main-2-p2",
+      "buildingId": "main",
+      "floorId": "main-2",
+      "type": "classroom",
+      "x": 88,
+      "y": 384.5,
+      "w": 59,
+      "h": 31,
+      "door": {
+        "x": 87,
+        "y": 400
+      },
+      "name": {
+        "ru": "Кабинет П",
+        "en": "Room P"
+      },
+      "description": {
+        "ru": "Учебный кабинет П (2 этаж второго корпуса), левое крыло.",
+        "en": "Teaching room P (floor 2, second building), left wing."
+      },
+      "aliases": [
+        "п",
+        "кабинет п",
+        "room p"
+      ],
+      "number": "Каб. П",
+      "label": "Каб. П"
+    },
+    {
+      "id": "main-2-207",
+      "buildingId": "main",
+      "floorId": "main-2",
+      "type": "classroom",
+      "x": 1.5,
+      "y": 418.5,
+      "w": 60.5,
+      "h": 140,
+      "door": {
+        "x": 62,
+        "y": 450
+      },
+      "name": {
+        "ru": "Аудитория 207",
+        "en": "Room 207"
+      },
+      "description": {
+        "ru": "Учебная аудитория № 207 (2 этаж второго корпуса), левое крыло.",
+        "en": "Classroom No. 207 (floor 2, second building), left wing."
+      },
+      "aliases": [
+        "207",
+        "кабинет 207",
+        "аудитория 207",
+        "room 207"
+      ],
+      "number": "207",
+      "label": "207"
+    },
+    {
+      "id": "main-2-225",
+      "buildingId": "main",
+      "floorId": "main-2",
+      "type": "classroom",
+      "x": 86,
+      "y": 417.5,
+      "w": 61,
+      "h": 141,
+      "door": {
+        "x": 87,
+        "y": 450
+      },
+      "name": {
+        "ru": "Аудитория 225",
+        "en": "Room 225"
+      },
+      "description": {
+        "ru": "Учебная аудитория № 225 (2 этаж второго корпуса), левое крыло.",
+        "en": "Classroom No. 225 (floor 2, second building), left wing."
+      },
+      "aliases": [
+        "225",
+        "кабинет 225",
+        "аудитория 225",
+        "room 225"
+      ],
+      "number": "225",
+      "label": "225"
+    }
+  ]
+}

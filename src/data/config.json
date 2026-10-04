@@ -1,0 +1,27 @@
+{
+  "_comment": "Общие настройки приложения и данные колледжа. Карта в приложении — только внутренние планы этажей (без карты улицы/территории).",
+  "college": {
+    "fullName": {
+      "ru": "АНО ПО «Технический колледж \"Логос\"»",
+      "en": "ANO PO \"Logos\" Technical College"
+    },
+    "shortName": {
+      "ru": "ТК «Логос»",
+      "en": "Logos College"
+    },
+    "appName": {
+      "ru": "ЛОГОС: Путеводитель",
+      "en": "LOGOS: Guidebook"
+    },
+    "appVersion": "1.0.0"
+  },
+  "defaults": {
+    "language": "system",
+    "theme": "system",
+    "startFloorId": "main-1"
+  },
+  "search": {
+    "historyLimit": 20,
+    "autocompleteLimit": 8
+  }
+}

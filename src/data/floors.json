@@ -1,0 +1,102 @@
+{
+  "_comment": "Геометрия планировок. В приложении только внутренние планы колледжа: этажи main-1 и main-2 сняты с РЕАЛЬНЫХ планов из папки Map/ (realPlan — имя файла без расширения, planFile — куда npm run assets копирует план внутри assets/images/maps/). Единицы viewBox совпадают с SVG-планами, unitsPerMeter задаёт масштаб. Виды областей (kind): corridor, hall, stairs.",
+  "unitsPerMeter": 25,
+  "floors": [
+    {
+      "id": "main-1",
+      "buildingId": "main",
+      "level": 1,
+      "name": {
+        "ru": "1 этаж",
+        "en": "Floor 1"
+      },
+      "width": 758,
+      "height": 552,
+      "unitsPerMeter": 10,
+      "realPlan": "map1lower",
+      "planFile": "plan_main_floor_1.svg",
+      "outline": "M0 0.7H147.6V93.5H758V241.8H609.7V263.7H547.8V241.8H147.6V550.6H0Z",
+      "background": "#FFFFFF",
+      "areas": [
+        {
+          "id": "corridor-h1",
+          "kind": "corridor",
+          "x": 0.5,
+          "y": 155.5,
+          "w": 547.3,
+          "h": 24,
+          "label": {
+            "ru": "Коридор",
+            "en": "Corridor"
+          }
+        },
+        {
+          "id": "corridor-v",
+          "kind": "corridor",
+          "x": 62,
+          "y": 179,
+          "w": 24,
+          "h": 290
+        },
+        {
+          "id": "corridor-nook",
+          "kind": "corridor",
+          "x": 85,
+          "y": 443,
+          "w": 34,
+          "h": 14
+        }
+      ]
+    },
+    {
+      "id": "main-2",
+      "buildingId": "main",
+      "level": 2,
+      "name": {
+        "ru": "2 этаж",
+        "en": "Floor 2"
+      },
+      "width": 767,
+      "height": 561,
+      "unitsPerMeter": 10,
+      "realPlan": "map2lower",
+      "planFile": "plan_main_floor_2.svg",
+      "outline": "M0 0.7H147V94.8H766.3V245.1H147V558.5H0Z",
+      "background": "#FFFFFF",
+      "areas": [
+        {
+          "id": "corridor-h1",
+          "kind": "corridor",
+          "x": 86.27,
+          "y": 156.51,
+          "w": 524.23,
+          "h": 26.4,
+          "label": {
+            "ru": "Коридор",
+            "en": "Corridor"
+          }
+        },
+        {
+          "id": "corridor-hall",
+          "kind": "corridor",
+          "x": 0,
+          "y": 112.5,
+          "w": 143.5,
+          "h": 44,
+          "label": {
+            "ru": "Хол",
+            "en": "Hall"
+          }
+        },
+        {
+          "id": "corridor-v",
+          "kind": "corridor",
+          "x": 62,
+          "y": 178,
+          "w": 24,
+          "h": 320
+        }
+      ]
+    }
+  ]
+}

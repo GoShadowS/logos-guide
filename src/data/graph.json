@@ -1,0 +1,87 @@
+{
+  "_comment": "Параметры графа навигации. cellSize — шаг сетки в единицах плана, walkSpeedMps — скорость пешехода, stairSeconds — добавка времени на лестничный переход, wallPenalty — штраф за близость к стене. Масштаб (единиц в метре) задаёт поле unitsPerMeter у каждого этажа в floors.json. verticalLinks — связи между этажами (stairs/elevator).",
+  "cellSize": 10,
+  "walkSpeedMps": 1.3,
+  "stairSeconds": 25,
+  "wallPenalty": 3,
+  "verticalLinks": [
+    {
+      "kind": "stairs",
+      "a": {
+        "floorId": "main-1",
+        "x": 578,
+        "y": 124
+      },
+      "b": {
+        "floorId": "main-2",
+        "x": 585,
+        "y": 126
+      }
+    },
+    {
+      "kind": "stairs",
+      "a": {
+        "floorId": "main-1",
+        "x": 359,
+        "y": 225
+      },
+      "b": {
+        "floorId": "main-2",
+        "x": 356,
+        "y": 213
+      }
+    },
+    {
+      "kind": "stairs",
+      "a": {
+        "floorId": "main-1",
+        "x": 31,
+        "y": 360
+      },
+      "b": {
+        "floorId": "main-2",
+        "x": 31,
+        "y": 374
+      }
+    },
+    {
+      "kind": "stairs",
+      "a": {
+        "floorId": "main-1",
+        "x": 578,
+        "y": 200
+      },
+      "b": {
+        "floorId": "main-2",
+        "x": 585,
+        "y": 213
+      }
+    },
+    {
+      "kind": "elevator",
+      "a": {
+        "floorId": "main-1",
+        "x": 127,
+        "y": 195
+      },
+      "b": {
+        "floorId": "main-2",
+        "x": 117,
+        "y": 198
+      }
+    },
+    {
+      "kind": "elevator",
+      "a": {
+        "floorId": "main-1",
+        "x": 127,
+        "y": 226
+      },
+      "b": {
+        "floorId": "main-2",
+        "x": 117,
+        "y": 229
+      }
+    }
+  ]
+}

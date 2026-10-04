@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Иконка типа POI: toilet (32x32 viewBox) -->
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+  <g fill="none" stroke="#1A18E0" stroke-width="2.6" stroke-linejoin="round">
+    <circle cx="24" cy="11" r="5.5"/><path d="M24 18v13h-7l-2.5 14h19L31 31h-7"/>
+  </g>
+</svg>

@@ -1,0 +1,163 @@
+{
+  "_comment": "Преподаватели (мок-данные). roomId ссылается на rooms.json. aliases включают «уличные» варианты написания — по ним тоже работает поиск.",
+  "teachers": [
+    {
+      "id": "t-zolotarev",
+      "name": {
+        "ru": "Золотарев В.В.",
+        "en": "Zolotarev V.V."
+      },
+      "subject": {
+        "ru": "Химия и биология",
+        "en": "Chemistry & Biology"
+      },
+      "roomId": "main-2-202",
+      "aliases": [
+        "золотарев",
+        "золотарев в.в.",
+        "золотарев виктор",
+        "сан саныч",
+        "сансаныч",
+        "сан саныч химия",
+        "zolotarev",
+        "chemistry teacher"
+      ]
+    },
+    {
+      "id": "t-ivanova",
+      "name": {
+        "ru": "Иванова Е.П.",
+        "en": "Ivanova E.P."
+      },
+      "subject": {
+        "ru": "История",
+        "en": "History"
+      },
+      "roomId": "main-1-119",
+      "aliases": [
+        "иванова",
+        "иванова е.п.",
+        "история",
+        "историк",
+        "ivanova",
+        "history teacher"
+      ]
+    },
+    {
+      "id": "t-petrov",
+      "name": {
+        "ru": "Петров А.С.",
+        "en": "Petrov A.S."
+      },
+      "subject": {
+        "ru": "Аэродинамика",
+        "en": "Aerodynamics"
+      },
+      "roomId": "main-2-lab-l1",
+      "aliases": [
+        "петров",
+        "петров а.с.",
+        "аэродинамика",
+        "petrov",
+        "aerodynamics teacher"
+      ]
+    },
+    {
+      "id": "t-sidorova",
+      "name": {
+        "ru": "Сидорова М.А.",
+        "en": "Sidorova M.A."
+      },
+      "subject": {
+        "ru": "Математика",
+        "en": "Mathematics"
+      },
+      "roomId": "main-2-209",
+      "aliases": [
+        "сидорова",
+        "сидорова м.а.",
+        "математика",
+        "sidorova",
+        "math teacher"
+      ]
+    },
+    {
+      "id": "t-kuznetsov",
+      "name": {
+        "ru": "Кузнецов Д.И.",
+        "en": "Kuznetsov D.I."
+      },
+      "subject": {
+        "ru": "Физика",
+        "en": "Physics"
+      },
+      "roomId": "main-2-211",
+      "aliases": [
+        "кузнецов",
+        "кузнецов д.и.",
+        "физика",
+        "kuznetsov",
+        "physics teacher"
+      ]
+    },
+    {
+      "id": "t-morozova",
+      "name": {
+        "ru": "Морозова О.В.",
+        "en": "Morozova O.V."
+      },
+      "subject": {
+        "ru": "Иностранный язык",
+        "en": "Foreign language"
+      },
+      "roomId": "main-2-230",
+      "aliases": [
+        "морозова",
+        "морозова о.в.",
+        "английский",
+        "иностранный язык",
+        "morozova",
+        "english teacher"
+      ]
+    },
+    {
+      "id": "t-nikolaev",
+      "name": {
+        "ru": "Николаев С.Ю.",
+        "en": "Nikolaev S.Y."
+      },
+      "subject": {
+        "ru": "Информатика",
+        "en": "Computer science"
+      },
+      "roomId": "main-2-lab-l2",
+      "aliases": [
+        "николаев",
+        "николаев с.ю.",
+        "информатика",
+        "nikolaev",
+        "it teacher"
+      ]
+    },
+    {
+      "id": "t-fedorova",
+      "name": {
+        "ru": "Фёдорова Л.Н.",
+        "en": "Fedorova L.N."
+      },
+      "subject": {
+        "ru": "Литература",
+        "en": "Literature"
+      },
+      "roomId": "main-2-236",
+      "aliases": [
+        "федорова",
+        "фёдорова",
+        "федорова л.н.",
+        "литература",
+        "fedorova",
+        "literature teacher"
+      ]
+    }
+  ]
+}

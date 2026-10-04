@@ -1,0 +1,25 @@
+{
+  "_comment": "Здания колледжа. floors — идентификаторы этажей из floors.json (по порядку снизу вверх).",
+  "buildings": [
+    {
+      "id": "main",
+      "name": {
+        "ru": "Учебный корпус",
+        "en": "Academic building"
+      },
+      "floors": [
+        "main-1",
+        "main-2"
+      ],
+      "address": {
+        "ru": "Учебный корпус",
+        "en": "Academic building"
+      },
+      "planAccuracy": "real",
+      "comment": {
+        "ru": "Реальные планы этажей (map1lower.svg, map2lower.svg).",
+        "en": "Real floor plans (map1lower.svg, map2lower.svg)."
+      }
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "_comment": "POI внутри здания: помещения и объекты, которых нет на планах как отдельных аудиторий (кулеры, банкоматы и т.п.). Координаты — в единицах viewBox плана этажа.",
+  "pois": [
+    {
+      "id": "poi-water-main",
+      "type": "vending",
+      "floorId": "main-1",
+      "x": 130,
+      "y": 250,
+      "name": {
+        "ru": "Кулер с водой",
+        "en": "Water cooler"
+      },
+      "description": {
+        "ru": "Кулер с питьевой водой в коридоре 1 этажа, у лифтов.",
+        "en": "Drinking water cooler in the floor 1 corridor, by the elevators."
+      },
+      "aliases": [
+        "кулер",
+        "вода",
+        "питьевая вода",
+        "water",
+        "cooler"
+      ]
+    }
+  ]
+}

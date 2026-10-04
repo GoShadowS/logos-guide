@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Иконка типа POI: vending (32x32 viewBox) -->
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+  <g fill="none" stroke="#1A18E0" stroke-width="2.6" stroke-linejoin="round">
+    <path d="M11 15h23v15a8.5 8.5 0 0 1-8.5 8.5h-6A8.5 8.5 0 0 1 11 30z"/><path d="M34 19h4a4 4 0 0 1 0 8h-4M11 43h23"/>
+  </g>
+</svg>
