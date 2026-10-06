@@ -32,6 +32,7 @@ export function PoiMarker({
 
   return (
     <Pressable
+      testID={`poi-marker-${poi.id}`}
       onPress={() => onPress && onPress(poi)}
       accessibilityRole="button"
       accessibilityLabel={labelText}

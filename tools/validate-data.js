@@ -8,14 +8,14 @@
  * Что проверяется:
  *   1. Синтаксис всех JSON-файлов в src/data/;
  *   2. Уникальность идентификаторов (аудитории, POI, этажи, корпуса);
- *   3. Ссылочная целостность: floorId, buildingId, roomId, teacherId;
- *   4. Планы этажей: файлы из папки Map/ существуют, viewBox совпадает с floors.json;
+ *   3. Ссылочная целостность: floorId и buildingId;
+ *   4. Планы этажей: встроенные SVG-файлы существуют, viewBox совпадает с floors.json;
  *   5. Двери аудиторий — на границе помещения и «смотрят» в проходимую зону;
  *   6. Лестницы/лифты — точки a и b обе проходимы на своих этажах;
  *   7. Локализация: ru/en совпадают, все используемые в коде ключи существуют,
  *      в файлах нет «мёртвых» ключей;
  *   8. Иконки: все имена глифов существуют в наборе MaterialCommunityIcons;
- *   9. Регрессии: в проекте нет расписания, QR-сканера, карты улицы (campus) и эмодзи.
+ *   9. Регрессии: нет данных расписания, QR-сканера, карты улицы (campus) и эмодзи; экран расписания может быть только пустой заглушкой.
  *
  * Код завершения: 0 — всё хорошо, 1 — найдены ошибки.
  */
@@ -89,18 +89,16 @@ const floors = loadJson('floors');
 const rooms = loadJson('rooms');
 const pois = loadJson('poi');
 const buildings = loadJson('buildings');
-const teachers = loadJson('teachers');
 const graph = loadJson('graph');
 const config = loadJson('config');
+const gpsCalibration = loadJson('gps-calibration');
 
 const roomsList = rooms && rooms.rooms ? rooms.rooms : [];
 const floorList = floors && floors.floors ? floors.floors : [];
 const poiList = pois && pois.pois ? pois.pois : [];
 const buildingList = buildings && buildings.buildings ? buildings.buildings : [];
-const teacherList = teachers && teachers.teachers ? teachers.teachers : [];
 
 const floorById = new Map(floorList.map((f) => [f.id, f]));
-const roomById = new Map(roomsList.map((r) => [r.id, r]));
 
 // --- Вспомогательные геометрические функции ---------------------------------
 function pointInRect(x, y, r) {
@@ -154,7 +152,6 @@ if (floors) checkUnique(floorList, 'floors.json');
 if (rooms) checkUnique(roomsList, 'rooms.json');
 if (pois) checkUnique(poiList, 'poi.json');
 if (buildings) checkUnique(buildingList, 'buildings.json');
-if (teachers) checkUnique(teacherList, 'teachers.json');
 
 // --- 2. Этажи и файлы планов ------------------------------------------------
 if (floors) {
@@ -173,23 +170,25 @@ if (floors) {
       fail(`floors.json: этаж «${floor.id}» без unitsPerMeter — расстояния в метрах считаются неверно`);
     }
 
-    // Реальный план: файл в Map/ и его копия в assets/images/maps/
+    // Проверяем встроенную копию плана. Если исходная папка Map/ доступна,
+    // используем её; в чистом checkout источником служит SVG из assets/.
     if (!floor.realPlan || !floor.planFile) {
       fail(`floors.json: этаж «${floor.id}» без realPlan/planFile`);
     } else {
       const source = path.join(SOURCE_PLANS_DIR, `${floor.realPlan}.svg`);
       const target = path.join(MAPS_DIR, floor.planFile);
-      if (!fs.existsSync(source)) {
-        fail(`floors.json: исходный план не найден — Map/${floor.realPlan}.svg`);
-      }
       if (!fs.existsSync(target)) {
-        fail(`floors.json: план не скопирован в assets/images/maps/${floor.planFile} (npm run assets)`);
+        fail(`floors.json: план не найден в assets/images/maps/${floor.planFile}`);
       }
-      if (fs.existsSync(source)) {
-        const svg = fs.readFileSync(source, 'utf8');
+      const planPath = fs.existsSync(source) ? source : target;
+      if (!fs.existsSync(source) && fs.existsSync(target)) {
+        note(`план ${floor.id}: исходник Map/ не включён в checkout, проверяется копия assets/`);
+      }
+      if (fs.existsSync(planPath)) {
+        const svg = fs.readFileSync(planPath, 'utf8');
         const viewBox = /viewBox="([\d.\s-]+)"/.exec(svg);
         if (!viewBox) {
-          fail(`Map/${floor.realPlan}.svg: нет атрибута viewBox`);
+          fail(`${path.relative(ROOT, planPath)}: нет атрибута viewBox`);
         } else {
           const [, , w, h] = viewBox[1].trim().split(/[\s,]+/).map(Number);
           if (w !== floor.width || h !== floor.height) {
@@ -214,6 +213,47 @@ if (floors) {
   }
 }
 
+// --- 2.5. GPS-геопривязка планов -------------------------------------------
+if (gpsCalibration) {
+  const calibrationFloors = gpsCalibration.floors || {};
+  for (const floor of floorList) {
+    const points = calibrationFloors[floor.id]?.controlPoints || [];
+    if (points.length < 3) {
+      fail(`gps-calibration.json: для этажа «${floor.id}» нужны минимум 3 опорные точки`);
+      continue;
+    }
+    const labels = new Set();
+    for (const point of points) {
+      const tag = `gps-calibration.json [${floor.id}/${point.label || '?'}]`;
+      if (labels.has(point.label)) fail(`${tag}: повторяется метка опорной точки`);
+      labels.add(point.label);
+      if (!Number.isFinite(point.latitude) || point.latitude < -90 || point.latitude > 90 ||
+          !Number.isFinite(point.longitude) || point.longitude < -180 || point.longitude > 180) {
+        fail(`${tag}: некорректные координаты WGS84`);
+      }
+      if (!Number.isFinite(point.x) || !Number.isFinite(point.y) ||
+          point.x < 0 || point.x > floor.width || point.y < 0 || point.y > floor.height) {
+        fail(`${tag}: X/Y должны попадать в viewBox плана этажа`);
+      }
+    }
+    let nonCollinear = false;
+    for (let i = 0; i < points.length && !nonCollinear; i += 1) {
+      for (let j = i + 1; j < points.length && !nonCollinear; j += 1) {
+        for (let k = j + 1; k < points.length; k += 1) {
+          const area2 = (points[j].x - points[i].x) * (points[k].y - points[i].y)
+            - (points[j].y - points[i].y) * (points[k].x - points[i].x);
+          if (Math.abs(area2) > 1) { nonCollinear = true; break; }
+        }
+      }
+    }
+    if (!nonCollinear) fail(`gps-calibration.json: точки этажа «${floor.id}» должны быть не на одной линии`);
+    note(`GPS ${floor.id}: опорных точек — ${points.length}`);
+  }
+  for (const floorId of Object.keys(calibrationFloors)) {
+    if (!floorById.has(floorId)) fail(`gps-calibration.json: неизвестный этаж «${floorId}»`);
+  }
+}
+
 // --- 3. Аудитории -----------------------------------------------------------
 if (rooms) {
   for (const room of roomsList) {
@@ -222,6 +262,9 @@ if (rooms) {
     if (!room.floorId || !floorById.has(room.floorId)) {
       fail(`${tag}: неизвестный floorId «${room.floorId}»`);
       continue;
+    }
+    if (Object.prototype.hasOwnProperty.call(room, 'teacherId')) {
+      fail(`${tag}: teacherId запрещён — каталог преподавателей удалён`);
     }
     if (!room.type) { fail(`${tag}: не указан type`); continue; }
     if (!KNOWN_POI_TYPES.has(room.type)) {
@@ -300,18 +343,6 @@ if (buildings) {
   }
 }
 
-// --- 6. Преподаватели -------------------------------------------------------
-if (teachers) {
-  for (const t of teacherList) {
-    const tag = `teachers.json [${t.id || '?'}]`;
-    if (!t.name || !t.name.ru || !t.name.en) fail(`${tag}: нет имени (name.ru / name.en)`);
-    if (t.roomId && !roomById.has(t.roomId)) {
-      fail(`${tag}: roomId «${t.roomId}» не найден в rooms.json`);
-    }
-    if (!t.subject || !t.subject.ru || !t.subject.en) warn(`${tag}: нет предмета (subject.ru / subject.en)`);
-  }
-}
-
 // --- 7. Граф навигации ------------------------------------------------------
 if (graph) {
   for (const link of graph.verticalLinks || []) {
@@ -375,13 +406,18 @@ if (appJson) {
     fail('app.json: extra.campusCenter относится к удалённой карте территории');
   }
   const raw = JSON.stringify(appJson).toLowerCase();
-  if (raw.includes('yandex')) fail('app.json: найдены упоминания Яндекс.Карт — карта улицы удалена');
-  if (raw.includes('access_fine_location') || raw.includes('nslocation')) {
-    fail('app.json: разрешения геолокации больше не нужны (карта улицы удалена)');
-  }
+  if (raw.includes('yandex')) fail('app.json: найдены упоминания Яндекс.Карт — внешняя карта не используется');
   const androidPermissions = (expo.android && expo.android.permissions) || [];
   if (!androidPermissions.includes('android.permission.RECORD_AUDIO')) {
     fail('app.json: нет android.permission.RECORD_AUDIO — голосовой поиск не заработает на Android');
+  }
+  for (const permission of ['android.permission.ACCESS_COARSE_LOCATION', 'android.permission.ACCESS_FINE_LOCATION']) {
+    if (!androidPermissions.includes(permission)) {
+      fail(`app.json: нет ${permission} — GPS-позицию нельзя будет получить на Android`);
+    }
+  }
+  if (!expo.plugins || !expo.plugins.some((p) => (Array.isArray(p) ? p[0] : p) === 'expo-location')) {
+    fail('app.json: не подключён плагин expo-location');
   }
   if (!expo.plugins || !expo.plugins.some((p) => (Array.isArray(p) ? p[0] : p) === 'expo-speech-recognition')) {
     fail('app.json: не подключён плагин expo-speech-recognition (голосовой поиск)');
@@ -391,10 +427,10 @@ if (appJson) {
 
 if (packageJson) {
   const deps = { ...(packageJson.dependencies || {}), ...(packageJson.devDependencies || {}) };
-  for (const banned of ['expo-location', 'expo-network', 'react-native-webview']) {
+  for (const banned of ['expo-network', 'react-native-webview']) {
     if (deps[banned]) fail(`package.json: зависимость ${banned} осталась — она нужна была карте улицы`);
   }
-  for (const required of ['expo-speech-recognition', 'react-native-svg', 'react-native-reanimated']) {
+  for (const required of ['expo-speech-recognition', 'expo-location', 'react-native-svg', 'react-native-reanimated']) {
     if (!deps[required]) fail(`package.json: нет зависимости ${required}`);
   }
   for (const script of ['validate', 'test', 'smoke', 'assets']) {
@@ -533,13 +569,11 @@ if (loc.ru) {
 
 // --- 11. Регрессии: удалённые разделы и эмодзи ------------------------------
 const forbiddenFiles = [
-  ['src/screens/ScheduleScreen.js', 'раздел «Расписание» удалён'],
   ['src/screens/QrScanScreen.js', 'сканирование QR-кодов удалено'],
-  ['src/data/schedule.json', 'раздел «Расписание» удалён'],
+  ['src/data/schedule.json', 'данные расписания не добавлялись'],
+  ['src/data/teachers.json', 'каталог преподавателей удалён'],
   ['src/components/YandexMapView.js', 'онлайн-карта улицы удалена'],
   ['src/services/yandexMap.js', 'онлайн-карта улицы удалена'],
-  ['src/utils/geo.js', 'привязка к GPS на карте улицы удалена'],
-  ['src/hooks/useCurrentLocation.js', 'геопозиция на карте улицы удалена'],
   ['src/components/FloorPlan.js', 'синтетические планы заменены реальными SVG'],
 ];
 for (const [rel, reason] of forbiddenFiles) {

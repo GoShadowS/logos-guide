@@ -36,7 +36,9 @@ import FloorTwoSvg from '../../assets/images/maps/plan_main_floor_2.svg';
 import { getFloor } from '../data';
 import { useTheme } from '../theme';
 import { PoiMarker } from './PoiMarker';
+import { RoomHitArea } from './RoomHitArea';
 import { RouteOverlay } from './RouteOverlay';
+import { UserLocationMarker } from './UserLocationMarker';
 
 /** Диапазон масштаба и шаг кнопок «+»/«−» */
 const MIN_SCALE = 0.75;
@@ -70,6 +72,7 @@ export const MapCanvas = forwardRef(function MapCanvas(
     endPoi = null,
     selectedPoiId = null,
     onPoiPress,
+    userLocation = null,
     dimMarkers = false,
     style,
   },
@@ -411,18 +414,31 @@ export const MapCanvas = forwardRef(function MapCanvas(
               />
             ) : null}
 
-            {visiblePois.map((poi) => (
-              <PoiMarker
-                key={poi.id}
-                poi={poi}
-                floor={displayedFloor}
-                selected={poi.id === selectedPoiId}
-                showLabel
-                onPress={onPoiPress}
-                isRouteEndpoint={routeEndIds.has(poi.id)}
-                size={dimMarkers ? 28 : 34}
-              />
-            ))}
+            {visiblePois.map((poi) =>
+              poi.kind === 'room' ? (
+                <RoomHitArea
+                  key={poi.id}
+                  poi={poi}
+                  floor={displayedFloor}
+                  selected={poi.id === selectedPoiId}
+                  onPress={onPoiPress}
+                  dim={dimMarkers && poi.id !== selectedPoiId}
+                />
+              ) : (
+                <PoiMarker
+                  key={poi.id}
+                  poi={poi}
+                  floor={displayedFloor}
+                  selected={poi.id === selectedPoiId}
+                  showLabel
+                  onPress={onPoiPress}
+                  isRouteEndpoint={routeEndIds.has(poi.id)}
+                  size={dimMarkers ? 28 : 34}
+                />
+              )
+            )}
+
+            <UserLocationMarker floor={displayedFloor} location={userLocation} />
           </Reanimated.View>
         </Reanimated.View>
       </GestureDetector>

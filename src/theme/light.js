@@ -16,9 +16,9 @@ export const spacing = {
 
 /** Скругления углов */
 export const radius = {
-  sm: 8,
-  md: 12,
-  lg: 16,
+  sm: 9,
+  md: 14,
+  lg: 18,
   xl: 24,
   pill: 999,
 };
@@ -36,10 +36,10 @@ export const typography = {
 
 /** Общая палитра бренда (не зависит от темы) */
 export const brand = {
-  primary: '#1A18E0',
-  primaryDark: '#120EA8',
-  primaryLight: '#5B57F0',
-  primarySoft: '#ECECFE',
+  primary: '#1512E8',
+  primaryDark: '#100CB8',
+  primaryLight: '#5452F4',
+  primarySoft: '#EEF0FF',
   route: '#1A18E0',
   routeSoft: 'rgba(26, 24, 224, 0.12)',
   success: '#0E9F5A',
@@ -53,13 +53,13 @@ export const lightTheme = {
   colors: {
     background: '#FFFFFF',
     surface: '#FFFFFF',
-    surfaceAlt: '#F0F2FC',
+    surfaceAlt: '#F2F3FC',
     surfaceElevated: '#FFFFFF',
-    text: '#101223',
-    textSecondary: '#666B80',
-    textTertiary: '#9AA0B4',
-    border: '#E2E5EF',
-    borderStrong: '#C9CEDE',
+    text: '#101116',
+    textSecondary: '#70727D',
+    textTertiary: '#A9ABB4',
+    border: '#ECEEF4',
+    borderStrong: '#D4D6DF',
     primary: brand.primary,
     primaryText: '#FFFFFF',
     primarySoft: brand.primarySoft,

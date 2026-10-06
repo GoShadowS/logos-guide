@@ -37,8 +37,8 @@ export function FloorSelector({ floorId, onChange, style }) {
         style={({ pressed }) => [
           styles.trigger,
           {
-            backgroundColor: theme.colors.surface,
-            borderColor: theme.colors.border,
+            backgroundColor: theme.colors.surfaceAlt,
+            borderColor: theme.colors.surfaceAlt,
             opacity: pressed ? 0.85 : 1,
           },
         ]}
@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 12,
     paddingVertical: 8,
-    borderRadius: 999,
+    borderRadius: 13,
     borderWidth: 1,
     minWidth: 116,
     justifyContent: 'space-between',

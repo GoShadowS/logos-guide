@@ -48,21 +48,20 @@ export function getMarkerColor(type, isDark) {
 
 /** Плитки «Быстрый поиск» на экране поиска */
 export const QUICK_CATEGORIES = [
-  { id: 'rooms', icon: 'school', labelKey: 'quick.rooms', types: ['classroom', 'lab', 'office'] },
-  { id: 'teachers', icon: 'human-male-board', labelKey: 'quick.teachers', teachers: true },
+  { id: 'rooms', icon: 'office-building', labelKey: 'quick.rooms', types: ['classroom', 'lab', 'office'] },
+  { id: 'entrances', icon: 'door-open', labelKey: 'quick.entrances', types: ['entrance'] },
   { id: 'toilets', icon: 'toilet', labelKey: 'quick.toilets', types: ['toilet'] },
   { id: 'security', icon: 'shield-account', labelKey: 'quick.security', types: ['security'] },
   { id: 'food', icon: 'food-fork-drink', labelKey: 'quick.food', types: ['cafeteria', 'vending'] },
   { id: 'stairs', icon: 'stairs', labelKey: 'quick.stairs', types: ['stairs', 'elevator'] },
-  { id: 'entrances', icon: 'door-open', labelKey: 'quick.entrances', types: ['entrance'] },
 ];
 
-/** Фильтры-чиппы на карте */
+/** Категории-фильтры на карте; широкие элементы повторяют быстрые действия из макета. */
 export const MAP_FILTERS = [
-  { id: 'all', icon: 'layers', labelKey: 'filter.all', types: null },
-  { id: 'rooms', icon: 'school', labelKey: 'quick.rooms', types: ['classroom', 'lab', 'office'] },
+  { id: 'rooms', icon: 'office-building', labelKey: 'quick.rooms', types: ['classroom', 'lab', 'office'] },
+  { id: 'stairs', icon: 'stairs', labelKey: 'quick.stairs', types: ['stairs', 'elevator'] },
   { id: 'toilets', icon: 'toilet', labelKey: 'quick.toilets', types: ['toilet'] },
   { id: 'food', icon: 'food-fork-drink', labelKey: 'quick.food', types: ['cafeteria', 'vending'] },
-  { id: 'stairs', icon: 'stairs', labelKey: 'quick.stairs', types: ['stairs', 'elevator'] },
+  { id: 'all', icon: 'layers-outline', labelKey: 'filter.all', types: null },
   { id: 'entrances', icon: 'door-open', labelKey: 'quick.entrances', types: ['entrance'] },
 ];

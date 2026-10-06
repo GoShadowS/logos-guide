@@ -43,6 +43,8 @@ const { buildRoute, secondsToMinutes } = require('../src/services/pathfinding');
 const data = require('../src/data');
 const { formatDistance, formatDuration, formatFloorAndBuilding, roundMeters } = require('../src/utils/format');
 const { translate, plural } = require('../src/services/localization');
+const { gpsToPlanLocation, getGpsCalibrationDiagnostics } = require('../src/services/geolocation');
+const gpsCalibration = require('../src/data/gps-calibration.json');
 
 const { searchPois, getPoi, getFloor, getBuildingOfFloor, getDefaultStartPoint } = data;
 
@@ -55,6 +57,22 @@ function check(name, condition, extra) {
     console.log(`  FAIL ${name}${extra ? ' — ' + extra : ''}`);
   }
 }
+
+// ---------------------------------------------------------------------------
+console.log('\n=== 0. Геопривязка GPS ===');
+for (const [floorId, calibration] of Object.entries(gpsCalibration.floors)) {
+  const diagnostics = getGpsCalibrationDiagnostics(floorId);
+  check(`${floorId}: рассчитаны все опорные точки`, diagnostics?.pointCount === calibration.controlPoints.length);
+  check(`${floorId}: ошибка калибровки менее 1.5 м`, diagnostics?.maxErrorMeters < 1.5, `${diagnostics?.maxErrorMeters} м`);
+  for (const point of calibration.controlPoints) {
+    const mapped = gpsToPlanLocation(floorId, point.latitude, point.longitude, 5);
+    const error = mapped ? Math.hypot(mapped.x - point.x, mapped.y - point.y) : Infinity;
+    check(`${floorId}: точка ${point.label} переводится на план`, !!mapped && mapped.withinPlan && error < 16, `${error.toFixed(1)} единиц плана`);
+    check(`${floorId}: точка ${point.label} сохраняет точность GPS`, mapped?.accuracyMeters === 5);
+  }
+}
+check('неизвестный этаж не геопривязывается', gpsToPlanLocation('campus', 55.2, 36.5) === null);
+check('некорректная GPS-широта отклоняется', gpsToPlanLocation('main-1', 100, 36.5) === null);
 
 // ---------------------------------------------------------------------------
 console.log('\n=== 1. Поиск ===');
@@ -70,10 +88,8 @@ const r213 = searchPois('213');
 check('поиск «213» находит ту же аудиторию (старый номер — алиас)', r213.length > 0 && r213[0].number === '236', JSON.stringify(r213.map((p) => p.name.ru)));
 const rStol = searchPois('столовая');
 check('поиск «столовая» находит столовую', rStol.some((p) => p.type === 'cafeteria'));
-const rZol = searchPois('золотарев');
-check('поиск по фамилии преподавателя «золотарев»', rZol.length > 0 && rZol[0].teacherId === 't-zolotarev', JSON.stringify(rZol.map((p) => p.name.ru)));
-const rSan = searchPois('сан саныч');
-check('поиск по прозвищу «сан саныч»', rSan.length > 0 && rSan[0].teacherId === 't-zolotarev');
+check('поиск по удалённой фамилии преподавателя ничего не находит', searchPois('золотарев').length === 0);
+check('в помещениях больше нет привязок к преподавателям', data.rooms.every((room) => !Object.prototype.hasOwnProperty.call(room, 'teacherId')));
 const r118 = searchPois('118');
 check('поиск «118» находит аудиторию 118', r118.length > 0 && r118[0].number === '118');
 const rToilet = searchPois('туалет');
@@ -91,6 +107,14 @@ function poi(id) {
   const p = getPoi(id);
   if (!p) throw new Error('Нет точки ' + id);
   return { floorId: p.floorId, x: p.x, y: p.y };
+}
+
+const gpsStart = gpsToPlanLocation('main-1', 55.215103, 36.537163, 5);
+const gpsStartedRoute = buildRoute(gpsStart, poi('main-1-119'));
+check('маршрут от откалиброванного GPS-положения строится', gpsStartedRoute.ok === true, gpsStartedRoute.error);
+if (gpsStartedRoute.ok) {
+  check('GPS-координата становится фактической точкой старта',
+    Math.hypot(gpsStartedRoute.points[0].x - gpsStart.x, gpsStartedRoute.points[0].y - gpsStart.y) < 0.1);
 }
 
 // 2.1 В пределах одного этажа: 119 → туалет
@@ -174,13 +198,14 @@ check('двери аудиторий внутри этажа', data.rooms.every(
 }));
 check('у корпуса перечислены оба этажа', getBuildingOfFloor('main-2')?.floors?.length === 2);
 
-// Файлы планов в приложении совпадают с исходниками в папке Map/
+// Планы могут поставляться только встроенными SVG-копиями assets/; Map/ — необязательный источник.
 for (const floor of data.floors) {
   const source = path.join(__dirname, '..', '..', 'Map', `${floor.realPlan}.svg`);
   const target = path.join(__dirname, '..', 'assets', 'images', 'maps', floor.planFile);
-  const same = fs.existsSync(source) && fs.existsSync(target)
-    && fs.readFileSync(source, 'utf8') === fs.readFileSync(target, 'utf8');
-  check(`план ${floor.id} совпадает с Map/${floor.realPlan}.svg`, same);
+  const packaged = fs.existsSync(target);
+  const matchesSource = !fs.existsSync(source)
+    || (packaged && fs.readFileSync(source, 'utf8') === fs.readFileSync(target, 'utf8'));
+  check(`план ${floor.id} доступен во встроенных ресурсах`, packaged && matchesSource);
 }
 
 // ---------------------------------------------------------------------------
@@ -196,7 +221,7 @@ check('formatFloorAndBuilding: корпус + этаж без [object Object]',
 check('plural: одна точка', translate('ru', plural('ru', 'search.found', 1), { count: 1 }).includes('Найдена'));
 check('plural: много точек', translate('ru', plural('ru', 'search.found', 12), { count: 12 }).includes('Найдено 12 точек'));
 check('перевод шага маршрута', translate('ru', 'ui.goUpStairs', { floor: 2 }) === 'Поднимитесь на 2 этаж по лестнице');
-check('нет ключей расписания', translate('en', 'schedule.title') === 'schedule.title');
+check('вкладка расписания локализована', translate('ru', 'tabs.schedule') === 'Расписание' && translate('en', 'tabs.schedule') === 'Schedule');
 
 console.log(`\nИтого: ${failures} ошибок(ка)\n`);
 process.exit(failures > 0 ? 1 : 0);

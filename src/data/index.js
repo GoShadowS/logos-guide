@@ -2,15 +2,14 @@
  * src/data/index.js — единый слой доступа к данным карт.
  *
  * Здесь собирается «индекс» всех точек, по которым работает поиск и навигация:
- * аудитории (rooms.json) + точки интереса (poi.json) + преподаватели (teachers.json).
+ * помещения (rooms.json) + точки интереса (poi.json).
  * Каждая точка приводится к единому виду:
  *   { id, kind, type, number, name: {ru,en}, floorId, x, y, buildingId,
- *     teacherId, aliases: [...], description?: {ru,en} }
+ *     roomBounds?, aliases: [...], description?: {ru,en} }
  */
 import floorsData from './floors.json';
 import roomsData from './rooms.json';
 import poiData from './poi.json';
-import teachersData from './teachers.json';
 import buildingsData from './buildings.json';
 import configData from './config.json';
 
@@ -36,7 +35,6 @@ export function normalizeText(value) {
 export const floors = floorsData.floors;
 export const rooms = roomsData.rooms;
 export const pois = poiData.pois;
-export const teachers = teachersData.teachers;
 export const buildings = buildingsData.buildings;
 export const config = configData;
 
@@ -45,7 +43,6 @@ export const DEFAULT_UNITS_PER_METER = floorsData.unitsPerMeter;
 
 const floorsById = new Map(floors.map((f) => [f.id, f]));
 const roomsById = new Map(rooms.map((r) => [r.id, r]));
-const teachersById = new Map(teachers.map((t) => [t.id, t]));
 const buildingsById = new Map(buildings.map((b) => [b.id, b]));
 
 export function getFloor(floorId) {
@@ -61,10 +58,6 @@ export function getFloorUnitsPerMeter(floorId) {
 
 export function getRoom(roomId) {
   return roomsById.get(roomId) || null;
-}
-
-export function getTeacher(teacherId) {
-  return teachersById.get(teacherId) || null;
 }
 
 export function getBuilding(buildingId) {
@@ -129,8 +122,8 @@ for (const room of rooms) {
     buildingId: room.buildingId || null,
     x: center.x,
     y: center.y,
+    roomBounds: { x: room.x, y: room.y, w: room.w, h: room.h },
     door: room.door || null,
-    teacherId: room.teacherId || null,
     aliases: room.aliases || [],
   });
 }
@@ -148,7 +141,6 @@ for (const poi of pois) {
     x: poi.x,
     y: poi.y,
     door: null,
-    teacherId: null,
     aliases: poi.aliases || [],
   });
 }
@@ -161,13 +153,6 @@ export function getPoi(id) {
 
 export function getAllPois() {
   return poiIndex;
-}
-
-/** Точка, соответствующая аудитории преподавателя */
-export function getPoiOfTeacher(teacherId) {
-  const teacher = teachersById.get(teacherId);
-  if (!teacher) return null;
-  return poiById.get(teacher.roomId) || null;
 }
 
 /**
@@ -199,10 +184,6 @@ function scorePoi(poi, query) {
   const nameRu = normalizeText(poi.name?.ru);
   const nameEn = normalizeText(poi.name?.en);
   const aliases = (poi.aliases || []).map(normalizeText);
-  const teacher = poi.teacherId ? teachersById.get(poi.teacherId) : null;
-  const teacherName = teacher ? normalizeText(teacher.name?.ru) : '';
-  const teacherSubject = teacher ? normalizeText(teacher.subject?.ru) : '';
-  const teacherAliases = teacher ? (teacher.aliases || []).map(normalizeText) : [];
 
   let score = 0;
 
@@ -221,21 +202,10 @@ function scorePoi(poi, query) {
     else if (alias.includes(query)) score = Math.max(score, 45);
   }
 
-  // Поиск по преподавателю и предмету
-  if (teacherName === query) score = Math.max(score, 70);
-  else if (teacherName.includes(query)) score = Math.max(score, 50);
-  if (teacherSubject === query) score = Math.max(score, 68);
-  else if (teacherSubject.includes(query)) score = Math.max(score, 48);
-  for (const alias of teacherAliases) {
-    if (alias === query) score = Math.max(score, 66);
-    else if (alias.includes(query)) score = Math.max(score, 46);
-  }
-
   // Match words across combined fields so "кабинет 236" finds room aliases and number.
   const tokens = query.split(' ').filter(Boolean);
   if (tokens.length > 1) {
-    const textFields = [nameRu, nameEn, ...aliases, teacherName, teacherSubject, ...teacherAliases]
-      .filter(Boolean);
+    const textFields = [nameRu, nameEn, ...aliases].filter(Boolean);
     const allMatched = tokens.every((token) =>
       number.includes(token) || textFields.some((field) => field.includes(token))
     );

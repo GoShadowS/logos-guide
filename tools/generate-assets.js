@@ -34,7 +34,7 @@ const floors = floorsData.floors;
 /** Фирменные цвета (совпадают с src/theme/light.js) */
 const C = {
   background: '#0B0B14',
-  primary: '#1A18E0',
+  primary: '#1512E8',
 };
 
 // ---------------------------------------------------------------------------
@@ -169,6 +169,35 @@ function buildLogoSvg({ width, height, withText = true }) {
 `;
 }
 
+/** Splash photo + light wash + compact loading copy from the visual reference. */
+function buildSplashSvg({ width, height, photoBase64 }) {
+  const centerX = width / 2;
+  const logoBaseline = Math.round(height * 0.505);
+  const logoSize = Math.round(width * 0.086);
+  const taglineY = logoBaseline + Math.round(logoSize * 0.82);
+  const titleY = height - 245;
+  const hintY = height - 175;
+  const subhintY = height - 128;
+  const barWidth = 302;
+  const barHeight = 18;
+  const barX = (width - barWidth) / 2;
+  const barY = height - 116;
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+  <image href="data:image/jpeg;base64,${photoBase64}" x="0" y="0" width="${width}" height="${height}" preserveAspectRatio="xMidYMid slice"/>
+  <rect width="${width}" height="${height}" fill="#FFFFFF" fill-opacity="0.82"/>
+  <text x="${centerX}" y="${logoBaseline}" text-anchor="middle" fill="${C.primary}" font-size="${logoSize}" font-weight="900" letter-spacing="-5" font-family="DejaVu Sans, sans-serif">ЛОГОС</text>
+  <text x="${centerX}" y="${taglineY}" text-anchor="middle" fill="#25254F" font-size="30" font-weight="700" letter-spacing="7" font-family="DejaVu Sans, sans-serif">П У Т Е В О Д И Т Е Л Ь</text>
+  <text x="${centerX}" y="${titleY}" text-anchor="middle" fill="#111116" font-size="44" font-weight="700" font-family="DejaVu Sans, sans-serif">Загружаем ваши данные</text>
+  <text x="${centerX}" y="${hintY}" text-anchor="middle" fill="#A7A7B0" font-size="30" font-weight="600" font-family="DejaVu Sans, sans-serif">Ищем кабинет 213...</text>
+  <text x="${centerX}" y="${subhintY}" text-anchor="middle" fill="#B2B2BA" font-size="24" font-weight="500" font-family="DejaVu Sans, sans-serif">Заходим в колледж</text>
+  <rect x="${barX}" y="${barY}" width="${barWidth}" height="${barHeight}" rx="9" fill="#E6E7F0" fill-opacity="0.72"/>
+  <rect x="${barX}" y="${barY}" width="130" height="${barHeight}" rx="9" fill="${C.primary}"/>
+</svg>
+`;
+}
+
 // ---------------------------------------------------------------------------
 // Запуск
 // ---------------------------------------------------------------------------
@@ -207,8 +236,13 @@ async function main() {
   await sharp(Buffer.from(logoSvg)).png().toFile(logoPath);
   console.log('✓ логотип:', path.relative(ROOT, logoPath));
 
-  // 4. Splash (1242×2436)
-  const splashSvg = buildLogoSvg({ width: 1242, height: 2436, withText: true });
+  // 4. Splash (1242×2436), using the exterior photo bundled with the app.
+  const exteriorPath = path.join(IMAGES_DIR, 'college-exterior.jpg');
+  if (!fs.existsSync(exteriorPath)) {
+    throw new Error(`Не найдено фото фасада колледжа: ${path.relative(ROOT, exteriorPath)}`);
+  }
+  const photoBase64 = fs.readFileSync(exteriorPath).toString('base64');
+  const splashSvg = buildSplashSvg({ width: 1242, height: 2436, photoBase64 });
   const splashPath = path.join(IMAGES_DIR, 'splash.png');
   await sharp(Buffer.from(splashSvg)).png().toFile(splashPath);
   console.log('✓ splash:', path.relative(ROOT, splashPath));

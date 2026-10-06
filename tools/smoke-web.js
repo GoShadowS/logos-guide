@@ -15,8 +15,9 @@
  *   4. тап по точке открывает карточку и строит маршрут;
  *   5. тема переключается МГНОВЕННО, без перезапуска приложения;
  *   6. в поле поиска можно печатать, результаты появляются;
- *   7. вкладок ровно четыре: нет «Расписания», нет QR-сканера, нет карты улицы;
- *   8. в отрисованном интерфейсе нет эмодзи.
+ *   7. вкладок ровно четыре: Главная, Карта, Расписание, Ещё;
+ *   8. избранное доступно из «Ещё», преподаватели не отображаются;
+ *   9. в отрисованном интерфейсе нет эмодзи.
  *
  * Запуск:  npm run smoke           (при необходимости сам соберёт бандл)
  *          node tools/smoke-web.js /path/to/export
@@ -81,6 +82,33 @@ const dom = new JSDOM('<!doctype html><html><body><div id="root"></div></body></
   virtualConsole,
 });
 const { window } = dom;
+
+// Реалистичный GPS-мок для браузерного smoke: фикс находится у контрольной
+// точки 6 первого этажа и имеет хорошую точность.
+const gpsTestPosition = {
+  coords: {
+    latitude: 55.215103,
+    longitude: 36.537163,
+    accuracy: 5,
+    altitude: null,
+    altitudeAccuracy: null,
+    heading: null,
+    speed: null,
+  },
+  timestamp: Date.now(),
+};
+Object.defineProperty(window.navigator, 'permissions', {
+  configurable: true,
+  value: { query: async () => ({ state: 'granted' }) },
+});
+Object.defineProperty(window.navigator, 'geolocation', {
+  configurable: true,
+  value: {
+    getCurrentPosition(success) { success(gpsTestPosition); },
+    watchPosition(success) { success(gpsTestPosition); return 1; },
+    clearWatch() {},
+  },
+});
 
 window.matchMedia =
   window.matchMedia ||
@@ -325,6 +353,8 @@ async function run() {
   const lang = visibleText().includes(RU.tabs.home) ? 'ru' : 'en';
   const L = lang === 'ru' ? RU : EN;
   console.log(`  (язык интерфейса: ${lang})`);
+  check('главный экран показывает фирменный заголовок и быстрый поиск',
+    containsText(L.home.title) && containsText(L.search.quickSearch));
 
   console.log('\n=== 2. Вкладки ===');
 /**
@@ -338,32 +368,33 @@ const tabLabels = Array.from(document.querySelectorAll('[role="tab"]')).map((el)
     stripIconGlyphs(el.textContent).trim()
   );
   check(
-    'ровно четыре вкладки: Главная, Карта, Избранное, Ещё',
+    'ровно четыре вкладки: Главная, Карта, Расписание, Ещё',
     tabLabels.length === 4 &&
       tabLabels.includes(L.tabs.home) &&
       tabLabels.includes(L.tabs.map) &&
-      tabLabels.includes(L.tabs.favorites) &&
+      tabLabels.includes(L.tabs.schedule) &&
       tabLabels.includes(L.tabs.more),
     JSON.stringify(tabLabels)
   );
-  check('вкладки «Расписание» нет', !tabLabels.some((label) => /расписани|schedule/i.test(label)),
-    JSON.stringify(tabLabels));
+  check('избранное скрыто из панели вкладок', !tabLabels.includes(L.tabs.favorites), JSON.stringify(tabLabels));
 
   console.log('\n=== 3. Поиск ===');
   const input = document.querySelector('input');
   check('поле поиска присутствует', !!input);
   const typeInto = async (value) => {
+    const activeInput = document.querySelector('input');
+    if (!activeInput) return;
     const setter = Object.getOwnPropertyDescriptor(
       window.HTMLInputElement.prototype,
       'value'
     ).set;
-    setter.call(input, value);
-    input.dispatchEvent(new window.Event('input', { bubbles: true }));
+    setter.call(activeInput, value);
+    activeInput.dispatchEvent(new window.Event('input', { bubbles: true }));
     await settle(250);
   };
   if (input) {
     await typeInto('236');
-    check('ввод в поле поиска работает', input.value === '236', input.value);
+    check('ввод в поле поиска работает', document.querySelector('input')?.value === '236', document.querySelector('input')?.value);
     check('результат по номеру «236» найден', containsText('236'));
     await typeInto('119');
     check('поиск «119» находит аудиторию 119', containsText('119'));
@@ -372,7 +403,7 @@ const tabLabels = Array.from(document.querySelectorAll('[role="tab"]')).map((el)
     if (clearButton) {
       click(clearButton);
       await settle(200);
-      check('кнопка очистки стирает запрос', input.value === '', input.value);
+      check('кнопка очистки стирает запрос', document.querySelector('input')?.value === '', document.querySelector('input')?.value);
     }
   }
   check('кнопка голосового ввода на месте', !!byAriaLabel(L.search.voiceInput));
@@ -384,6 +415,8 @@ const tabLabels = Array.from(document.querySelectorAll('[role="tab"]')).map((el)
     check('результат поиска можно открыть', click(resultRow));
     await settle(700);
     const addFavorite = document.querySelector('[aria-label="' + L.poi.addToFavorites + '"]');
+    check('карточка кабинета показывает нижнюю навигацию из макета',
+      Array.from(document.querySelectorAll('[role="tab"]')).some((tab) => stripIconGlyphs(tab.textContent).includes(L.tabs.schedule)));
     check('в карточке точки есть кнопка «В избранное»', !!addFavorite);
     if (addFavorite) {
       click(addFavorite);
@@ -394,7 +427,9 @@ const tabLabels = Array.from(document.querySelectorAll('[role="tab"]')).map((el)
       );
       window.history.back();
       await settle(900);
-      clickText(L.tabs.favorites);
+      clickText(L.tabs.more);
+      await settle(450);
+      clickText(L.favorites.title);
       await settle(600);
       check('аудитория появилась в избранном', containsText('119'));
       const removeButton = findByTextLast(L.favorites.remove);
@@ -413,7 +448,21 @@ const tabLabels = Array.from(document.querySelectorAll('[role="tab"]')).map((el)
   await settle(500);
   const floor1Plan = document.querySelector('svg[viewBox="0 0 758 552"]');
   check('отрисован реальный план 1 этажа (Map/map1lower.svg, 758×552)', !!floor1Plan);
-  check('на карте есть маркеры точек', !!byAriaLabel('119'));
+  check('кабинеты доступны нажатием по форме комнаты', !!document.querySelector('[data-testid="room-hit-area-main-1-119"]'));
+  const gpsButton = byAriaLabel(L.map.locateMe);
+  check('кнопка GPS-местоположения доступна на карте', !!gpsButton);
+  if (gpsButton) {
+    click(gpsButton);
+    await settle(450);
+    check('GPS-разрешение получает координаты и рисует точку на плане',
+      !!document.querySelector('[data-testid="user-location-marker"]'));
+    check('приём GPS не приводит к ошибке времени выполнения', runtimeErrors.length === 0,
+      runtimeErrors.slice(0, 3).join(' | '));
+    click(byAriaLabel(L.map.resetView));
+    await settle(350);
+  }
+  check('у аудитории нет отдельной иконки-маркера', !document.querySelector('[data-testid="poi-marker-main-1-119"]'));
+  check('отдельные точки интереса сохраняют свои маркеры', !!document.querySelector('[data-testid="poi-marker-poi-water-main"]'));
 
   console.log('\n=== 5. Приближение карты ===');
   const initialScale = mapScale();
@@ -439,11 +488,18 @@ const tabLabels = Array.from(document.querySelectorAll('[role="tab"]')).map((el)
   check('кнопка «вписать» возвращает масштаб 1', Math.abs(mapScale() - 1) < 0.01, String(mapScale()));
 
   console.log('\n=== 6. Точка на карте и маршрут ===');
-  const roomMarker = byAriaLabel('119');
+  const roomMarker = document.querySelector('[data-testid="room-hit-area-main-1-119"]');
   check('найдена точка «119» на плане', !!roomMarker);
   if (roomMarker) {
     click(roomMarker);
     await settle(400);
+    const selectedRooms = document.querySelectorAll('[data-testid="room-hit-area-main-1-119"]');
+    const selectedRoom = selectedRooms[selectedRooms.length - 1];
+    const selectionColor = selectedRoom ? window.getComputedStyle(selectedRoom).backgroundColor : '';
+    check('выбранная комната подсвечена и подписана',
+      !!selectedRoom && selectedRoom.textContent.includes('119')
+        && selectionColor !== 'rgba(0, 0, 0, 0)' && selectionColor !== 'transparent',
+      selectionColor);
     check('открылась карточка точки (экран не упал)', containsText(L.ui.buildRoute));
     const buildingName = BUILDINGS[0].name[lang] || BUILDINGS[0].name.ru;
     check(
@@ -452,16 +508,17 @@ const tabLabels = Array.from(document.querySelectorAll('[role="tab"]')).map((el)
         containsText((L.ui.floor || 'Floor') + ' 1') &&
         !visibleText().includes('[object Object]')
     );
-    clickText(L.ui.buildRoute);
+    clickTextLast(L.ui.buildRoute);
     await settle(700);
     check(
       'маршрут построен: появились «Начать маршрут» и «Очистить»',
       containsText(L.ui.startRoute) && containsText(L.ui.clear)
     );
+    check('при точном GPS маршрут начинается от позиции пользователя', containsText(L.map.routeFromGps));
     check('маршрут отрисован линией на плане', !!document.querySelector('svg polyline'));
 
     console.log('\n=== 6a. Пошаговая навигация ===');
-    clickText(L.ui.startRoute);
+    clickTextLast(L.ui.startRoute);
     await settle(700);
     check('открылся экран пошаговой навигации', containsText(L.ui.steps));
     const stepLabels = [
@@ -573,7 +630,8 @@ const tabLabels = Array.from(document.querySelectorAll('[role="tab"]')).map((el)
   const text = visibleText();
   check('нет QR-сканера', !/qr/i.test(text));
   check('нет карты улицы/территории', !/территори|campus/i.test(text));
-  check('нет расписания', !/расписани|schedule/i.test(text));
+  check('видимая панель содержит вкладку расписания', tabLabels.includes(L.tabs.schedule));
+  check('в интерфейсе нет раздела или карточек преподавателей', !/преподават|teachers?/i.test(text));
 
   console.log('\n=== 9. Эмодзи ===');
   const emojiRe = /[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}]/u;
