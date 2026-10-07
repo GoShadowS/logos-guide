@@ -50,9 +50,9 @@ export const SearchBar = forwardRef(function SearchBar(
   const containerStyle = [
     styles.container,
     {
-      backgroundColor: theme.colors.surface,
-      borderColor: theme.colors.border,
-      borderRadius: theme.radius.pill,
+      backgroundColor: theme.colors.surfaceAlt,
+      borderColor: theme.colors.surfaceAlt,
+      borderRadius: theme.radius.lg,
     },
     style,
   ];
@@ -78,7 +78,7 @@ export const SearchBar = forwardRef(function SearchBar(
         <MaterialCommunityIcons
           name="magnify"
           size={21}
-          color={theme.colors.textTertiary}
+          color={theme.colors.primary}
           style={styles.leftIcon}
         />
         <Text numberOfLines={1} style={[styles.placeholder, { color: theme.colors.textTertiary }]}>
@@ -93,7 +93,7 @@ export const SearchBar = forwardRef(function SearchBar(
       <MaterialCommunityIcons
         name="magnify"
         size={21}
-        color={theme.colors.textTertiary}
+        color={theme.colors.primary}
         style={styles.leftIcon}
       />
       <TextInput

@@ -8,12 +8,12 @@
     "icon": "./assets/images/logo.png",
     "scheme": "logosguide",
     "userInterfaceStyle": "automatic",
-    "backgroundColor": "#0B0B14",
-    "primaryColor": "#1A18E0",
+    "backgroundColor": "#FFFFFF",
+    "primaryColor": "#1512E8",
     "splash": {
       "image": "./assets/images/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#0B0B14"
+      "resizeMode": "cover",
+      "backgroundColor": "#FFFFFF"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -32,7 +32,9 @@
         "backgroundColor": "#0B0B14"
       },
       "permissions": [
-        "android.permission.RECORD_AUDIO"
+        "android.permission.RECORD_AUDIO",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
       ]
     },
     "web": {
@@ -40,6 +42,12 @@
       "bundler": "metro"
     },
     "plugins": [
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Геопозиция нужна, чтобы показать вас на плане этажа и ориентировать внутри корпуса."
+        }
+      ],
       [
         "expo-speech-recognition",
         {

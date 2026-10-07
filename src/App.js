@@ -16,6 +16,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { ThemeProvider, useTheme } from './theme';
 import { I18nProvider } from './localization/I18nProvider';
 import { RootNavigator } from './navigation/RootNavigator';
+import { StartupScreen } from './components/StartupScreen';
 
 // Не скрываем splash-экран, пока приложение не готово
 SplashScreen.preventAutoHideAsync().catch(() => {});
@@ -23,12 +24,14 @@ SplashScreen.preventAutoHideAsync().catch(() => {});
 /** Внутренний контент: знает тему и язык, поэтому может настроить StatusBar */
 function AppContent({ onReady }) {
   const { theme } = useTheme();
+  const [showStartup, setShowStartup] = useState(true);
 
   useEffect(() => {
-    // Как только тема и язык загружены — скрываем splash
+    // Keep the branded loading surface visible while local app data settles.
     const timer = setTimeout(() => {
       onReady();
-    }, 150);
+      setShowStartup(false);
+    }, 750);
     return () => clearTimeout(timer);
   }, [onReady]);
 
@@ -39,16 +42,14 @@ function AppContent({ onReady }) {
         backgroundColor="transparent"
         translucent
       />
-      <RootNavigator />
+      {showStartup ? <StartupScreen /> : <RootNavigator />}
     </>
   );
 }
 
 export default function App() {
-  const [ready, setReady] = useState(false);
   const handleReady = useCallback(() => {
     SplashScreen.hideAsync().catch(() => {});
-    setReady(true);
   }, []);
 
   return (

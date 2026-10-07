@@ -1,7 +1,4 @@
-/**
- * navigation/TabNavigator.js — нижняя навигация приложения.
- * Вкладки: Главная | Карта | Ещё.
- */
+/** Bottom navigation: Home | Map | Schedule | More. */
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -10,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MapScreen } from '../screens/MapScreen';
 import { SearchScreen } from '../screens/SearchScreen';
 import { FavoritesScreen } from '../screens/FavoritesScreen';
+import { ScheduleScreen } from '../screens/ScheduleScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
 import { useTheme } from '../theme';
 import { useI18n } from '../localization/I18nProvider';
@@ -21,18 +19,17 @@ export function TabNavigator() {
   const { t } = useI18n();
   const insets = useSafeAreaInsets();
 
-  const iconFor = (routeName) => {
+  const iconFor = (routeName, focused) => {
     switch (routeName) {
       case 'MapTab':
-        return 'map-outline';
-      case 'SearchTab':
-        return 'home-outline';
+        return focused ? 'map' : 'map-outline';
+      case 'ScheduleTab':
+        return focused ? 'calendar-month' : 'calendar-month-outline';
       case 'SettingsTab':
         return 'dots-grid';
-      case 'FavoritesTab':
-        return 'heart-outline';
+      case 'SearchTab':
       default:
-        return 'circle';
+        return focused ? 'home' : 'home-outline';
     }
   };
 
@@ -42,34 +39,42 @@ export function TabNavigator() {
         headerShown: false,
         tabBarActiveTintColor: theme.colors.primary,
         tabBarInactiveTintColor: theme.colors.textTertiary,
+        tabBarHideOnKeyboard: true,
         tabBarStyle: {
           backgroundColor: theme.colors.surface,
           borderTopColor: theme.colors.border,
           borderTopWidth: 1,
-          height: 58 + insets.bottom,
-          paddingTop: 4,
-          paddingBottom: Math.max(6, insets.bottom),
+          height: 68 + insets.bottom,
+          paddingTop: 6,
+          paddingBottom: Math.max(7, insets.bottom),
+          elevation: 0,
         },
         tabBarLabelStyle: {
-          fontSize: 11,
-          fontWeight: '600',
+          fontSize: 10.5,
+          fontWeight: '700',
+          marginTop: -2,
         },
-        tabBarIcon: ({ color, size }) => (
-          <MaterialCommunityIcons name={iconFor(route.name)} size={size - 2} color={color} />
+        tabBarIcon: ({ color, size, focused }) => (
+          <MaterialCommunityIcons
+            name={iconFor(route.name, focused)}
+            size={size + (focused ? 1 : 0)}
+            color={color}
+          />
         ),
       })}
     >
-        <Tab.Screen name="SearchTab" component={SearchScreen} options={{ title: t('tabs.home') }} />
-        <Tab.Screen name="MapTab" component={MapScreen} options={{ title: t('tabs.map') }} />
-        <Tab.Screen
-          name="FavoritesTab"
-          component={FavoritesScreen}
-          options={{ title: t('tabs.favorites') }}
-        />
+      <Tab.Screen name="SearchTab" component={SearchScreen} options={{ title: t('tabs.home') }} />
+      <Tab.Screen name="MapTab" component={MapScreen} options={{ title: t('tabs.map') }} />
+      <Tab.Screen name="ScheduleTab" component={ScheduleScreen} options={{ title: t('tabs.schedule') }} />
+      <Tab.Screen name="SettingsTab" component={SettingsScreen} options={{ title: t('tabs.more') }} />
+      {/* Keep favorites reachable from More without adding a fifth visible tab. */}
       <Tab.Screen
-        name="SettingsTab"
-        component={SettingsScreen}
-        options={{ title: t('tabs.more') }}
+        name="FavoritesTab"
+        component={FavoritesScreen}
+        options={{
+          title: t('tabs.favorites'),
+          tabBarButton: () => null,
+        }}
       />
     </Tab.Navigator>
   );

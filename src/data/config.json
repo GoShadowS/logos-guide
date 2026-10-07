@@ -17,7 +17,7 @@
   },
   "defaults": {
     "language": "system",
-    "theme": "system",
+    "theme": "light",
     "startFloorId": "main-1"
   },
   "search": {

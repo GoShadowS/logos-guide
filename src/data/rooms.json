@@ -53,8 +53,8 @@
         "en": "Room 115"
       },
       "description": {
-        "ru": "Учебная аудитория № 115 (1 этаж второго корпуса). Занятия по расписанию — см. раздел «Расписание».",
-        "en": "Classroom No. 115 (floor 1, second building). Classes follow the timetable — see the Schedule section."
+        "ru": "Учебная аудитория № 115 (1 этаж второго корпуса).",
+        "en": "Classroom No. 115 (floor 1, second building)."
       },
       "aliases": [
         "115",
@@ -236,8 +236,8 @@
         "en": "Room 119"
       },
       "description": {
-        "ru": "Учебная аудитория № 119 (1 этаж второго корпуса). Преподаватель: Иванова М.П. (история).",
-        "en": "Classroom No. 119 (floor 1, second building). Teacher: M.P. Ivanova (history)."
+        "ru": "Учебная аудитория № 119 (1 этаж второго корпуса).",
+        "en": "Classroom No. 119 (floor 1, second building)."
       },
       "aliases": [
         "119",
@@ -247,7 +247,6 @@
         "room 119"
       ],
       "number": "119",
-      "teacherId": "t-ivanova",
       "label": "119"
     },
     {
@@ -327,19 +326,17 @@
         "en": "Room 120 — Aerodynamics"
       },
       "description": {
-        "ru": "Лаборатория № 120 (1 этаж второго корпуса): практические занятия по аэродинамике. Преподаватель: Петров С.А.",
-        "en": "Laboratory No. 120 (floor 1, second building): aerodynamics practicals. Teacher: S.A. Petrov."
+        "ru": "Лаборатория № 120 (1 этаж второго корпуса): практические занятия по аэродинамике.",
+        "en": "Laboratory No. 120 (floor 1, second building): aerodynamics practicals."
       },
       "aliases": [
         "120",
         "кабинет 120",
-        "аэродинамика",
         "авиа",
         "room 120",
         "aerodynamics"
       ],
       "number": "120",
-      "teacherId": "t-petrov",
       "label": "120"
     },
     {
@@ -867,8 +864,8 @@
         "en": "Room 230"
       },
       "description": {
-        "ru": "Учебная аудитория № 230 (2 этаж второго корпуса). Преподаватель: Морозова Е.В. (информатика).",
-        "en": "Classroom No. 230 (floor 2, second building). Teacher: E.V. Morozova (computer science)."
+        "ru": "Учебная аудитория № 230 (2 этаж второго корпуса).",
+        "en": "Classroom No. 230 (floor 2, second building)."
       },
       "aliases": [
         "230",
@@ -877,7 +874,6 @@
         "room 230"
       ],
       "number": "230",
-      "teacherId": "t-morozova",
       "label": "230"
     },
     {
@@ -929,8 +925,8 @@
         "en": "Room 209"
       },
       "description": {
-        "ru": "Учебная аудитория № 209 (2 этаж второго корпуса). Преподаватель: Сидорова А.А. (математика).",
-        "en": "Classroom No. 209 (floor 2, second building). Teacher: A.A. Sidorova (mathematics)."
+        "ru": "Учебная аудитория № 209 (2 этаж второго корпуса).",
+        "en": "Classroom No. 209 (floor 2, second building)."
       },
       "aliases": [
         "209",
@@ -939,7 +935,6 @@
         "room 209"
       ],
       "number": "209",
-      "teacherId": "t-sidorova",
       "label": "209"
     },
     {
@@ -1172,8 +1167,8 @@
         "en": "Room 211"
       },
       "description": {
-        "ru": "Учебная аудитория № 211 (2 этаж второго корпуса). Преподаватель: Кузнецов Д.С. (физика).",
-        "en": "Classroom No. 211 (floor 2, second building). Teacher: D.S. Kuznetsov (physics)."
+        "ru": "Учебная аудитория № 211 (2 этаж второго корпуса).",
+        "en": "Classroom No. 211 (floor 2, second building)."
       },
       "aliases": [
         "211",
@@ -1182,7 +1177,6 @@
         "room 211"
       ],
       "number": "211",
-      "teacherId": "t-kuznetsov",
       "label": "211"
     },
     {
@@ -1409,23 +1403,19 @@
         "en": "Room 202 — Chemistry & Biology"
       },
       "description": {
-        "ru": "Лаборатория № 202 (2 этаж второго корпуса): химия и биология. Преподаватель: Золотарев В.В.",
-        "en": "Laboratory No. 202 (floor 2, second building): chemistry and biology. Teacher: V.V. Zolotarev."
+        "ru": "Лаборатория № 202 (2 этаж второго корпуса): химия и биология.",
+        "en": "Laboratory No. 202 (floor 2, second building): chemistry and biology."
       },
       "aliases": [
         "202",
         "кабинет 202",
         "химия",
         "биология",
-        "золотарев",
-        "сан саныч",
-        "сансаныч",
         "room 202",
         "chemistry",
         "biology"
       ],
       "number": "202",
-      "teacherId": "t-zolotarev",
       "label": "202"
     },
     {

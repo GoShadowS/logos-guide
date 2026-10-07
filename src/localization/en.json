@@ -2,49 +2,75 @@
   "tabs": {
     "home": "Home",
     "map": "Map",
+    "schedule": "Schedule",
     "favorites": "Favorites",
     "more": "More"
   },
+  "splash": {
+    "loading": "Loading your data",
+    "searching": "Looking for room 118...",
+    "entering": "Welcome to the college"
+  },
+  "home": {
+    "title": "Where do you need to go today?",
+    "subtitle": "Room number, place name, or subject",
+    "searchPlaceholder": "For example: room 118",
+    "collegeGuide": "Logos Technical College",
+    "noRecentSearches": "Your recent searches will appear here"
+  },
+  "schedule": {
+    "title": "Schedule",
+    "unavailable": "The schedule is not available yet",
+    "hint": "For now, use room search and the college map"
+  },
   "map": {
     "title": "College map",
-    "quickSearchPlaceholder": "Where do you need to go? e.g. Room 213",
     "chooseFloor": "Choose floor",
-    "tapMarker": "Tap a point to build a route",
+    "tapMarker": "Tap a room or point of interest",
     "zoomIn": "Zoom in",
     "zoomOut": "Zoom out",
-    "resetView": "Fit plan to screen"
+    "resetView": "Fit plan to screen",
+    "locateMe": "My location",
+    "gpsRequesting": "Requesting location permission…",
+    "gpsLocating": "Getting a GPS fix…",
+    "gpsPermissionDenied": "Location access was denied. Allow it in device settings.",
+    "gpsFailed": "Could not get a location. Check that Location Services are enabled.",
+    "gpsAccuracy": "GPS · accuracy ±{accuracy} m",
+    "gpsOutsidePlan": "The GPS fix is outside this floor plan or the signal is too inaccurate.",
+    "gpsFloorManual": "Floor is selected manually; GPS cannot detect it inside the building.",
+    "routeFromGps": "Route starts from your GPS position"
   },
   "search": {
-    "placeholder": "Room number, teacher name or subject",
+    "placeholder": "Room number or place name",
+    "similarQueries": "Related searches",
     "quickSearch": "Quick search",
     "recentSearches": "Recent searches",
-    "clearHistory": "Clear history",
     "noResults": "Nothing found",
-    "noResultsHint": "Check your query or try another one: e.g. \"213\", \"cafeteria\", \"Zolotarev\"",
+    "noResultsHint": "Check your query or try another one: e.g. \"213\", \"cafeteria\", \"library\"",
     "foundOne": "Found {count} point",
     "foundFew": "Found {count} points",
     "foundMany": "Found {count} points",
     "voiceUnavailable": "Could not start speech recognition. Check the speech recognition service in device settings.",
     "voicePermissionDenied": "Allow microphone access to use voice search.",
     "voiceStop": "Stop voice input",
-    "emptyTitle": "Start searching",
-    "emptyHint": "Enter a room number, place name or teacher's surname",
     "voiceInput": "Voice input",
     "voiceError": "Speech recognition failed. Please try again."
   },
   "poi": {
-    "teacher": "Teacher",
-    "howToGet": "How to get there",
+    "room": "Room",
+    "routeStartHeading": "Where to start?",
+    "routeFromHere": "I’m here",
     "routeFromMainEntrance": "Main entrance",
     "routeFromCafeteria": "Cafeteria",
+    "chooseStartPoint": "Choose a point",
     "addToFavorites": "Add to favorites",
     "removeFromFavorites": "Remove from favorites",
-    "noDescription": "No description available",
-    "details": "Description",
     "notFound": "Point not found"
   },
   "navigation": {
-    "goUpStairs": "Go up to floor {floor} by the stairs"
+    "goUpStairs": "Go up to floor {floor} by the stairs",
+    "gpsHint": "The blue dot is an approximate GPS position. Indoor GPS can drift; advance route steps manually.",
+    "gpsFloorHint": "GPS does not detect floors. The plan changes with the route steps."
   },
   "settings": {
     "language": "Language",
@@ -62,7 +88,7 @@
   },
   "about": {
     "title": "About the app",
-    "description": "A guidebook for the ANO PO \"Logos\" Technical College building: search for rooms, teachers and places, build routes across the floors.",
+    "description": "A guidebook for the ANO PO \"Logos\" Technical College building: search for rooms and places, build routes across the floors.",
     "developer": "Developer",
     "developerName": "IP of the LOGOS: Guidebook team",
     "college": "College",
@@ -99,7 +125,6 @@
   },
   "quick": {
     "rooms": "Rooms",
-    "teachers": "Teachers",
     "toilets": "Toilets",
     "security": "Security",
     "food": "Food",

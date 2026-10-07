@@ -7,14 +7,13 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, StyleSheet, Pressable, ScrollView, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 import { MapCanvas } from '../components/MapCanvas';
 import { FloorSelector } from '../components/FloorSelector';
 import { BottomSheet, getSheetHeight } from '../components/BottomSheet';
 import { Button } from '../components/Button';
-import { Chip } from '../components/Chip';
-import { SearchBar } from '../components/SearchBar';
 import { PoiIcon } from '../components/PoiIcon';
 import { useTheme } from '../theme';
 import { useI18n } from '../localization/I18nProvider';
@@ -22,11 +21,16 @@ import { useFavorites } from '../hooks/useFavorites';
 import { MAP_FILTERS } from '../theme/poiTypes';
 import { getAllPois, getPoi, getFloor, getBuildingOfFloor, getDefaultStartPoint } from '../data';
 import { buildRoute } from '../services/pathfinding';
+import { getNavGraph } from '../services/graph';
+import { gpsToPlanLocation } from '../services/geolocation';
+import { useGpsLocation } from '../hooks/useGpsLocation';
 import { formatDistance, formatDuration, formatFloorAndBuilding } from '../utils/format';
 import { getLastFloor, setLastFloor } from '../services/storage';
 
 /** Высота строки чипсов-фильтров вместе с отступами */
-const FILTERS_ROW_HEIGHT = 46;
+const FILTERS_ROW_HEIGHT = 78;
+const GPS_ROUTE_START_MAX_ACCURACY_METERS = 20;
+const GPS_ROUTE_START_SNAP_CELLS = 12;
 
 export function MapScreen({ navigation, route }) {
   const { theme } = useTheme();
@@ -44,6 +48,45 @@ export function MapScreen({ navigation, route }) {
   const [filterId, setFilterId] = useState('all');
   const [sheetCollapsed, setSheetCollapsed] = useState(true);
   const [routeError, setRouteError] = useState(null);
+  const [gpsFloorId, setGpsFloorId] = useState('main-1');
+  const { status: gpsStatus, location: gpsLocation, start: startGps, stop: stopGps } = useGpsLocation();
+
+  const planLocation = useMemo(() => {
+    const coords = gpsLocation?.coords;
+    if (!coords) return null;
+    return gpsToPlanLocation(gpsFloorId, coords.latitude, coords.longitude, coords.accuracy);
+  }, [gpsFloorId, gpsLocation]);
+
+  // Используем GPS как начало маршрута только при приемлемой точности и
+  // если точка находится рядом с проходимой зоной текущего (вручную выбранного) этажа.
+  const gpsRouteStart = useMemo(() => {
+    const coords = gpsLocation?.coords;
+    if (gpsStatus !== 'tracking' || !coords) return null;
+    if (Number.isFinite(coords.accuracy) && coords.accuracy > GPS_ROUTE_START_MAX_ACCURACY_METERS) {
+      return null;
+    }
+    const point = gpsToPlanLocation(gpsFloorId, coords.latitude, coords.longitude, coords.accuracy);
+    if (!point?.withinPlan) return null;
+    if (!getNavGraph().snapToWalkable(gpsFloorId, point.x, point.y, GPS_ROUTE_START_SNAP_CELLS)) {
+      return null;
+    }
+    return { ...point, id: 'gps-start', type: 'entrance' };
+  }, [gpsFloorId, gpsLocation, gpsStatus]);
+
+  const gpsStatusText = useMemo(() => {
+    if (gpsStatus === 'requesting') return t('map.gpsRequesting');
+    if (gpsStatus === 'locating') return t('map.gpsLocating');
+    if (gpsStatus === 'denied') return t('map.gpsPermissionDenied');
+    if (gpsStatus === 'error') return t('map.gpsFailed');
+    if (gpsStatus !== 'tracking') return null;
+    if (!planLocation?.withinPlan) return t('map.gpsOutsidePlan');
+    const accuracy = Math.round(planLocation.accuracyMeters ?? 0);
+    return `${t('map.gpsAccuracy', { accuracy })} · ${t('map.gpsFloorManual')}`;
+  }, [gpsStatus, planLocation, t]);
+
+  useFocusEffect(
+    useCallback(() => () => stopGps(), [stopGps])
+  );
 
   // --- Восстановление последнего открытого этажа ---------------------------
   useEffect(() => {
@@ -90,6 +133,7 @@ export function MapScreen({ navigation, route }) {
 
   const changeFloor = useCallback((nextFloorId) => {
     setFloorId(nextFloorId);
+    setGpsFloorId(nextFloorId);
     setLastFloor(nextFloorId);
     setSelectedPoi(null);
     setRouteError(null);
@@ -100,9 +144,27 @@ export function MapScreen({ navigation, route }) {
     setSheetCollapsed(false);
   }, []);
 
+  const handleLocateMe = useCallback(async () => {
+    const targetFloorId = gpsStatus === 'tracking' ? gpsFloorId : floorId;
+    if (gpsStatus !== 'tracking') setGpsFloorId(floorId);
+    const fix = gpsStatus === 'tracking' ? gpsLocation : await startGps();
+    const coords = fix?.coords;
+    if (!coords) return;
+    const point = gpsToPlanLocation(targetFloorId, coords.latitude, coords.longitude, coords.accuracy);
+    if (point?.withinPlan) {
+      if (floorId !== targetFloorId) {
+        setFloorId(targetFloorId);
+        setLastFloor(targetFloorId);
+        setTimeout(() => mapRef.current?.fitToPoints([point]), 350);
+      } else {
+        mapRef.current?.fitToPoints([point]);
+      }
+    }
+  }, [floorId, gpsFloorId, gpsLocation, gpsStatus, startGps]);
+
   const handleBuildRoute = useCallback((destinationPoi) => {
     if (!destinationPoi) return;
-    const start = getDefaultStartPoint();
+    const start = gpsRouteStart || getDefaultStartPoint();
     if (!start) {
       setRouteError('routeNotFound');
       return;
@@ -131,7 +193,7 @@ export function MapScreen({ navigation, route }) {
     setTimeout(() => {
       mapRef.current?.fitToPoints(pointsOnFloor);
     }, 350);
-  }, []);
+  }, [gpsRouteStart]);
 
   const handleResetRoute = useCallback(() => {
     setActiveRoute(null);
@@ -169,8 +231,8 @@ export function MapScreen({ navigation, route }) {
       return (
         <ScrollView style={styles.sheetScroll} contentContainerStyle={styles.sheetBody}>
           <View style={styles.routeHeader}>
-            <PoiIcon type={routeEnd.type} size={42} />
-            <View style={styles.routeHeaderText}>
+            {routeEnd.kind !== 'room' ? <PoiIcon type={routeEnd.type} size={42} /> : null}
+            <View style={[styles.routeHeaderText, routeEnd.kind === 'room' && { marginLeft: 0 }]}>
               <Text style={[styles.sheetTitle, { color: theme.colors.text }]} numberOfLines={1}>
                 {routeEnd.number || routeEnd.name?.[language] || routeEnd.name?.ru}
               </Text>
@@ -191,6 +253,9 @@ export function MapScreen({ navigation, route }) {
                   t,
                   language
                 )}
+              </Text>
+              <Text style={[styles.routeOrigin, { color: theme.colors.textSecondary }]} numberOfLines={1}>
+                {routeStart?.id === 'gps-start' ? t('map.routeFromGps') : t('poi.routeFromMainEntrance')}
               </Text>
             </View>
           </View>
@@ -225,8 +290,8 @@ export function MapScreen({ navigation, route }) {
             style={styles.selectedHeader}
             accessibilityRole="button"
           >
-            <PoiIcon type={selectedPoi.type} size={46} />
-            <View style={styles.routeHeaderText}>
+            {selectedPoi.kind !== 'room' ? <PoiIcon type={selectedPoi.type} size={46} /> : null}
+            <View style={[styles.routeHeaderText, selectedPoi.kind === 'room' && { marginLeft: 0 }]}>
               <Text style={[styles.sheetTitle, { color: theme.colors.text }]} numberOfLines={1}>
                 {selectedPoi.number || selectedPoi.name?.[language] || selectedPoi.name?.ru}
               </Text>
@@ -288,40 +353,84 @@ export function MapScreen({ navigation, route }) {
         endPoi={routeEnd}
         selectedPoiId={selectedPoi?.id}
         onPoiPress={handlePoiPress}
+        userLocation={gpsStatus === 'tracking' ? planLocation : null}
         dimMarkers={!!activeRoute}
       />
 
-      {/* Верхняя панель: поиск + выбор этажа */}
-      <View style={[styles.topBar, { paddingTop: insets.top + 8 }]} pointerEvents="box-none">
-        <SearchBar
-          value=""
-          onChangeText={() => {}}
-          onPress={openSearch}
-          editable={false}
-          placeholder={t('map.quickSearchPlaceholder')}
-        />
+      {/* Верхняя навигация и ручной выбор этажа */}
+      <View style={[styles.topBar, { paddingTop: Math.max(insets.top + 6, 14) }]} pointerEvents="box-none">
+        <View style={styles.headerRow}>
+          <Pressable
+            onPress={() => navigation.navigate('SearchTab')}
+            accessibilityRole="button"
+            accessibilityLabel={t('ui.back')}
+            hitSlop={8}
+            style={styles.headerButton}
+          >
+            <MaterialCommunityIcons name="chevron-left" size={29} color={theme.colors.primary} />
+          </Pressable>
+          <Text style={[styles.mapTitle, { color: theme.colors.text }]}>{t('map.title')}</Text>
+          <Pressable
+            onPress={openSearch}
+            accessibilityRole="button"
+            accessibilityLabel={t('search.placeholder')}
+            hitSlop={8}
+            style={[styles.headerButton, styles.searchButton, { backgroundColor: theme.colors.surfaceAlt }]}
+          >
+            <MaterialCommunityIcons name="magnify" size={21} color={theme.colors.primary} />
+          </Pressable>
+        </View>
         <View style={styles.floorRow}>
           <FloorSelector floorId={floorId} onChange={changeFloor} />
+          <Text style={[styles.buildingLabel, { color: theme.colors.textTertiary }]} numberOfLines={1}>
+            {getBuildingOfFloor(floorId)?.name?.[language] || ''}
+          </Text>
         </View>
+        {gpsStatusText ? (
+          <View style={[styles.gpsStatus, { backgroundColor: theme.colors.surface }]}>
+            <MaterialCommunityIcons name="crosshairs-gps" size={14} color={theme.colors.info} />
+            <Text style={[styles.gpsStatusText, { color: theme.colors.textSecondary }]}>
+              {gpsStatusText}
+            </Text>
+          </View>
+        ) : null}
       </View>
 
-      {/* Чипсы фильтров */}
+      {/* Быстрые фильтры над нижней карточкой */}
       <View style={[styles.filterRow, { bottom: filtersBottom }]} pointerEvents="box-none">
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.filterScroll}
         >
-          {MAP_FILTERS.map((filter) => (
-            <Chip
-              key={filter.id}
-              label={t('filter.' + filter.id)}
-              icon={filter.icon}
-              selected={filter.id === filterId}
-              onPress={() => setFilterId(filter.id)}
-              style={styles.filterChip}
-            />
-          ))}
+          {MAP_FILTERS.map((filter) => {
+            const selected = filter.id === filterId;
+            return (
+              <Pressable
+                key={filter.id}
+                onPress={() => setFilterId(filter.id)}
+                accessibilityRole="button"
+                accessibilityState={{ selected }}
+                style={({ pressed }) => [
+                  styles.filterTile,
+                  {
+                    backgroundColor: selected ? theme.colors.primarySoft : theme.colors.surface,
+                    borderColor: selected ? theme.colors.primarySoft : theme.colors.border,
+                    opacity: pressed ? 0.76 : 1,
+                  },
+                ]}
+              >
+                <MaterialCommunityIcons
+                  name={filter.icon}
+                  size={23}
+                  color={theme.colors.primary}
+                />
+                <Text style={[styles.filterTileLabel, { color: theme.colors.text }]} numberOfLines={1}>
+                  {t('filter.' + filter.id)}
+                </Text>
+              </Pressable>
+            );
+          })}
         </ScrollView>
       </View>
 
@@ -342,6 +451,25 @@ export function MapScreen({ navigation, route }) {
           style={[styles.fab, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}
         >
           <MaterialCommunityIcons name="minus" size={22} color={theme.colors.text} />
+        </Pressable>
+        <Pressable
+          testID="gps-location-button"
+          onPress={handleLocateMe}
+          accessibilityRole="button"
+          accessibilityLabel={t('map.locateMe')}
+          style={[
+            styles.fab,
+            {
+              backgroundColor: gpsStatus === 'tracking' ? theme.colors.primary : theme.colors.surface,
+              borderColor: theme.colors.border,
+            },
+          ]}
+        >
+          <MaterialCommunityIcons
+            name={gpsStatus === 'tracking' ? 'crosshairs-gps' : 'crosshairs'}
+            size={21}
+            color={gpsStatus === 'tracking' ? theme.colors.primaryText : theme.colors.info}
+          />
         </Pressable>
         <Pressable
           onPress={() => mapRef.current?.resetView()}
@@ -368,14 +496,35 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    paddingHorizontal: 12,
+    paddingHorizontal: 22,
     zIndex: 10,
   },
+  headerRow: { flexDirection: 'row', alignItems: 'center', minHeight: 38 },
+  headerButton: { width: 38, height: 38, alignItems: 'flex-start', justifyContent: 'center' },
+  searchButton: { alignItems: 'center', justifyContent: 'center', borderRadius: 19 },
+  mapTitle: { flex: 1, textAlign: 'center', fontSize: 20, fontWeight: '800', letterSpacing: -0.25 },
   floorRow: {
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: 8,
   },
+  buildingLabel: { flex: 1, fontSize: 12, fontWeight: '600', marginLeft: 12 },
+  gpsStatus: {
+    marginTop: 7,
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    maxWidth: '88%',
+    borderRadius: 10,
+    paddingHorizontal: 9,
+    paddingVertical: 6,
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 5,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+  },
+  gpsStatusText: { fontSize: 11, lineHeight: 15, marginLeft: 5, flexShrink: 1 },
   floatingColumn: {
     position: 'absolute',
     right: 12,
@@ -403,8 +552,18 @@ const styles = StyleSheet.create({
     right: 0,
     zIndex: 5,
   },
-  filterScroll: { paddingHorizontal: 12 },
-  filterChip: { marginRight: 8 },
+  filterScroll: { paddingHorizontal: 18 },
+  filterTile: {
+    width: 72,
+    height: 72,
+    borderWidth: 1,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 8,
+    paddingHorizontal: 4,
+  },
+  filterTileLabel: { fontSize: 9.5, fontWeight: '700', marginTop: 6, textAlign: 'center' },
   sheetScroll: { flexGrow: 0 },
   sheetBody: { padding: 16, paddingTop: 4 },
   sheetTitle: { fontSize: 18, fontWeight: '700' },
@@ -413,6 +572,7 @@ const styles = StyleSheet.create({
   routeHeader: { flexDirection: 'row', alignItems: 'center' },
   routeHeaderText: { flex: 1, marginLeft: 12 },
   routeMetrics: { flexDirection: 'row', alignItems: 'center', marginTop: 4 },
+  routeOrigin: { fontSize: 11, marginTop: 2 },
   metricsText: { fontSize: 14, fontWeight: '700', marginLeft: 5 },
   routeActions: { flexDirection: 'row', alignItems: 'center', marginTop: 16 },
 });
