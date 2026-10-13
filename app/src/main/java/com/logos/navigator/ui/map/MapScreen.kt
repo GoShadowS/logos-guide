@@ -228,7 +228,7 @@ fun MapScreen(
                 },
                 navigationIcon = {
                     Image(
-                        painter = painterResource(R.drawable.logo_college),
+                        painter = painterResource(R.drawable.logo),
                         contentDescription = stringResource(R.string.splash_description),
                         modifier = Modifier.padding(start = 12.dp, end = 8.dp).size(38.dp).clip(CircleShape),
                     )
