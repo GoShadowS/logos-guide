@@ -138,6 +138,11 @@ fun MapScreen(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
+    val roomsOnSelectedFloor = remember(state.rooms, state.selectedFloor) {
+        state.rooms.filter { it.floor == state.selectedFloor }
+    }
+    val navigationNodes = remember(state.navigation) { state.navigation?.nodes.orEmpty() }
+    val navigationEdges = remember(state.navigation) { state.navigation?.edges.orEmpty() }
     val snackbarHostState = remember { SnackbarHostState() }
     var mapView by remember { mutableStateOf<SvgMapView?>(null) }
     var menuExpanded by remember { mutableStateOf(false) }
@@ -300,9 +305,9 @@ fun MapScreen(
                             view.submit(
                                 svg = state.floorSvg,
                                 floor = floor,
-                                rooms = state.rooms.filter { it.floor == state.selectedFloor },
-                                nodes = state.navigation?.nodes.orEmpty(),
-                                edges = state.navigation?.edges.orEmpty(),
+                                rooms = roomsOnSelectedFloor,
+                                nodes = navigationNodes,
+                                edges = navigationEdges,
                                 userPosition = state.userPosition,
                                 accuracyMeters = state.gpsAccuracyMeters,
                                 locationMode = state.locationMode,

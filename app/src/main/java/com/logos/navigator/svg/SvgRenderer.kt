@@ -1,26 +1,34 @@
 package com.logos.navigator.svg
 
+import android.graphics.Bitmap
 import android.graphics.Canvas
 import com.caverock.androidsvg.RenderOptions
 import com.caverock.androidsvg.SVG
 import com.logos.navigator.data.model.FloorPlan
+import kotlin.math.ceil
 
-/** Тонкий векторный рендерер AndroidSVG; CSS-подсветка включается только при наличии SVG id. */
+/** Рендерит исходный SVG; растровый результат используется только как временный кэш кадра. */
 object SvgRenderer {
-    private val safeSvgId = Regex("[A-Za-z_][A-Za-z0-9_.:-]*")
-
-    fun render(canvas: Canvas, svg: SVG, floor: FloorPlan, highlightElementIds: List<String> = emptyList()) {
-        val options = RenderOptions.create()
-            .viewBox(floor.viewBoxX.toFloat(), floor.viewBoxY.toFloat(), floor.width.toFloat(), floor.height.toFloat())
-            .viewPort(floor.viewBoxX.toFloat(), floor.viewBoxY.toFloat(), floor.width.toFloat(), floor.height.toFloat())
-        val safeIds = highlightElementIds.distinct().filter(safeSvgId::matches)
-        if (safeIds.isNotEmpty()) {
-            options.css(
-                safeIds.joinToString("\n") { id ->
-                    "#$id { fill: #FFE082 !important; stroke: #F57C00 !important; stroke-width: 3 !important; }"
-                },
+    /** Растеризует SVG для текущего масштаба в памяти, не создавая PNG-файл и не меняя источник координат. */
+    fun renderToBitmap(svg: SVG, floor: FloorPlan, pixelsPerSvgUnit: Float): Bitmap {
+        val width = ceil(floor.width * pixelsPerSvgUnit).toInt().coerceAtLeast(1)
+        val height = ceil(floor.height * pixelsPerSvgUnit).toInt().coerceAtLeast(1)
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        return try {
+            val canvas = Canvas(bitmap)
+            svg.renderToCanvas(
+                canvas,
+                renderOptions(floor, 0f, 0f, width.toFloat(), height.toFloat()),
             )
+            bitmap
+        } catch (error: Throwable) {
+            bitmap.recycle()
+            throw error
         }
-        svg.renderToCanvas(canvas, options)
     }
+
+    private fun renderOptions(floor: FloorPlan, viewportX: Float, viewportY: Float, viewportWidth: Float, viewportHeight: Float) =
+        RenderOptions.create()
+            .viewBox(floor.viewBoxX.toFloat(), floor.viewBoxY.toFloat(), floor.width.toFloat(), floor.height.toFloat())
+            .viewPort(viewportX, viewportY, viewportWidth, viewportHeight)
 }
