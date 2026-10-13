@@ -103,6 +103,7 @@
     <string name="share_location">Share location</string>
     <string name="share_room">Share room</string>
     <string name="share_room_text">%1$s: %2$s%3$s, %4$s.</string>
+    <string name="share_room_number_format"> (%1$s)</string>
     <string name="share_location_unknown">My location has not been marked yet.</string>
     <string name="share_near_room">I’m on %1$s, near “%2$s%3$s”.</string>
     <string name="share_floor">I’m on %1$s at the college.</string>

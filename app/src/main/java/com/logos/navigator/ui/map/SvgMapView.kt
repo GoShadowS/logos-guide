@@ -489,9 +489,9 @@ class SvgMapView @JvmOverloads constructor(
             val isTarget = room.id == destination?.id || room.id == selectedRoom?.id
             if (!labelsEnabled && !isTarget) return@forEach
             val geometry = roomGeometries.firstOrNull { it.room.id == room.id }
-            val centerX = room.centerX?.toFloat() ?: room.x?.toFloat() ?: geometry?.bounds?.centerX
+            val centerX = room.centerX?.toFloat() ?: room.x?.toFloat() ?: geometry?.bounds?.centerX()
                 ?: return@forEach
-            val centerY = room.centerY?.toFloat() ?: room.y?.toFloat() ?: geometry?.bounds?.centerY
+            val centerY = room.centerY?.toFloat() ?: room.y?.toFloat() ?: geometry?.bounds?.centerY()
                 ?: return@forEach
             val label = room.number?.takeIf(String::isNotBlank) ?: room.localizedName(context).take(18)
             drawLabel(

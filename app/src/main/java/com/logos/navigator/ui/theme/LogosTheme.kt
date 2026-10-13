@@ -14,6 +14,7 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowInsetsControllerCompat
 import com.logos.navigator.data.model.ThemeMode
@@ -86,7 +87,12 @@ fun LogosTheme(
         }
     }
     val density = LocalDensity.current
-    CompositionLocalProvider(LocalDensity provides density.copy(fontScale = density.fontScale * fontScale.coerceIn(0.8f, 1.6f))) {
+    CompositionLocalProvider(
+        LocalDensity provides Density(
+            density = density.density,
+            fontScale = density.fontScale * fontScale.coerceIn(0.8f, 1.6f),
+        ),
+    ) {
         MaterialTheme(colorScheme = colorScheme, typography = Typography(), content = content)
     }
 }
