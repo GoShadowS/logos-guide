@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="app_language_entries">
+        <item>@string/language_system</item>
+        <item>@string/language_russian</item>
+        <item>@string/language_english</item>
+    </string-array>
+    <string-array name="theme_mode_entries">
+        <item>@string/theme_system</item>
+        <item>@string/theme_light</item>
+        <item>@string/theme_dark</item>
+    </string-array>
+    <string-array name="room_label_mode_entries">
+        <item>@string/labels_always</item>
+        <item>@string/labels_on_zoom</item>
+        <item>@string/labels_never</item>
+    </string-array>
+</resources>

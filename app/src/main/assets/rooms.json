@@ -1,0 +1,3328 @@
+{
+  "rooms": [
+    {
+      "id": "room_104",
+      "name_ru": "Актовый зал",
+      "name_en": "Assembly Hall",
+      "number": "104",
+      "floor": 1,
+      "category": "common",
+      "description_ru": "Актовый зал на первом этаже. Вход на плане не отмечен отдельно и требует полевой проверки.",
+      "description_en": "Assembly hall on the first floor. Its entrance is not explicitly marked on the plan and needs an on-site check.",
+      "nodeId": "1_door_104",
+      "x": 683.3734999999999,
+      "y": 167.4141,
+      "svgElementId": "room_104",
+      "svgElementIds": [
+        "room_104"
+      ],
+      "doorNodeId": "1_door_104",
+      "doorNodeIds": [
+        "1_door_104"
+      ],
+      "centerX": 683.3734999999999,
+      "centerY": 167.4141,
+      "polygon": [],
+      "polygons": [
+        [
+          {
+            "x": 609.665,
+            "y": 93.0081
+          },
+          {
+            "x": 757.082,
+            "y": 93.0081
+          },
+          {
+            "x": 757.082,
+            "y": 241.82010000000002
+          },
+          {
+            "x": 609.665,
+            "y": 241.82010000000002
+          }
+        ]
+      ],
+      "aliases_ru": [
+        "зал 104",
+        "актовый зал",
+        "актовый",
+        "assembly hall",
+        "auditorium"
+      ],
+      "aliases_en": [
+        "assembly hall",
+        "assembly room",
+        "auditorium"
+      ],
+      "role": "assembly_hall",
+      "route_available": true,
+      "geometry_status": "door_to_verify",
+      "expected_geometry_parts": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "room_113",
+      "name_ru": "Тренажёрный центр",
+      "name_en": "Fitness and Flight Training Center",
+      "number": "113",
+      "floor": 1,
+      "category": "common",
+      "description_ru": "Тренажёрный центр с малой полётной зоной.",
+      "description_en": "Fitness center with a small flight-training zone.",
+      "nodeId": "1_door_113",
+      "x": 74.6385,
+      "y": 509.91395000000017,
+      "svgElementId": "room_113",
+      "svgElementIds": [
+        "room_113"
+      ],
+      "doorNodeId": "1_door_113",
+      "doorNodeIds": [
+        "1_door_113"
+      ],
+      "centerX": 74.6385,
+      "centerY": 509.91395000000017,
+      "polygon": [],
+      "polygons": [
+        [
+          {
+            "x": 0.0,
+            "y": 467.828
+          },
+          {
+            "x": 149.277,
+            "y": 467.828
+          },
+          {
+            "x": 149.277,
+            "y": 551.9999
+          },
+          {
+            "x": 0.0,
+            "y": 551.9999
+          }
+        ]
+      ],
+      "aliases_ru": [
+        "тренажерный центр",
+        "тренажёрный центр",
+        "малая полетная зона",
+        "малая полётная зона",
+        "полетная зона",
+        "тренажерный зал"
+      ],
+      "aliases_en": [
+        "fitness centre",
+        "gym",
+        "small flight zone",
+        "flight training zone"
+      ],
+      "role": "fitness",
+      "route_available": true,
+      "geometry_status": "mapped",
+      "expected_geometry_parts": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "room_114",
+      "name_ru": "Симулятор беспилотных систем",
+      "name_en": "Unmanned Systems Simulator",
+      "number": "114",
+      "floor": 1,
+      "category": "laboratory",
+      "description_ru": "Симулятор беспилотных систем.",
+      "description_en": "Unmanned-systems simulator.",
+      "nodeId": "1_door_114",
+      "x": 298.5,
+      "y": 124.75,
+      "svgElementId": "room_114",
+      "svgElementIds": [
+        "room_114"
+      ],
+      "doorNodeId": "1_door_114",
+      "doorNodeIds": [
+        "1_door_114"
+      ],
+      "centerX": 298.5,
+      "centerY": 124.75,
+      "polygon": [],
+      "polygons": [
+        [
+          {
+            "x": 256.0,
+            "y": 93.5
+          },
+          {
+            "x": 341.0,
+            "y": 93.5
+          },
+          {
+            "x": 341.0,
+            "y": 156.0
+          },
+          {
+            "x": 256.0,
+            "y": 156.0
+          }
+        ]
+      ],
+      "aliases_ru": [
+        "симулятор бпла",
+        "беспилотник",
+        "беспилотные системы",
+        "симулятор беспилотных систем"
+      ],
+      "aliases_en": [
+        "uav simulator",
+        "drone simulator",
+        "unmanned aerial vehicle simulator"
+      ],
+      "role": "simulator",
+      "route_available": true,
+      "geometry_status": "mapped",
+      "expected_geometry_parts": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "room_115",
+      "name_ru": "Слесарная",
+      "name_en": "Metalworking Workshop",
+      "number": "115",
+      "floor": 1,
+      "category": "laboratory",
+      "description_ru": "Слесарная мастерская.",
+      "description_en": "Metalworking workshop.",
+      "nodeId": "1_door_115",
+      "x": 202.50000000000003,
+      "y": 124.75014964661962,
+      "svgElementId": "room_115",
+      "svgElementIds": [
+        "room_115"
+      ],
+      "doorNodeId": "1_door_115",
+      "doorNodeIds": [
+        "1_door_115"
+      ],
+      "centerX": 202.50000000000003,
+      "centerY": 124.75014964661962,
+      "polygon": [],
+      "polygons": [
+        [
+          {
+            "x": 147.93,
+            "y": 94.1973
+          },
+          {
+            "x": 257.07,
+            "y": 94.1973
+          },
+          {
+            "x": 257.11676171875,
+            "y": 94.20208925781249
+          },
+          {
+            "x": 257.16040625,
+            "y": 94.21568281249999
+          },
+          {
+            "x": 257.19997265625,
+            "y": 94.2371443359375
+          },
+          {
+            "x": 257.23449999999997,
+            "y": 94.26553750000001
+          },
+          {
+            "x": 257.26302734374997,
+            "y": 94.2999259765625
+          },
+          {
+            "x": 257.28459375,
+            "y": 94.3393734375
+          },
+          {
+            "x": 257.29823828125,
+            "y": 94.3829435546875
+          },
+          {
+            "x": 257.303,
+            "y": 94.4297
+          },
+          {
+            "x": 257.303,
+            "y": 155.07
+          },
+          {
+            "x": 257.29823828125,
+            "y": 155.11676171874998
+          },
+          {
+            "x": 257.28459375,
+            "y": 155.16040625
+          },
+          {
+            "x": 257.26302734374997,
+            "y": 155.19997265625
+          },
+          {
+            "x": 257.2345,
+            "y": 155.23449999999997
+          },
+          {
+            "x": 257.19997265625,
+            "y": 155.26302734375
+          },
+          {
+            "x": 257.16040625,
+            "y": 155.28459375
+          },
+          {
+            "x": 257.11676171875,
+            "y": 155.29823828125
+          },
+          {
+            "x": 257.07,
+            "y": 155.303
+          },
+          {
+            "x": 147.93,
+            "y": 155.303
+          },
+          {
+            "x": 147.88323828125002,
+            "y": 155.29823828125
+          },
+          {
+            "x": 147.83959375,
+            "y": 155.28459375
+          },
+          {
+            "x": 147.80002734375,
+            "y": 155.26302734375
+          },
+          {
+            "x": 147.76550000000003,
+            "y": 155.2345
+          },
+          {
+            "x": 147.73697265625,
+            "y": 155.19997265625
+          },
+          {
+            "x": 147.71540625,
+            "y": 155.16040625
+          },
+          {
+            "x": 147.70176171875,
+            "y": 155.11676171874998
+          },
+          {
+            "x": 147.697,
+            "y": 155.07
+          },
+          {
+            "x": 147.697,
+            "y": 94.4297
+          },
+          {
+            "x": 147.70176171875,
+            "y": 94.3829435546875
+          },
+          {
+            "x": 147.71540625,
+            "y": 94.3393734375
+          },
+          {
+            "x": 147.73697265625,
+            "y": 94.29992597656249
+          },
+          {
+            "x": 147.7655,
+            "y": 94.2655375
+          },
+          {
+            "x": 147.80002734375,
+            "y": 94.23714433593749
+          },
+          {
+            "x": 147.83959375,
+            "y": 94.2156828125
+          },
+          {
+            "x": 147.88323828125002,
+            "y": 94.2020892578125
+          },
+          {
+            "x": 147.93,
+            "y": 94.1973
+          }
+        ]
+      ],
+      "aliases_ru": [
+        "слесарная мастерская",
+        "мастерская",
+        "слесарка"
+      ],
+      "aliases_en": [
+        "workshop",
+        "metalworking shop",
+        "mechanical workshop"
+      ],
+      "role": "workshop",
+      "route_available": true,
+      "geometry_status": "mapped",
+      "expected_geometry_parts": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "room_118",
+      "name_ru": "Учебный кабинет №118",
+      "name_en": "Classroom 118",
+      "number": "118",
+      "floor": 1,
+      "category": "classroom",
+      "description_ru": "Учебный кабинет №118.",
+      "description_en": "Classroom 118.",
+      "nodeId": "1_door_118",
+      "x": 30.692500000000006,
+      "y": 288.78805,
+      "svgElementId": "room_118",
+      "svgElementIds": [
+        "room_118"
+      ],
+      "doorNodeId": "1_door_118",
+      "doorNodeIds": [
+        "1_door_118"
+      ],
+      "centerX": 30.692500000000006,
+      "centerY": 288.78805,
+      "polygon": [],
+      "polygons": [
+        [
+          {
+            "x": 0.0,
+            "y": 251.585
+          },
+          {
+            "x": 61.385,
+            "y": 251.585
+          },
+          {
+            "x": 61.385,
+            "y": 325.9911
+          },
+          {
+            "x": 0.0,
+            "y": 325.9911
+          }
+        ]
+      ],
+      "aliases_ru": [
+        "кабинет 118",
+        "класс 118",
+        "118 кабинет"
+      ],
+      "aliases_en": [
+        "room 118",
+        "classroom 118"
+      ],
+      "role": "classroom",
+      "route_available": true,
+      "geometry_status": "mapped",
+      "expected_geometry_parts": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "room_119",
+      "name_ru": "Учебный кабинет №119",
+      "name_en": "Classroom 119",
+      "number": "119",
+      "floor": 1,
+      "category": "classroom",
+      "description_ru": "Учебный кабинет №119.",
+      "description_en": "Classroom 119.",
+      "nodeId": "1_door_119",
+      "x": 30.6925,
+      "y": 216.24304999999998,
+      "svgElementId": "room_119",
+      "svgElementIds": [
+        "room_119"
+      ],
+      "doorNodeId": "1_door_119",
+      "doorNodeIds": [
+        "1_door_119"
+      ],
+      "centerX": 30.6925,
+      "centerY": 216.24304999999998,
+      "polygon": [],
+      "polygons": [
+        [
+          {
+            "x": 0.0,
+            "y": 179.04
+          },
+          {
+            "x": 61.385,
+            "y": 179.04
+          },
+          {
+            "x": 61.385,
+            "y": 253.4461
+          },
+          {
+            "x": 0.0,
+            "y": 253.4461
+          }
+        ]
+      ],
+      "aliases_ru": [
+        "кабинет 119",
+        "класс 119",
+        "119 кабинет"
+      ],
+      "aliases_en": [
+        "room 119",
+        "classroom 119"
+      ],
+      "role": "classroom",
+      "route_available": true,
+      "geometry_status": "mapped",
+      "expected_geometry_parts": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "room_120",
+      "name_ru": "Учебный кабинет аэродинамики",
+      "name_en": "Aerodynamics Classroom",
+      "number": "120",
+      "floor": 1,
+      "category": "classroom",
+      "description_ru": "Кабинет аэродинамики.",
+      "description_en": "Aerodynamics classroom.",
+      "nodeId": "1_door_120",
+      "x": 280.8830499999999,
+      "y": 210.43004999999997,
+      "svgElementId": "room_120",
+      "svgElementIds": [
+        "room_120"
+      ],
+      "doorNodeId": "1_door_120",
+      "doorNodeIds": [
+        "1_door_120"
+      ],
+      "centerX": 280.8830499999999,
+      "centerY": 210.43004999999997,
+      "polygon": [],
+      "polygons": [
+        [
+          {
+            "x": 243.68,
+            "y": 179.04
+          },
+          {
+            "x": 318.0861,
+            "y": 179.04
+          },
+          {
+            "x": 318.0861,
+            "y": 241.8201
+          },
+          {
+            "x": 243.68,
+            "y": 241.8201
+          }
+        ]
+      ],
+      "aliases_ru": [
+        "аэродинамика",
+        "кабинет аэродинамики",
+        "аэродинамический кабинет"
+      ],
+      "aliases_en": [
+        "aerodynamics",
+        "aerodynamics room"
+      ],
+      "role": "classroom",
+      "route_available": true,
+      "geometry_status": "mapped",
+      "expected_geometry_parts": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "room_126",
+      "name_ru": "Столовая",
+      "name_en": "Cafeteria",
+      "number": "126",
+      "floor": 1,
+      "category": "common",
+      "description_ru": "Столовая колледжа.",
+      "description_en": "College cafeteria.",
+      "nodeId": "1_door_126",
+      "x": 74.17421872750388,
+      "y": 77.89409715146479,
+      "svgElementId": "room_126",
+      "svgElementIds": [
+        "room_126"
+      ],
+      "doorNodeId": "1_door_126",
+      "doorNodeIds": [
+        "1_door_126"
+      ],
+      "centerX": 74.17421872750388,
+      "centerY": 77.89409715146479,
+      "polygon": [],
+      "polygons": [
+        [
+          {
+            "x": 0.932861,
+            "y": 0.700195
+          },
+          {
+            "x": 147.414,
+            "y": 0.700195
+          },
+          {
+            "x": 147.46105078124998,
+            "y": 0.70490571484375
+          },
+          {
+            "x": 147.50484375,
+            "y": 0.71842121875
+          },
+          {
+            "x": 147.54446484375,
+            "y": 0.7398165507812501
+          },
+          {
+            "x": 147.57899999999998,
+            "y": 0.76816675
+          },
+          {
+            "x": 147.60753515624998,
+            "y": 0.80254685546875
+          },
+          {
+            "x": 147.62915625,
+            "y": 0.8420319062500001
+          },
+          {
+            "x": 147.64294921875,
+            "y": 0.88569694140625
+          },
+          {
+            "x": 147.648,
+            "y": 0.932617
+          },
+          {
+            "x": 147.648,
+            "y": 154.854
+          },
+          {
+            "x": 147.643236328125,
+            "y": 154.90109179687502
+          },
+          {
+            "x": 147.62957812500002,
+            "y": 154.944984375
+          },
+          {
+            "x": 147.607974609375,
+            "y": 154.984728515625
+          },
+          {
+            "x": 147.579375,
+            "y": 155.019375
+          },
+          {
+            "x": 147.544728515625,
+            "y": 155.047974609375
+          },
+          {
+            "x": 147.504984375,
+            "y": 155.06957812500002
+          },
+          {
+            "x": 147.461091796875,
+            "y": 155.083236328125
+          },
+          {
+            "x": 147.414,
+            "y": 155.088
+          },
+          {
+            "x": 0.932861,
+            "y": 155.088
+          },
+          {
+            "x": 0.8859397929687501,
+            "y": 155.083236328125
+          },
+          {
+            "x": 0.8422742187500001,
+            "y": 155.069578125
+          },
+          {
+            "x": 0.8027890976562501,
+            "y": 155.04797460937502
+          },
+          {
+            "x": 0.76840925,
+            "y": 155.019375
+          },
+          {
+            "x": 0.7400594960937501,
+            "y": 154.984728515625
+          },
+          {
+            "x": 0.7186646562500001,
+            "y": 154.944984375
+          },
+          {
+            "x": 0.7051495507812501,
+            "y": 154.90109179687502
+          },
+          {
+            "x": 0.700439,
+            "y": 154.854
+          },
+          {
+            "x": 0.700439,
+            "y": 0.932617
+          },
+          {
+            "x": 0.70521698046875,
+            "y": 0.8857418125000001
+          },
+          {
+            "x": 0.71877490625,
+            "y": 0.842114875
+          },
+          {
+            "x": 0.7401906289062501,
+            "y": 0.802658125
+          },
+          {
+            "x": 0.768542,
+            "y": 0.7682935
+          },
+          {
+            "x": 0.8029068710937499,
+            "y": 0.7399429375000001
+          },
+          {
+            "x": 0.8423630937500001,
+            "y": 0.718528375
+          },
+          {
+            "x": 0.88598851953125,
+            "y": 0.70497175
+          },
+          {
+            "x": 0.932861,
+            "y": 0.700195
+          }
+        ]
+      ],
+      "aliases_ru": [
+        "буфет",
+        "питание",
+        "столовая 126"
+      ],
+      "aliases_en": [
+        "dining room",
+        "canteen",
+        "food"
+      ],
+      "role": "cafeteria",
+      "route_available": true,
+      "geometry_status": "mapped",
+      "expected_geometry_parts": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "room_138",
+      "name_ru": "Учебный кабинет №138",
+      "name_en": "Classroom 138",
+      "number": "138",
+      "floor": 1,
+      "category": "classroom",
+      "description_ru": "Учебный кабинет №138.",
+      "description_en": "Classroom 138.",
+      "nodeId": "1_door_138",
+      "x": 117.42219999999999,
+      "y": 408.5352999999999,
+      "svgElementId": "room_138",
+      "svgElementIds": [
+        "room_138"
+      ],
+      "doorNodeId": "1_door_138",
+      "doorNodeIds": [
+        "1_door_138"
+      ],
+      "centerX": 117.42219999999999,
+      "centerY": 408.5352999999999,
+      "polygon": [],
+      "polygons": [
+        [
+          {
+            "x": 85.5671,
+            "y": 374.355
+          },
+          {
+            "x": 149.2773,
+            "y": 374.355
+          },
+          {
+            "x": 149.2773,
+            "y": 442.7156
+          },
+          {
+            "x": 85.5671,
+            "y": 442.7156
+          }
+        ]
+      ],
+      "aliases_ru": [
+        "кабинет 138",
+        "класс 138"
+      ],
+      "aliases_en": [
+        "room 138",
+        "classroom 138"
+      ],
+      "role": "classroom",
+      "route_available": true,
+      "geometry_status": "mapped",
+      "expected_geometry_parts": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "room_139",
+      "name_ru": "Учебный кабинет №139",
+      "name_en": "Classroom 139",
+      "number": "139",
+      "floor": 1,
+      "category": "classroom",
+      "description_ru": "Учебный кабинет №139.",
+      "description_en": "Classroom 139.",
+      "nodeId": "1_door_139",
+      "x": 117.4222,
+      "y": 340.8728500000001,
+      "svgElementId": "room_139",
+      "svgElementIds": [
+        "room_139"
+      ],
+      "doorNodeId": "1_door_139",
+      "doorNodeIds": [
+        "1_door_139"
+      ],
+      "centerX": 117.4222,
+      "centerY": 340.8728500000001,
+      "polygon": [],
+      "polygons": [
+        [
+          {
+            "x": 85.5671,
+            "y": 305.995
+          },
+          {
+            "x": 149.2773,
+            "y": 305.995
+          },
+          {
+            "x": 149.2773,
+            "y": 375.7507
+          },
+          {
+            "x": 85.5671,
+            "y": 375.7507
+          }
+        ]
+      ],
+      "aliases_ru": [
+        "кабинет 139",
+        "класс 139"
+      ],
+      "aliases_en": [
+        "room 139",
+        "classroom 139"
+      ],
+      "role": "classroom",
+      "route_available": true,
+      "geometry_status": "mapped",
+      "expected_geometry_parts": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "room_education_department",
+      "name_ru": "Учебная часть",
+      "name_en": "Academic Office",
+      "number": "141, 142, 147, 159, 160",
+      "floor": 1,
+      "category": "administrative",
+      "description_ru": "Одна физическая зона и один вход: номера 141, 142, 147, 159 и 160 относятся к учебной части. Положение входа на плане требует проверки.",
+      "description_en": "One physical area and one entrance: cabinet numbers 141, 142, 147, 159 and 160 refer to the Academic Office. The entrance position needs verification.",
+      "nodeId": "1_door_academic",
+      "x": 432.64800046787417,
+      "y": 124.75263785174496,
+      "svgElementId": "room_educational_department",
+      "svgElementIds": [
+        "room_educational_department"
+      ],
+      "doorNodeId": "1_door_academic",
+      "doorNodeIds": [
+        "1_door_academic"
+      ],
+      "centerX": 432.64800046787417,
+      "centerY": 124.75263785174496,
+      "polygon": [],
+      "polygons": [
+        [
+          {
+            "x": 450.0,
+            "y": 93.5078
+          },
+          {
+            "x": 525.423,
+            "y": 93.5078
+          },
+          {
+            "x": 525.423,
+            "y": 156.0
+          },
+          {
+            "x": 449.622,
+            "y": 156.0
+          },
+          {
+            "x": 449.622,
+            "y": 155.992
+          },
+          {
+            "x": 420.324,
+            "y": 155.992
+          },
+          {
+            "x": 420.324,
+            "y": 156.0
+          },
+          {
+            "x": 339.873,
+            "y": 156.0
+          },
+          {
+            "x": 339.873,
+            "y": 93.5078
+          },
+          {
+            "x": 420.0,
+            "y": 93.5078
+          },
+          {
+            "x": 420.0,
+            "y": 93.5
+          },
+          {
+            "x": 450.0,
+            "y": 93.5
+          },
+          {
+            "x": 450.0,
+            "y": 93.5078
+          }
+        ]
+      ],
+      "aliases_ru": [
+        "141",
+        "142",
+        "147",
+        "159",
+        "160",
+        "кабинет 141",
+        "кабинет 142",
+        "кабинет 147",
+        "кабинет 159",
+        "кабинет 160",
+        "кабинет системного администратора",
+        "кабинет инженерных служб",
+        "преподавательская",
+        "административный кабинет",
+        "бухгалтерия",
+        "учебная часть"
+      ],
+      "aliases_en": [
+        "academic office",
+        "office 141",
+        "office 142",
+        "office 147",
+        "office 159",
+        "office 160",
+        "system administrator office",
+        "engineering services office",
+        "staff room",
+        "administrative office",
+        "accounting office"
+      ],
+      "role": "academic_office",
+      "route_available": true,
+      "geometry_status": "door_to_verify",
+      "expected_geometry_parts": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "room_144",
+      "name_ru": "Кабинет врача",
+      "name_en": "Doctor’s Office",
+      "number": "144",
+      "floor": 1,
+      "category": "medical",
+      "description_ru": "Кабинет врача №144. Для карты ожидаются два смежных контура; точные зоны и вход не подтверждены, поэтому подсветка и маршрут пока отключены.",
+      "description_en": "Doctor’s office 144. Two adjoining areas are expected, but their exact outlines and entrance have not been verified; highlighting and routing are disabled.",
+      "nodeId": null,
+      "x": null,
+      "y": null,
+      "svgElementId": null,
+      "svgElementIds": [],
+      "doorNodeId": null,
+      "doorNodeIds": [],
+      "centerX": null,
+      "centerY": null,
+      "polygon": [],
+      "polygons": [],
+      "aliases_ru": [
+        "144",
+        "медпункт",
+        "медицинский кабинет",
+        "врач",
+        "кабинет врача",
+        "первая помощь"
+      ],
+      "aliases_en": [
+        "medical office",
+        "doctor",
+        "first aid",
+        "nurse office"
+      ],
+      "role": "medical",
+      "route_available": false,
+      "geometry_status": "needs_mapping_two_zones",
+      "expected_geometry_parts": 2,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "room_148",
+      "name_ru": "Кабинет иностранного языка",
+      "name_en": "Foreign-Language Classroom",
+      "number": "148",
+      "floor": 1,
+      "category": "classroom",
+      "description_ru": "Кабинет иностранного языка.",
+      "description_en": "Foreign-language classroom.",
+      "nodeId": "1_door_148",
+      "x": 206.47715,
+      "y": 210.43005000000005,
+      "svgElementId": "room_148",
+      "svgElementIds": [
+        "room_148"
+      ],
+      "doorNodeId": "1_door_148",
+      "doorNodeIds": [
+        "1_door_148"
+      ],
+      "centerX": 206.47715,
+      "centerY": 210.43005000000005,
+      "polygon": [],
+      "polygons": [
+        [
+          {
+            "x": 167.879,
+            "y": 179.04
+          },
+          {
+            "x": 245.07529999999997,
+            "y": 179.04
+          },
+          {
+            "x": 245.07529999999997,
+            "y": 241.8201
+          },
+          {
+            "x": 167.879,
+            "y": 241.8201
+          }
+        ]
+      ],
+      "aliases_ru": [
+        "иностранный язык",
+        "английский кабинет",
+        "языковой кабинет",
+        "кабинет языка"
+      ],
+      "aliases_en": [
+        "language classroom",
+        "foreign language room",
+        "english classroom"
+      ],
+      "role": "classroom",
+      "route_available": true,
+      "geometry_status": "mapped",
+      "expected_geometry_parts": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "room_149",
+      "name_ru": "Кабинет директора",
+      "name_en": "Director’s Office",
+      "number": "149",
+      "floor": 1,
+      "category": "administrative",
+      "description_ru": "Кабинет директора.",
+      "description_en": "Director’s office.",
+      "nodeId": "1_door_149",
+      "x": 402.25831271559093,
+      "y": 206.41640015712818,
+      "svgElementId": "room_149",
+      "svgElementIds": [
+        "room_149"
+      ],
+      "doorNodeId": "1_door_149",
+      "doorNodeIds": [
+        "1_door_149"
+      ],
+      "centerX": 402.25831271559093,
+      "centerY": 206.41640015712818,
+      "polygon": [],
+      "polygons": [
+        [
+          {
+            "x": 336.687,
+            "y": 179.737
+          },
+          {
+            "x": 449.692,
+            "y": 179.737
+          },
+          {
+            "x": 449.73871875000003,
+            "y": 179.74171875
+          },
+          {
+            "x": 449.78225,
+            "y": 179.75524999999996
+          },
+          {
+            "x": 449.82165625,
+            "y": 179.77665625
+          },
+          {
+            "x": 449.856,
+            "y": 179.805
+          },
+          {
+            "x": 449.88434374999997,
+            "y": 179.83934375
+          },
+          {
+            "x": 449.90575,
+            "y": 179.87875
+          },
+          {
+            "x": 449.91928125,
+            "y": 179.92228125
+          },
+          {
+            "x": 449.924,
+            "y": 179.969
+          },
+          {
+            "x": 449.924,
+            "y": 240.889
+          },
+          {
+            "x": 449.91928125000004,
+            "y": 240.93576367187504
+          },
+          {
+            "x": 449.90575,
+            "y": 240.97942187499999
+          },
+          {
+            "x": 449.88434374999997,
+            "y": 241.019025390625
+          },
+          {
+            "x": 449.856,
+            "y": 241.053625
+          },
+          {
+            "x": 449.82165625,
+            "y": 241.08227148437498
+          },
+          {
+            "x": 449.78225,
+            "y": 241.10401562500002
+          },
+          {
+            "x": 449.73871875,
+            "y": 241.117908203125
+          },
+          {
+            "x": 449.692,
+            "y": 241.123
+          },
+          {
+            "x": 383.423,
+            "y": 241.123
+          },
+          {
+            "x": 383.37628125000003,
+            "y": 241.11790820312498
+          },
+          {
+            "x": 383.33275,
+            "y": 241.10401562500002
+          },
+          {
+            "x": 383.29334375,
+            "y": 241.082271484375
+          },
+          {
+            "x": 383.25899999999996,
+            "y": 241.053625
+          },
+          {
+            "x": 383.23065625,
+            "y": 241.019025390625
+          },
+          {
+            "x": 383.20925,
+            "y": 240.979421875
+          },
+          {
+            "x": 383.19571874999997,
+            "y": 240.935763671875
+          },
+          {
+            "x": 383.191,
+            "y": 240.889
+          },
+          {
+            "x": 383.191,
+            "y": 210.895
+          },
+          {
+            "x": 383.15796289062496,
+            "y": 210.56693554687502
+          },
+          {
+            "x": 383.063203125,
+            "y": 210.261359375
+          },
+          {
+            "x": 382.91324804687497,
+            "y": 209.984822265625
+          },
+          {
+            "x": 382.714625,
+            "y": 209.743875
+          },
+          {
+            "x": 382.473861328125,
+            "y": 209.545068359375
+          },
+          {
+            "x": 382.19748437500004,
+            "y": 209.394953125
+          },
+          {
+            "x": 381.892021484375,
+            "y": 209.300080078125
+          },
+          {
+            "x": 381.564,
+            "y": 209.267
+          },
+          {
+            "x": 336.687,
+            "y": 209.267
+          },
+          {
+            "x": 336.64028125,
+            "y": 209.26228125
+          },
+          {
+            "x": 336.59675000000004,
+            "y": 209.24875
+          },
+          {
+            "x": 336.55734375000003,
+            "y": 209.22734375
+          },
+          {
+            "x": 336.523,
+            "y": 209.199
+          },
+          {
+            "x": 336.49465625,
+            "y": 209.16465625
+          },
+          {
+            "x": 336.47325,
+            "y": 209.12525
+          },
+          {
+            "x": 336.45971875,
+            "y": 209.08171875000002
+          },
+          {
+            "x": 336.455,
+            "y": 209.035
+          },
+          {
+            "x": 336.455,
+            "y": 179.969
+          },
+          {
+            "x": 336.45971875,
+            "y": 179.92228125
+          },
+          {
+            "x": 336.47325,
+            "y": 179.87874999999997
+          },
+          {
+            "x": 336.49465625,
+            "y": 179.83934375
+          },
+          {
+            "x": 336.523,
+            "y": 179.805
+          },
+          {
+            "x": 336.55734375,
+            "y": 179.77665625
+          },
+          {
+            "x": 336.59675000000004,
+            "y": 179.75525
+          },
+          {
+            "x": 336.64028125000004,
+            "y": 179.74171875
+          },
+          {
+            "x": 336.687,
+            "y": 179.737
+          }
+        ]
+      ],
+      "aliases_ru": [
+        "директор",
+        "директорская"
+      ],
+      "aliases_en": [
+        "director",
+        "principal office"
+      ],
+      "role": "office",
+      "route_available": true,
+      "geometry_status": "mapped",
+      "expected_geometry_parts": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "room_161",
+      "name_ru": "Методический кабинет",
+      "name_en": "Methodology Office",
+      "number": "161",
+      "floor": 1,
+      "category": "administrative",
+      "description_ru": "Методический кабинет №161. На текущем SVG плане помещение не идентифицировано; требуется уточнить контур и вход.",
+      "description_en": "Methodology office 161. The room is not identified on the current SVG plan; its outline and entrance must be confirmed.",
+      "nodeId": null,
+      "x": null,
+      "y": null,
+      "svgElementId": null,
+      "svgElementIds": [],
+      "doorNodeId": null,
+      "doorNodeIds": [],
+      "centerX": null,
+      "centerY": null,
+      "polygon": [],
+      "polygons": [],
+      "aliases_ru": [
+        "161",
+        "методический кабинет",
+        "методический"
+      ],
+      "aliases_en": [
+        "methodical office",
+        "methodology room",
+        "staff development office"
+      ],
+      "role": "office",
+      "route_available": false,
+      "geometry_status": "needs_mapping",
+      "expected_geometry_parts": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "room_202",
+      "name_ru": "Кабинет химии и биологии",
+      "name_en": "Chemistry and Biology Classroom",
+      "number": "202",
+      "floor": 2,
+      "category": "laboratory",
+      "description_ru": "Кабинет химии и биологии с отдельной лаборантской 202; обе зоны подсвечиваются как одно помещение.",
+      "description_en": "Chemistry and biology classroom with a separate laboratory assistant room 202; both areas are highlighted as one destination.",
+      "nodeId": "2_door_202",
+      "x": 117.00014999999998,
+      "y": 315.4608859843233,
+      "svgElementId": null,
+      "svgElementIds": [
+        "room_202_main",
+        "room_202_lab_assistant",
+        "room_202_lab_assistant_detail"
+      ],
+      "doorNodeId": "2_door_202",
+      "doorNodeIds": [
+        "2_door_202",
+        "2_door_202_lab_assistant"
+      ],
+      "centerX": 117.00014999999998,
+      "centerY": 315.4608859843233,
+      "polygon": [],
+      "polygons": [
+        [
+          {
+            "x": 147.29299999999998,
+            "y": 328.293
+          },
+          {
+            "x": 86.70729999999998,
+            "y": 328.293
+          },
+          {
+            "x": 86.70729999999995,
+            "y": 246.70730000000003
+          },
+          {
+            "x": 147.29299999999995,
+            "y": 246.70730000000003
+          }
+        ],
+        [
+          {
+            "x": 147.293,
+            "y": 384.293
+          },
+          {
+            "x": 86.7073,
+            "y": 384.293
+          },
+          {
+            "x": 86.7073,
+            "y": 328.70730000000003
+          },
+          {
+            "x": 147.293,
+            "y": 328.70730000000003
+          }
+        ]
+      ],
+      "aliases_ru": [
+        "кабинет химии",
+        "химия",
+        "биология",
+        "лаборантская 202",
+        "кабинет 202"
+      ],
+      "aliases_en": [
+        "chemistry room",
+        "biology room",
+        "lab assistant room 202",
+        "classroom 202"
+      ],
+      "role": "laboratory",
+      "route_available": true,
+      "geometry_status": "mapped_two_parts",
+      "expected_geometry_parts": 2,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "room_207",
+      "name_ru": "Лаборатория электротехники",
+      "name_en": "Electrical Engineering Laboratory",
+      "number": "207",
+      "floor": 2,
+      "category": "laboratory",
+      "description_ru": "Лаборатория электротехники. Положение входа в графе предварительное и требует проверки на месте.",
+      "description_en": "Electrical engineering laboratory. The entrance position in the graph is provisional and must be checked on site.",
+      "nodeId": "2_door_207",
+      "x": 38.11072202620916,
+      "y": 511.1811989289806,
+      "svgElementId": "room_207",
+      "svgElementIds": [
+        "room_207"
+      ],
+      "doorNodeId": "2_door_207",
+      "doorNodeIds": [
+        "2_door_207"
+      ],
+      "centerX": 38.11072202620916,
+      "centerY": 511.1811989289806,
+      "polygon": [],
+      "polygons": [
+        [
+          {
+            "x": 61.2932,
+            "y": 459.707
+          },
+          {
+            "x": 61.2932,
+            "y": 477.63
+          },
+          {
+            "x": 78.0295,
+            "y": 477.63
+          },
+          {
+            "x": 77.7932,
+            "y": 496.351
+          },
+          {
+            "x": 77.7932,
+            "y": 559.34
+          },
+          {
+            "x": 0.709229,
+            "y": 559.34
+          },
+          {
+            "x": 0.950439,
+            "y": 459.707
+          },
+          {
+            "x": 61.2932,
+            "y": 459.707
+          }
+        ]
+      ],
+      "aliases_ru": [
+        "электротехническая лаборатория",
+        "электротехника",
+        "лаборатория 207"
+      ],
+      "aliases_en": [
+        "electrical lab",
+        "electrical engineering lab"
+      ],
+      "role": "laboratory",
+      "route_available": true,
+      "geometry_status": "door_to_verify",
+      "expected_geometry_parts": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "room_209",
+      "name_ru": "Лаборатория беспилотных авиационных систем",
+      "name_en": "Unmanned Aerial Systems Laboratory",
+      "number": "209",
+      "floor": 2,
+      "category": "laboratory",
+      "description_ru": "Лаборатория беспилотных авиационных систем.",
+      "description_en": "Unmanned aerial systems laboratory.",
+      "nodeId": "2_door_209",
+      "x": 478.728,
+      "y": 126.12849999999999,
+      "svgElementId": "room_209",
+      "svgElementIds": [
+        "room_209"
+      ],
+      "doorNodeId": "2_door_209",
+      "doorNodeIds": [
+        "2_door_209"
+      ],
+      "centerX": 478.728,
+      "centerY": 126.12849999999999,
+      "polygon": [],
+      "polygons": [
+        [
+          {
+            "x": 422.629,
+            "y": 95.4862
+          },
+          {
+            "x": 534.827,
+            "y": 95.4862
+          },
+          {
+            "x": 534.827,
+            "y": 156.7708
+          },
+          {
+            "x": 422.629,
+            "y": 156.7708
+          }
+        ]
+      ],
+      "aliases_ru": [
+        "беспилотные авиационные системы",
+        "бпла",
+        "лаборатория беспилотников",
+        "209"
+      ],
+      "aliases_en": [
+        "uas laboratory",
+        "uav lab",
+        "drone laboratory"
+      ],
+      "role": "laboratory",
+      "route_available": true,
+      "geometry_status": "mapped",
+      "expected_geometry_parts": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "room_211",
+      "name_ru": "Кабинет физики",
+      "name_en": "Physics Classroom",
+      "number": "211",
+      "floor": 2,
+      "category": "classroom",
+      "description_ru": "Кабинет физики.",
+      "description_en": "Physics classroom.",
+      "nodeId": "2_door_211",
+      "x": 245.37400000000005,
+      "y": 213.55250000000004,
+      "svgElementId": "room_211",
+      "svgElementIds": [
+        "room_211"
+      ],
+      "doorNodeId": "2_door_211",
+      "doorNodeIds": [
+        "2_door_211"
+      ],
+      "centerX": 245.37400000000005,
+      "centerY": 213.55250000000004,
+      "polygon": [],
+      "polygons": [
+        [
+          {
+            "x": 322.451,
+            "y": 245.609
+          },
+          {
+            "x": 168.297,
+            "y": 245.609
+          },
+          {
+            "x": 168.297,
+            "y": 181.496
+          },
+          {
+            "x": 322.451,
+            "y": 181.496
+          },
+          {
+            "x": 322.451,
+            "y": 245.609
+          }
+        ]
+      ],
+      "aliases_ru": [
+        "физика",
+        "кабинет 211"
+      ],
+      "aliases_en": [
+        "physics room",
+        "room 211"
+      ],
+      "role": "classroom",
+      "route_available": true,
+      "geometry_status": "mapped",
+      "expected_geometry_parts": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "room_213",
+      "name_ru": "Лаборатория метеорологии",
+      "name_en": "Meteorology Laboratory",
+      "number": "213",
+      "floor": 2,
+      "category": "laboratory",
+      "description_ru": "Лаборатория метеорологии. На плане также указана как «236 (213)».",
+      "description_en": "Meteorology laboratory. The plan also labels it “236 (213)”.",
+      "nodeId": "2_door_213",
+      "x": 30.999980000000004,
+      "y": 230.99998,
+      "svgElementId": "room_213",
+      "svgElementIds": [
+        "room_213"
+      ],
+      "doorNodeId": "2_door_213",
+      "doorNodeIds": [
+        "2_door_213"
+      ],
+      "centerX": 30.999980000000004,
+      "centerY": 230.99998,
+      "polygon": [],
+      "polygons": [
+        [
+          {
+            "x": 61.29283,
+            "y": 181.70713
+          },
+          {
+            "x": 0.7071299999999994,
+            "y": 181.70713
+          },
+          {
+            "x": 0.7071299999999994,
+            "y": 280.29283
+          },
+          {
+            "x": 61.29283,
+            "y": 280.29283
+          }
+        ]
+      ],
+      "aliases_ru": [
+        "236",
+        "236 (213)",
+        "метеорология",
+        "кабинет 236",
+        "лаборатория 213"
+      ],
+      "aliases_en": [
+        "236",
+        "236 (213)",
+        "weather laboratory",
+        "meteorology lab"
+      ],
+      "role": "laboratory",
+      "route_available": true,
+      "geometry_status": "mapped",
+      "expected_geometry_parts": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "room_214",
+      "name_ru": "Читальный зал / библиотека",
+      "name_en": "Reading Room / Library",
+      "number": "214",
+      "floor": 2,
+      "category": "common",
+      "description_ru": "Читальный зал и библиотека. На плане отмечены два входа.",
+      "description_en": "Reading room and library. The plan marks two entrances.",
+      "nodeId": "2_door_214_east",
+      "x": 72.59863,
+      "y": 57.04163,
+      "svgElementId": "room_214",
+      "svgElementIds": [
+        "room_214"
+      ],
+      "doorNodeId": "2_door_214_east",
+      "doorNodeIds": [
+        "2_door_214_east",
+        "2_door_214_west"
+      ],
+      "centerX": 72.59863,
+      "centerY": 57.04163,
+      "polygon": [],
+      "polygons": [
+        [
+          {
+            "x": 144.49013,
+            "y": 0.70713
+          },
+          {
+            "x": 0.7071300000000065,
+            "y": 0.70713
+          },
+          {
+            "x": 0.7071300000000065,
+            "y": 113.37613
+          },
+          {
+            "x": 144.49013,
+            "y": 113.37613
+          }
+        ]
+      ],
+      "aliases_ru": [
+        "библиотека",
+        "читальный зал",
+        "библиотека 214"
+      ],
+      "aliases_en": [
+        "library",
+        "reading room",
+        "library 214"
+      ],
+      "role": "library",
+      "route_available": true,
+      "geometry_status": "mapped",
+      "expected_geometry_parts": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "room_217",
+      "name_ru": "Учебный кабинет №217",
+      "name_en": "Classroom 217",
+      "number": "217",
+      "floor": 2,
+      "category": "classroom",
+      "description_ru": "Учебный кабинет №217.",
+      "description_en": "Classroom 217.",
+      "nodeId": "2_door_217",
+      "x": 452.5636499999995,
+      "y": 213.55239999999975,
+      "svgElementId": "room_217",
+      "svgElementIds": [
+        "room_217"
+      ],
+      "doorNodeId": "2_door_217",
+      "doorNodeIds": [
+        "2_door_217"
+      ],
+      "centerX": 452.5636499999995,
+      "centerY": 213.55239999999975,
+      "polygon": [],
+      "polygons": [
+        [
+          {
+            "x": 425.457,
+            "y": 182.203
+          },
+          {
+            "x": 479.6703,
+            "y": 182.203
+          },
+          {
+            "x": 479.6703,
+            "y": 244.9018
+          },
+          {
+            "x": 425.457,
+            "y": 244.9018
+          }
+        ]
+      ],
+      "aliases_ru": [
+        "кабинет 217",
+        "класс 217"
+      ],
+      "aliases_en": [
+        "room 217",
+        "classroom 217"
+      ],
+      "role": "classroom",
+      "route_available": true,
+      "geometry_status": "mapped",
+      "expected_geometry_parts": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "room_222",
+      "name_ru": "Кабинет информатики",
+      "name_en": "Computer Science Classroom",
+      "number": "222",
+      "floor": 2,
+      "category": "classroom",
+      "description_ru": "Кабинет информатики.",
+      "description_en": "Computer science classroom.",
+      "nodeId": "2_door_222",
+      "x": 536.475550000001,
+      "y": 213.55240000000038,
+      "svgElementId": "room_222",
+      "svgElementIds": [
+        "room_222"
+      ],
+      "doorNodeId": "2_door_222",
+      "doorNodeIds": [
+        "2_door_222"
+      ],
+      "centerX": 536.475550000001,
+      "centerY": 213.55240000000038,
+      "polygon": [],
+      "polygons": [
+        [
+          {
+            "x": 511.726,
+            "y": 182.203
+          },
+          {
+            "x": 561.2251,
+            "y": 182.203
+          },
+          {
+            "x": 561.2251,
+            "y": 244.9018
+          },
+          {
+            "x": 511.726,
+            "y": 244.9018
+          }
+        ]
+      ],
+      "aliases_ru": [
+        "информатика",
+        "компьютерный класс",
+        "кабинет 222"
+      ],
+      "aliases_en": [
+        "computer room",
+        "computer lab",
+        "computing classroom"
+      ],
+      "role": "classroom",
+      "route_available": true,
+      "geometry_status": "mapped",
+      "expected_geometry_parts": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "room_224",
+      "name_ru": "Кабинет психолога",
+      "name_en": "Psychologist’s Office",
+      "number": "224",
+      "floor": 2,
+      "category": "medical",
+      "description_ru": "Кабинет психолога.",
+      "description_en": "Psychologist’s office.",
+      "nodeId": "2_door_224",
+      "x": 408.9567000000009,
+      "y": 213.55240000000057,
+      "svgElementId": "room_224",
+      "svgElementIds": [
+        "room_224"
+      ],
+      "doorNodeId": "2_door_224",
+      "doorNodeIds": [
+        "2_door_224"
+      ],
+      "centerX": 408.9567000000009,
+      "centerY": 213.55240000000057,
+      "polygon": [],
+      "polygons": [
+        [
+          {
+            "x": 392.457,
+            "y": 182.203
+          },
+          {
+            "x": 425.4564,
+            "y": 182.203
+          },
+          {
+            "x": 425.4564,
+            "y": 244.9018
+          },
+          {
+            "x": 392.457,
+            "y": 244.9018
+          }
+        ]
+      ],
+      "aliases_ru": [
+        "психолог",
+        "кабинет 224"
+      ],
+      "aliases_en": [
+        "psychologist",
+        "counsellor",
+        "counselor office"
+      ],
+      "role": "psychologist",
+      "route_available": true,
+      "geometry_status": "mapped",
+      "expected_geometry_parts": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "room_225",
+      "name_ru": "Лаборатория биотехнических и медицинских аппаратов",
+      "name_en": "Biotechnical and Medical Equipment Laboratory",
+      "number": "225",
+      "floor": 2,
+      "category": "laboratory",
+      "description_ru": "Лаборатория биотехнических и медицинских аппаратов. На плане номер 225 также подписан у отдельного практического помещения; эта дополнительная зона включена в подсветку и требует подтверждения.",
+      "description_en": "Laboratory for biotechnical and medical equipment. The plan labels a separate adjacent practical room 225; that extra area is highlighted but should be verified.",
+      "nodeId": "2_door_225_lab",
+      "x": 114.83692018215736,
+      "y": 478.93826451796406,
+      "svgElementId": null,
+      "svgElementIds": [
+        "room_225",
+        "room_225_practical"
+      ],
+      "doorNodeId": "2_door_225_lab",
+      "doorNodeIds": [
+        "2_door_225_lab",
+        "2_door_225_practical"
+      ],
+      "centerX": 114.83692018215736,
+      "centerY": 478.93826451796406,
+      "polygon": [],
+      "polygons": [
+        [
+          {
+            "x": 86.9773,
+            "y": 431.707
+          },
+          {
+            "x": 86.9773,
+            "y": 477.629
+          },
+          {
+            "x": 77.7351,
+            "y": 477.629
+          },
+          {
+            "x": 77.7351,
+            "y": 559.339
+          },
+          {
+            "x": 147.707,
+            "y": 559.339
+          },
+          {
+            "x": 147.707,
+            "y": 431.707
+          },
+          {
+            "x": 86.9773,
+            "y": 431.707
+          }
+        ],
+        [
+          {
+            "x": 147.79013,
+            "y": 383.50013
+          },
+          {
+            "x": 86.97703,
+            "y": 383.50013
+          },
+          {
+            "x": 86.97703,
+            "y": 416.49953
+          },
+          {
+            "x": 147.79013,
+            "y": 416.49953
+          }
+        ]
+      ],
+      "aliases_ru": [
+        "биотехнические аппараты",
+        "медицинские аппараты",
+        "практический кабинет 225",
+        "лаборатория 225"
+      ],
+      "aliases_en": [
+        "biotechnical devices",
+        "medical devices laboratory",
+        "practical room 225"
+      ],
+      "role": "laboratory",
+      "route_available": true,
+      "geometry_status": "related_area_to_verify",
+      "expected_geometry_parts": 2,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "room_228",
+      "name_ru": "Лаборатория радиотехники",
+      "name_en": "Radio Engineering Laboratory",
+      "number": "228",
+      "floor": 2,
+      "category": "laboratory",
+      "description_ru": "Лаборатория радиотехники.",
+      "description_en": "Radio engineering laboratory.",
+      "nodeId": "2_door_228",
+      "x": 201.29612999999998,
+      "y": 126.12852999999997,
+      "svgElementId": "room_228",
+      "svgElementIds": [
+        "room_228"
+      ],
+      "doorNodeId": "2_door_228",
+      "doorNodeIds": [
+        "2_door_228"
+      ],
+      "centerX": 201.29612999999998,
+      "centerY": 126.12852999999997,
+      "polygon": [],
+      "polygons": [
+        [
+          {
+            "x": 258.10213,
+            "y": 95.48623
+          },
+          {
+            "x": 144.49013,
+            "y": 95.48623
+          },
+          {
+            "x": 144.49013,
+            "y": 156.77083
+          },
+          {
+            "x": 258.10213,
+            "y": 156.77083
+          }
+        ]
+      ],
+      "aliases_ru": [
+        "радиотехника",
+        "радиоэлектроника",
+        "лаборатория 228"
+      ],
+      "aliases_en": [
+        "radio lab",
+        "radio engineering lab"
+      ],
+      "role": "laboratory",
+      "route_available": true,
+      "geometry_status": "mapped",
+      "expected_geometry_parts": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "room_229",
+      "name_ru": "Кабинет №229",
+      "name_en": "Room 229",
+      "number": "229",
+      "floor": 2,
+      "category": "classroom",
+      "description_ru": "Помещение №229.",
+      "description_en": "Room 229.",
+      "nodeId": "2_door_229",
+      "x": 495.69787999999903,
+      "y": 213.5525299999996,
+      "svgElementId": "room_229",
+      "svgElementIds": [
+        "room_229"
+      ],
+      "doorNodeId": "2_door_229",
+      "doorNodeIds": [
+        "2_door_229"
+      ],
+      "centerX": 495.69787999999903,
+      "centerY": 213.5525299999996,
+      "polygon": [],
+      "polygons": [
+        [
+          {
+            "x": 511.72613,
+            "y": 182.20313000000002
+          },
+          {
+            "x": 479.66963,
+            "y": 182.20313000000002
+          },
+          {
+            "x": 479.66963,
+            "y": 244.90193
+          },
+          {
+            "x": 511.72613,
+            "y": 244.90193
+          }
+        ]
+      ],
+      "aliases_ru": [
+        "кабинет 229",
+        "229"
+      ],
+      "aliases_en": [
+        "room 229",
+        "office 229"
+      ],
+      "role": "classroom",
+      "route_available": true,
+      "geometry_status": "mapped",
+      "expected_geometry_parts": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "room_230",
+      "name_ru": "Электрорадиомонтажная",
+      "name_en": "Electrical and Radio Assembly Workshop",
+      "number": "230",
+      "floor": 2,
+      "category": "laboratory",
+      "description_ru": "Электрорадиомонтажная и связанная с ней лаборантская 230. На плане это два смежных контура с отдельными входами.",
+      "description_en": "Electrical and radio assembly workshop and its associated laboratory assistant room 230. The SVG shows two adjoining areas with separate doors.",
+      "nodeId": "2_door_230_main",
+      "x": 342.6185284587747,
+      "y": 126.12856301688429,
+      "svgElementId": null,
+      "svgElementIds": [
+        "room_230_main",
+        "room_230_lab_assistant"
+      ],
+      "doorNodeId": "2_door_230_main",
+      "doorNodeIds": [
+        "2_door_230_main",
+        "2_door_230_assistant"
+      ],
+      "centerX": 342.6185284587747,
+      "centerY": 126.12856301688429,
+      "polygon": [],
+      "polygons": [
+        [
+          {
+            "x": 258.102,
+            "y": 95.4862
+          },
+          {
+            "x": 356.6287,
+            "y": 95.4862
+          },
+          {
+            "x": 356.6287,
+            "y": 156.7708
+          },
+          {
+            "x": 258.102,
+            "y": 156.7708
+          }
+        ],
+        [
+          {
+            "x": 426.164,
+            "y": 94.7793
+          },
+          {
+            "x": 426.164,
+            "y": 157.478
+          },
+          {
+            "x": 356.394,
+            "y": 157.478
+          },
+          {
+            "x": 356.394,
+            "y": 94.7793
+          },
+          {
+            "x": 426.164,
+            "y": 94.7793
+          }
+        ]
+      ],
+      "aliases_ru": [
+        "электрорадиомонтажная 230",
+        "лаборантская 230",
+        "электрорадиомонтаж",
+        "электромонтаж"
+      ],
+      "aliases_en": [
+        "electrical radio installation",
+        "lab assistant room 230",
+        "electronics workshop"
+      ],
+      "role": "laboratory",
+      "route_available": true,
+      "geometry_status": "mapped_two_parts",
+      "expected_geometry_parts": 2,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "room_232",
+      "name_ru": "Преподавательская",
+      "name_en": "Teachers’ Room",
+      "number": "232",
+      "floor": 2,
+      "category": "administrative",
+      "description_ru": "Преподавательская №232. На текущем плане контур и вход не подтверждены.",
+      "description_en": "Teachers’ room 232. Its outline and entrance are not confirmed on the current plan.",
+      "nodeId": null,
+      "x": null,
+      "y": null,
+      "svgElementId": null,
+      "svgElementIds": [],
+      "doorNodeId": null,
+      "doorNodeIds": [],
+      "centerX": null,
+      "centerY": null,
+      "polygon": [],
+      "polygons": [],
+      "aliases_ru": [
+        "232",
+        "комната преподавателей",
+        "учительская"
+      ],
+      "aliases_en": [
+        "staff room",
+        "teachers room",
+        "faculty room"
+      ],
+      "role": "staff_room",
+      "route_available": false,
+      "geometry_status": "needs_mapping",
+      "expected_geometry_parts": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "room_233",
+      "name_ru": "Учебный кабинет №233",
+      "name_en": "Classroom 233",
+      "number": "233",
+      "floor": 2,
+      "category": "classroom",
+      "description_ru": "Учебный кабинет №233. На текущем плане контур и вход не подтверждены.",
+      "description_en": "Classroom 233. Its outline and entrance are not confirmed on the current plan.",
+      "nodeId": null,
+      "x": null,
+      "y": null,
+      "svgElementId": null,
+      "svgElementIds": [],
+      "doorNodeId": null,
+      "doorNodeIds": [],
+      "centerX": null,
+      "centerY": null,
+      "polygon": [],
+      "polygons": [],
+      "aliases_ru": [
+        "233",
+        "кабинет 233",
+        "класс 233"
+      ],
+      "aliases_en": [
+        "room 233",
+        "classroom 233"
+      ],
+      "role": "classroom",
+      "route_available": false,
+      "geometry_status": "needs_mapping",
+      "expected_geometry_parts": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "room_hall_1",
+      "name_ru": "Холл первого этажа",
+      "name_en": "First-Floor Lobby",
+      "number": null,
+      "floor": 1,
+      "category": "common",
+      "description_ru": "Холл первого этажа.",
+      "description_en": "First-floor lobby.",
+      "nodeId": "1_hall_lobby",
+      "x": 578.7399999999999,
+      "y": 198.10555000000002,
+      "svgElementId": "room_hall_1",
+      "svgElementIds": [
+        "room_hall_1"
+      ],
+      "doorNodeId": "1_hall_lobby",
+      "doorNodeIds": [
+        "1_hall_lobby"
+      ],
+      "centerX": 578.7399999999999,
+      "centerY": 198.10555000000002,
+      "polygon": [],
+      "polygons": [
+        [
+          {
+            "x": 547.815,
+            "y": 154.392
+          },
+          {
+            "x": 609.6650000000001,
+            "y": 154.392
+          },
+          {
+            "x": 609.6650000000001,
+            "y": 241.8191
+          },
+          {
+            "x": 547.815,
+            "y": 241.8191
+          }
+        ]
+      ],
+      "aliases_ru": [
+        "холл",
+        "вестибюль",
+        "первый этаж холл"
+      ],
+      "aliases_en": [
+        "lobby",
+        "foyer"
+      ],
+      "role": "hall",
+      "route_available": true,
+      "geometry_status": "mapped",
+      "expected_geometry_parts": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "room_entrance_main",
+      "name_ru": "Главный вход",
+      "name_en": "Main Entrance",
+      "number": null,
+      "floor": 1,
+      "category": "entrance",
+      "description_ru": "Главный вход и входная зона первого этажа. Координата узла 1_01 предварительная и должна быть проверена на месте.",
+      "description_en": "Main entrance and first-floor entry zone. Node 1_01 is provisional and must be checked on site.",
+      "nodeId": "1_01",
+      "x": 578.7400000000008,
+      "y": 251.58500000000026,
+      "svgElementId": "room_entrance_main",
+      "svgElementIds": [
+        "room_entrance_main"
+      ],
+      "doorNodeId": "1_01",
+      "doorNodeIds": [
+        "1_01"
+      ],
+      "centerX": 578.7400000000008,
+      "centerY": 251.58500000000026,
+      "polygon": [],
+      "polygons": [
+        [
+          {
+            "x": 547.815,
+            "y": 239.494
+          },
+          {
+            "x": 609.6650000000001,
+            "y": 239.494
+          },
+          {
+            "x": 609.6650000000001,
+            "y": 263.676
+          },
+          {
+            "x": 547.815,
+            "y": 263.676
+          }
+        ]
+      ],
+      "aliases_ru": [
+        "вход",
+        "главный вход",
+        "вход в колледж"
+      ],
+      "aliases_en": [
+        "entrance",
+        "front entrance",
+        "college entrance"
+      ],
+      "role": "entrance",
+      "route_available": true,
+      "geometry_status": "mapped",
+      "expected_geometry_parts": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "room_cloakroom",
+      "name_ru": "Гардероб",
+      "name_en": "Cloakroom",
+      "number": null,
+      "floor": 1,
+      "category": "common",
+      "description_ru": "Гардероб первого этажа.",
+      "description_en": "First-floor cloakroom.",
+      "nodeId": "1_door_cloakroom",
+      "x": 498.75360000000006,
+      "y": 210.43005000000002,
+      "svgElementId": "room_cloakroom",
+      "svgElementIds": [
+        "room_cloakroom"
+      ],
+      "doorNodeId": "1_door_cloakroom",
+      "doorNodeIds": [
+        "1_door_cloakroom"
+      ],
+      "centerX": 498.75360000000006,
+      "centerY": 210.43005000000002,
+      "polygon": [],
+      "polygons": [
+        [
+          {
+            "x": 448.762,
+            "y": 179.04
+          },
+          {
+            "x": 548.7452,
+            "y": 179.04
+          },
+          {
+            "x": 548.7452,
+            "y": 241.8201
+          },
+          {
+            "x": 448.762,
+            "y": 241.8201
+          }
+        ]
+      ],
+      "aliases_ru": [
+        "раздевалка",
+        "гардеробная"
+      ],
+      "aliases_en": [
+        "coatroom",
+        "cloak room"
+      ],
+      "role": "cloakroom",
+      "route_available": true,
+      "geometry_status": "mapped",
+      "expected_geometry_parts": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "room_wc_m_1",
+      "name_ru": "Мужской туалет",
+      "name_en": "Men’s Restroom",
+      "number": null,
+      "floor": 1,
+      "category": "common",
+      "description_ru": "Мужской туалет первого этажа.",
+      "description_en": "Men’s restroom on the first floor.",
+      "nodeId": "1_door_wc_m",
+      "x": 127.56710000000005,
+      "y": 194.9290000000001,
+      "svgElementId": "room_wc_m_1",
+      "svgElementIds": [
+        "room_wc_m_1"
+      ],
+      "doorNodeId": "1_door_wc_m",
+      "doorNodeIds": [
+        "1_door_wc_m"
+      ],
+      "centerX": 127.56710000000005,
+      "centerY": 194.9290000000001,
+      "polygon": [],
+      "polygons": [
+        [
+          {
+            "x": 85.5671,
+            "y": 178.929
+          },
+          {
+            "x": 169.56709999999998,
+            "y": 178.929
+          },
+          {
+            "x": 169.56709999999998,
+            "y": 210.929
+          },
+          {
+            "x": 85.5671,
+            "y": 210.929
+          }
+        ]
+      ],
+      "aliases_ru": [
+        "туалет",
+        "мужской санузел",
+        "санузел м",
+        "мужской туалет"
+      ],
+      "aliases_en": [
+        "restroom",
+        "toilet",
+        "men’s toilet",
+        "mens restroom",
+        "wc"
+      ],
+      "role": "restroom",
+      "route_available": true,
+      "geometry_status": "mapped",
+      "expected_geometry_parts": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "room_wc_w_1",
+      "name_ru": "Женский туалет",
+      "name_en": "Women’s Restroom",
+      "number": null,
+      "floor": 1,
+      "category": "common",
+      "description_ru": "Женский туалет первого этажа.",
+      "description_en": "Women’s restroom on the first floor.",
+      "nodeId": "1_door_wc_w",
+      "x": 127.56709999999995,
+      "y": 225.92899999999995,
+      "svgElementId": "room_wc_w_1",
+      "svgElementIds": [
+        "room_wc_w_1"
+      ],
+      "doorNodeId": "1_door_wc_w",
+      "doorNodeIds": [
+        "1_door_wc_w"
+      ],
+      "centerX": 127.56709999999995,
+      "centerY": 225.92899999999995,
+      "polygon": [],
+      "polygons": [
+        [
+          {
+            "x": 85.5671,
+            "y": 209.929
+          },
+          {
+            "x": 169.56709999999998,
+            "y": 209.929
+          },
+          {
+            "x": 169.56709999999998,
+            "y": 241.929
+          },
+          {
+            "x": 85.5671,
+            "y": 241.929
+          }
+        ]
+      ],
+      "aliases_ru": [
+        "туалет",
+        "женский санузел",
+        "санузел ж",
+        "женский туалет"
+      ],
+      "aliases_en": [
+        "restroom",
+        "toilet",
+        "women’s toilet",
+        "womens restroom",
+        "wc"
+      ],
+      "role": "restroom",
+      "route_available": true,
+      "geometry_status": "mapped",
+      "expected_geometry_parts": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "room_stairs_west_1",
+      "name_ru": "Западная лестница",
+      "name_en": "West Staircase",
+      "number": null,
+      "floor": 1,
+      "category": "common",
+      "description_ru": "Западная лестница первого этажа.",
+      "description_en": "West staircase on the first floor.",
+      "nodeId": "1_stairs_west",
+      "x": 31.0,
+      "y": 354.0,
+      "svgElementId": "room_stairs_west_1",
+      "svgElementIds": [
+        "room_stairs_west_1"
+      ],
+      "doorNodeId": "1_stairs_west",
+      "doorNodeIds": [
+        "1_stairs_west"
+      ],
+      "centerX": 31.0,
+      "centerY": 354.0,
+      "polygon": [],
+      "polygons": [
+        [
+          {
+            "x": 0.0,
+            "y": 386.0
+          },
+          {
+            "x": 62.0,
+            "y": 386.0
+          },
+          {
+            "x": 62.0,
+            "y": 322.0
+          },
+          {
+            "x": 0.0,
+            "y": 322.0
+          }
+        ]
+      ],
+      "aliases_ru": [
+        "лестница",
+        "лестница западная",
+        "западная лестница"
+      ],
+      "aliases_en": [
+        "stairs",
+        "west stairs",
+        "staircase"
+      ],
+      "role": "stairs",
+      "route_available": true,
+      "geometry_status": "mapped",
+      "expected_geometry_parts": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "room_stairs_central_1",
+      "name_ru": "Центральная лестница",
+      "name_en": "Central Staircase",
+      "number": null,
+      "floor": 1,
+      "category": "common",
+      "description_ru": "Центральная лестница первого этажа.",
+      "description_en": "Central staircase on the first floor.",
+      "nodeId": "1_stairs_central",
+      "x": 344.8391151667025,
+      "y": 218.96746980015956,
+      "svgElementId": "room_stairs_central_1",
+      "svgElementIds": [
+        "room_stairs_central_1"
+      ],
+      "doorNodeId": "1_stairs_central",
+      "doorNodeIds": [
+        "1_stairs_central"
+      ],
+      "centerX": 344.8391151667025,
+      "centerY": 218.96746980015956,
+      "polygon": [],
+      "polygons": [
+        [
+          {
+            "x": 335.525,
+            "y": 179.737
+          },
+          {
+            "x": 335.525,
+            "y": 209.732
+          },
+          {
+            "x": 381.796,
+            "y": 209.732
+          },
+          {
+            "x": 381.796,
+            "y": 241.123
+          },
+          {
+            "x": 317.621,
+            "y": 241.123
+          },
+          {
+            "x": 317.621,
+            "y": 179.737
+          },
+          {
+            "x": 335.525,
+            "y": 179.737
+          }
+        ]
+      ],
+      "aliases_ru": [
+        "лестница",
+        "центральная лестница"
+      ],
+      "aliases_en": [
+        "stairs",
+        "central stairs",
+        "staircase"
+      ],
+      "role": "stairs",
+      "route_available": true,
+      "geometry_status": "mapped",
+      "expected_geometry_parts": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "room_stairs_east_1",
+      "name_ru": "Восточная лестница",
+      "name_en": "East Staircase",
+      "number": null,
+      "floor": 1,
+      "category": "common",
+      "description_ru": "Восточная лестница первого этажа.",
+      "description_en": "East staircase on the first floor.",
+      "nodeId": "1_stairs_east",
+      "x": 578.7400000000001,
+      "y": 124.39815000000003,
+      "svgElementId": "room_stairs_east_1",
+      "svgElementIds": [
+        "room_stairs_east_1"
+      ],
+      "doorNodeId": "1_stairs_east",
+      "doorNodeIds": [
+        "1_stairs_east"
+      ],
+      "centerX": 578.7400000000001,
+      "centerY": 124.39815000000003,
+      "polygon": [],
+      "polygons": [
+        [
+          {
+            "x": 547.815,
+            "y": 93.0081
+          },
+          {
+            "x": 609.6650000000001,
+            "y": 93.0081
+          },
+          {
+            "x": 609.6650000000001,
+            "y": 155.7882
+          },
+          {
+            "x": 547.815,
+            "y": 155.7882
+          }
+        ]
+      ],
+      "aliases_ru": [
+        "лестница",
+        "восточная лестница"
+      ],
+      "aliases_en": [
+        "stairs",
+        "east stairs",
+        "staircase"
+      ],
+      "role": "stairs",
+      "route_available": true,
+      "geometry_status": "mapped",
+      "expected_geometry_parts": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "room_lift_1",
+      "name_ru": "Лифт",
+      "name_en": "Elevator",
+      "number": null,
+      "floor": 1,
+      "category": "common",
+      "description_ru": "Лифт для посетителей, которым необходим доступный маршрут. Межэтажный переход помечен как требующий доступности.",
+      "description_en": "Elevator for visitors who need an accessible route. The inter-floor link is marked as requiring accessibility.",
+      "nodeId": "1_elevator",
+      "x": 536.5,
+      "y": 124.75,
+      "svgElementId": "room_lift_1",
+      "svgElementIds": [
+        "room_lift_1"
+      ],
+      "doorNodeId": "1_elevator",
+      "doorNodeIds": [
+        "1_elevator"
+      ],
+      "centerX": 536.5,
+      "centerY": 124.75,
+      "polygon": [],
+      "polygons": [
+        [
+          {
+            "x": 524.0,
+            "y": 93.5
+          },
+          {
+            "x": 549.0,
+            "y": 93.5
+          },
+          {
+            "x": 549.0,
+            "y": 156.0
+          },
+          {
+            "x": 524.0,
+            "y": 156.0
+          }
+        ]
+      ],
+      "aliases_ru": [
+        "лифт",
+        "подъёмник"
+      ],
+      "aliases_en": [
+        "elevator",
+        "lift"
+      ],
+      "role": "elevator",
+      "route_available": true,
+      "geometry_status": "mapped",
+      "expected_geometry_parts": null,
+      "requiresAccessibility": true
+    },
+    {
+      "id": "room_162",
+      "name_ru": "Помещение 162",
+      "name_en": "Room 162",
+      "number": "162",
+      "floor": 1,
+      "category": "common",
+      "description_ru": "Помещение 162, обозначенное на плане первого этажа. Назначение не уточняется по доступным данным.",
+      "description_en": "Room 162 as labelled on the first-floor plan. Its function is not specified in the available data.",
+      "nodeId": "1_door_162",
+      "x": 30.925,
+      "y": 444.11095,
+      "svgElementId": "room_162",
+      "svgElementIds": [
+        "room_162"
+      ],
+      "doorNodeId": "1_door_162",
+      "doorNodeIds": [
+        "1_door_162"
+      ],
+      "centerX": 30.925,
+      "centerY": 444.11095,
+      "polygon": [],
+      "polygons": [
+        [
+          {
+            "x": 0.0,
+            "y": 469.223
+          },
+          {
+            "x": 61.85,
+            "y": 469.223
+          },
+          {
+            "x": 61.85,
+            "y": 418.9989
+          },
+          {
+            "x": 0.0,
+            "y": 418.9989
+          }
+        ]
+      ],
+      "aliases_ru": [
+        "162",
+        "помещение №162"
+      ],
+      "aliases_en": [
+        "r",
+        "o",
+        "o",
+        "m",
+        " ",
+        "1",
+        "6",
+        "2"
+      ],
+      "role": "auxiliary",
+      "route_available": true,
+      "geometry_status": "mapped",
+      "expected_geometry_parts": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "room_wc_m_2",
+      "name_ru": "Мужской туалет",
+      "name_en": "Men’s Restroom",
+      "number": null,
+      "floor": 2,
+      "category": "common",
+      "description_ru": "Мужской туалет второго этажа.",
+      "description_en": "Men’s restroom on the second floor.",
+      "nodeId": "2_door_wc_m",
+      "x": 117.38357999999998,
+      "y": 199.17423,
+      "svgElementId": "room_wc_m_2",
+      "svgElementIds": [
+        "room_wc_m_2"
+      ],
+      "doorNodeId": "2_door_wc_m",
+      "doorNodeIds": [
+        "2_door_wc_m"
+      ],
+      "centerX": 117.38357999999998,
+      "centerY": 199.17423,
+      "polygon": [],
+      "polygons": [
+        [
+          {
+            "x": 147.79013,
+            "y": 182.20313000000002
+          },
+          {
+            "x": 86.97703,
+            "y": 182.20313000000002
+          },
+          {
+            "x": 86.97703,
+            "y": 216.14533
+          },
+          {
+            "x": 147.79013,
+            "y": 216.14533
+          }
+        ]
+      ],
+      "aliases_ru": [
+        "туалет",
+        "мужской санузел",
+        "санузел м",
+        "мужской туалет"
+      ],
+      "aliases_en": [
+        "restroom",
+        "toilet",
+        "men’s toilet",
+        "mens restroom",
+        "wc"
+      ],
+      "role": "restroom",
+      "route_available": true,
+      "geometry_status": "mapped",
+      "expected_geometry_parts": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "room_wc_w_2",
+      "name_ru": "Женский туалет",
+      "name_en": "Women’s Restroom",
+      "number": null,
+      "floor": 2,
+      "category": "common",
+      "description_ru": "Женский туалет второго этажа.",
+      "description_en": "Women’s restroom on the second floor.",
+      "nodeId": "2_door_wc_w",
+      "x": 117.38358000000001,
+      "y": 229.34598,
+      "svgElementId": "room_wc_w_2",
+      "svgElementIds": [
+        "room_wc_w_2"
+      ],
+      "doorNodeId": "2_door_wc_w",
+      "doorNodeIds": [
+        "2_door_wc_w"
+      ],
+      "centerX": 117.38358000000001,
+      "centerY": 229.34598,
+      "polygon": [],
+      "polygons": [
+        [
+          {
+            "x": 147.79013,
+            "y": 213.78913
+          },
+          {
+            "x": 86.97703,
+            "y": 213.78913
+          },
+          {
+            "x": 86.97703,
+            "y": 244.90283
+          },
+          {
+            "x": 147.79013,
+            "y": 244.90283
+          }
+        ]
+      ],
+      "aliases_ru": [
+        "туалет",
+        "женский санузел",
+        "санузел ж",
+        "женский туалет"
+      ],
+      "aliases_en": [
+        "restroom",
+        "toilet",
+        "women’s toilet",
+        "womens restroom",
+        "wc"
+      ],
+      "role": "restroom",
+      "route_available": true,
+      "geometry_status": "mapped",
+      "expected_geometry_parts": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "room_stairs_west_2",
+      "name_ru": "Западная лестница",
+      "name_en": "West Staircase",
+      "number": null,
+      "floor": 2,
+      "category": "common",
+      "description_ru": "Западная лестница второго этажа.",
+      "description_en": "West staircase on the second floor.",
+      "nodeId": "2_stairs_west",
+      "x": 31.0,
+      "y": 447.5,
+      "svgElementId": "room_stairs_west_2",
+      "svgElementIds": [
+        "room_stairs_west_2"
+      ],
+      "doorNodeId": "2_stairs_west",
+      "doorNodeIds": [
+        "2_stairs_west"
+      ],
+      "centerX": 31.0,
+      "centerY": 447.5,
+      "polygon": [],
+      "polygons": [
+        [
+          {
+            "x": 62.0,
+            "y": 417.0
+          },
+          {
+            "x": 0.0,
+            "y": 417.0
+          },
+          {
+            "x": 0.0,
+            "y": 478.0
+          },
+          {
+            "x": 62.0,
+            "y": 478.0
+          },
+          {
+            "x": 62.0,
+            "y": 417.0
+          }
+        ]
+      ],
+      "aliases_ru": [
+        "лестница",
+        "лестница западная",
+        "западная лестница"
+      ],
+      "aliases_en": [
+        "stairs",
+        "west stairs",
+        "staircase"
+      ],
+      "role": "stairs",
+      "route_available": true,
+      "geometry_status": "mapped",
+      "expected_geometry_parts": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "room_stairs_central_2",
+      "name_ru": "Центральная лестница",
+      "name_en": "Central Staircase",
+      "number": null,
+      "floor": 2,
+      "category": "common",
+      "description_ru": "Центральная лестница второго этажа.",
+      "description_en": "Central staircase on the second floor.",
+      "nodeId": "2_stairs_central",
+      "x": 357.10107999999974,
+      "y": 213.55252999999988,
+      "svgElementId": "room_stairs_central_2",
+      "svgElementIds": [
+        "room_stairs_central_2"
+      ],
+      "doorNodeId": "2_stairs_central",
+      "doorNodeIds": [
+        "2_stairs_central"
+      ],
+      "centerX": 357.10107999999974,
+      "centerY": 213.55252999999988,
+      "polygon": [],
+      "polygons": [
+        [
+          {
+            "x": 391.98613,
+            "y": 182.20313000000002
+          },
+          {
+            "x": 322.21603,
+            "y": 182.20313000000002
+          },
+          {
+            "x": 322.21603,
+            "y": 244.90193
+          },
+          {
+            "x": 391.98613,
+            "y": 244.90193
+          }
+        ]
+      ],
+      "aliases_ru": [
+        "лестница",
+        "центральная лестница"
+      ],
+      "aliases_en": [
+        "stairs",
+        "central stairs",
+        "staircase"
+      ],
+      "role": "stairs",
+      "route_available": true,
+      "geometry_status": "mapped",
+      "expected_geometry_parts": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "room_stairs_east_2",
+      "name_ru": "Восточная лестница",
+      "name_en": "East Staircase",
+      "number": null,
+      "floor": 2,
+      "category": "common",
+      "description_ru": "Восточная лестница второго этажа.",
+      "description_en": "East staircase on the second floor.",
+      "nodeId": "2_stairs_east",
+      "x": 585.2678499999997,
+      "y": 126.12850000000003,
+      "svgElementId": "room_stairs_east_2",
+      "svgElementIds": [
+        "room_stairs_east_2"
+      ],
+      "doorNodeId": "2_stairs_east",
+      "doorNodeIds": [
+        "2_stairs_east"
+      ],
+      "centerX": 585.2678499999997,
+      "centerY": 126.12850000000003,
+      "polygon": [],
+      "polygons": [
+        [
+          {
+            "x": 560.754,
+            "y": 95.4862
+          },
+          {
+            "x": 609.7817,
+            "y": 95.4862
+          },
+          {
+            "x": 609.7817,
+            "y": 156.7708
+          },
+          {
+            "x": 560.754,
+            "y": 156.7708
+          }
+        ]
+      ],
+      "aliases_ru": [
+        "лестница",
+        "восточная лестница"
+      ],
+      "aliases_en": [
+        "stairs",
+        "east stairs",
+        "staircase"
+      ],
+      "role": "stairs",
+      "route_available": true,
+      "geometry_status": "mapped",
+      "expected_geometry_parts": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "room_lift_2",
+      "name_ru": "Лифт",
+      "name_en": "Elevator",
+      "number": null,
+      "floor": 2,
+      "category": "common",
+      "description_ru": "Лифт для посетителей, которым необходим доступный маршрут. Межэтажный переход помечен как требующий доступности.",
+      "description_en": "Elevator for visitors who need an accessible route. The inter-floor link is marked as requiring accessibility.",
+      "nodeId": "2_elevator",
+      "x": 547.7897499999997,
+      "y": 126.10529999999969,
+      "svgElementId": "room_lift_2",
+      "svgElementIds": [
+        "room_lift_2"
+      ],
+      "doorNodeId": "2_elevator",
+      "doorNodeIds": [
+        "2_elevator"
+      ],
+      "centerX": 547.7897499999997,
+      "centerY": 126.10529999999969,
+      "polygon": [],
+      "polygons": [
+        [
+          {
+            "x": 534.59,
+            "y": 94.7559
+          },
+          {
+            "x": 560.9895,
+            "y": 94.7559
+          },
+          {
+            "x": 560.9895,
+            "y": 157.4547
+          },
+          {
+            "x": 534.59,
+            "y": 157.4547
+          }
+        ]
+      ],
+      "aliases_ru": [
+        "лифт",
+        "подъёмник"
+      ],
+      "aliases_en": [
+        "elevator",
+        "lift"
+      ],
+      "role": "elevator",
+      "route_available": true,
+      "geometry_status": "mapped",
+      "expected_geometry_parts": null,
+      "requiresAccessibility": true
+    },
+    {
+      "id": "room_observation_2",
+      "name_ru": "Смотровая",
+      "name_en": "Observation Room",
+      "number": null,
+      "floor": 2,
+      "category": "common",
+      "description_ru": "Смотровая расположена в серой закрытой зоне. Помещение не является доступной точкой назначения и не включено в маршрутный граф.",
+      "description_en": "The observation room is inside the grey restricted area. It is not a routable destination and is excluded from the navigation graph.",
+      "nodeId": null,
+      "x": 620.8603500000015,
+      "y": 170.18240000000017,
+      "svgElementId": "room_observation_2",
+      "svgElementIds": [
+        "room_observation_2"
+      ],
+      "doorNodeId": null,
+      "doorNodeIds": [],
+      "centerX": 620.8603500000015,
+      "centerY": 170.18240000000017,
+      "polygon": [],
+      "polygons": [
+        [
+          {
+            "x": 609.782,
+            "y": 138.833
+          },
+          {
+            "x": 631.9387,
+            "y": 138.833
+          },
+          {
+            "x": 631.9387,
+            "y": 201.5318
+          },
+          {
+            "x": 609.782,
+            "y": 201.5318
+          }
+        ]
+      ],
+      "aliases_ru": [
+        "смотровая",
+        "смотровая комната",
+        "наблюдательная"
+      ],
+      "aliases_en": [
+        "observation room",
+        "viewing room"
+      ],
+      "role": "restricted",
+      "route_available": false,
+      "geometry_status": "restricted",
+      "expected_geometry_parts": null,
+      "requiresAccessibility": false
+    }
+  ]
+}
