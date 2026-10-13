@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="screen_horizontal_padding">16dp</dimen>
+    <dimen name="screen_vertical_padding">12dp</dimen>
+    <dimen name="map_control_size">46dp</dimen>
+    <dimen name="dialog_max_width">560dp</dimen>
+    <dimen name="adaptive_rail_width">80dp</dimen>
+    <dimen name="content_max_width">720dp</dimen>
+</resources>

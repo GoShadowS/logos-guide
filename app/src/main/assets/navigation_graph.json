@@ -1,0 +1,2150 @@
+{
+  "floors": [
+    {
+      "number": 1,
+      "title": "1 этаж",
+      "mapAsset": "floors/floor_1.svg",
+      "width": 758,
+      "height": 552,
+      "viewBoxX": 0,
+      "viewBoxY": 0,
+      "metersPerUnit": 0.08332894
+    },
+    {
+      "number": 2,
+      "title": "2 этаж",
+      "mapAsset": "floors/floor_2.svg",
+      "width": 767,
+      "height": 561,
+      "viewBoxX": 0,
+      "viewBoxY": 0,
+      "metersPerUnit": 0.08334442
+    }
+  ],
+  "gpsAnchors": [
+    {
+      "floor": 1,
+      "id": "1_5",
+      "lat": 55.214762,
+      "lon": 36.536331,
+      "x": 758.0,
+      "y": 275.52
+    },
+    {
+      "floor": 1,
+      "id": "1_6",
+      "lat": 55.215103,
+      "lon": 36.537163,
+      "x": 148.34,
+      "y": 275.52
+    },
+    {
+      "floor": 1,
+      "id": "1_7",
+      "lat": 55.215359,
+      "lon": 36.536879,
+      "x": 148.34,
+      "y": 552.0
+    },
+    {
+      "floor": 1,
+      "id": "1_8",
+      "lat": 55.215429,
+      "lon": 36.537066,
+      "x": 0.0,
+      "y": 552.0
+    },
+    {
+      "floor": 2,
+      "id": "2_1",
+      "lat": 55.215005,
+      "lon": 36.537568,
+      "x": 0.0,
+      "y": 0.0
+    },
+    {
+      "floor": 2,
+      "id": "2_2",
+      "lat": 55.214928,
+      "lon": 36.537406,
+      "x": 151.67,
+      "y": 0.0
+    },
+    {
+      "floor": 2,
+      "id": "2_3",
+      "lat": 55.214996,
+      "lon": 36.53731,
+      "x": 151.67,
+      "y": 101.5
+    },
+    {
+      "floor": 2,
+      "id": "2_4",
+      "lat": 55.214671,
+      "lon": 36.536464,
+      "x": 767.0,
+      "y": 101.5
+    }
+  ],
+  "nodes": [
+    {
+      "id": "1_01",
+      "floor": 1,
+      "x": 576.54,
+      "y": 240.96,
+      "name": "Главный вход",
+      "nameEn": "Main entrance",
+      "type": "entrance",
+      "roomId": "room_entrance_main",
+      "connectsRoom": "room_entrance_main",
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "1_hall_lobby",
+      "floor": 1,
+      "x": 579.0,
+      "y": 199.0,
+      "name": "Холл",
+      "nameEn": "Lobby",
+      "type": "hallway",
+      "roomId": null,
+      "connectsRoom": null,
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "1_hall_north",
+      "floor": 1,
+      "x": 579.0,
+      "y": 168.0,
+      "name": "Коридор у холла",
+      "nameEn": "Lobby corridor",
+      "type": "hallway",
+      "roomId": null,
+      "connectsRoom": null,
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "1_corridor_east",
+      "floor": 1,
+      "x": 547.0,
+      "y": 166.0,
+      "name": "Восточный коридор",
+      "nameEn": "East corridor",
+      "type": "hallway",
+      "roomId": null,
+      "connectsRoom": null,
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "1_corridor_cloakroom",
+      "floor": 1,
+      "x": 515.0,
+      "y": 166.0,
+      "name": "Коридор у гардероба",
+      "nameEn": "Cloakroom corridor",
+      "type": "hallway",
+      "roomId": null,
+      "connectsRoom": null,
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "1_corridor_academic",
+      "floor": 1,
+      "x": 425.0,
+      "y": 166.0,
+      "name": "Коридор у учебной части",
+      "nameEn": "Academic Office corridor",
+      "type": "hallway",
+      "roomId": null,
+      "connectsRoom": null,
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "1_corridor_central",
+      "floor": 1,
+      "x": 349.7,
+      "y": 166.0,
+      "name": "Центральный коридор",
+      "nameEn": "Central corridor",
+      "type": "hallway",
+      "roomId": null,
+      "connectsRoom": null,
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "1_corridor_114",
+      "floor": 1,
+      "x": 278.0,
+      "y": 166.0,
+      "name": "Коридор кабинета 114",
+      "nameEn": "Room 114 corridor",
+      "type": "hallway",
+      "roomId": null,
+      "connectsRoom": null,
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "1_corridor_115",
+      "floor": 1,
+      "x": 230.0,
+      "y": 166.0,
+      "name": "Коридор кабинета 115",
+      "nameEn": "Room 115 corridor",
+      "type": "hallway",
+      "roomId": null,
+      "connectsRoom": null,
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "1_corridor_cafe",
+      "floor": 1,
+      "x": 120.0,
+      "y": 166.0,
+      "name": "Коридор у столовой",
+      "nameEn": "Cafeteria corridor",
+      "type": "hallway",
+      "roomId": null,
+      "connectsRoom": null,
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "1_corridor_west",
+      "floor": 1,
+      "x": 74.0,
+      "y": 166.0,
+      "name": "Западный коридор",
+      "nameEn": "West corridor",
+      "type": "hallway",
+      "roomId": null,
+      "connectsRoom": null,
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "1_west_wc_m",
+      "floor": 1,
+      "x": 74.0,
+      "y": 198.0,
+      "name": "Западный коридор",
+      "nameEn": "West corridor",
+      "type": "hallway",
+      "roomId": null,
+      "connectsRoom": null,
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "1_west_wc_w",
+      "floor": 1,
+      "x": 74.0,
+      "y": 230.0,
+      "name": "Западный коридор",
+      "nameEn": "West corridor",
+      "type": "hallway",
+      "roomId": null,
+      "connectsRoom": null,
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "1_west_room119",
+      "floor": 1,
+      "x": 74.0,
+      "y": 245.0,
+      "name": "Коридор у кабинета 119",
+      "nameEn": "Room 119 corridor",
+      "type": "hallway",
+      "roomId": null,
+      "connectsRoom": null,
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "1_west_room118",
+      "floor": 1,
+      "x": 74.0,
+      "y": 287.0,
+      "name": "Коридор у кабинета 118",
+      "nameEn": "Room 118 corridor",
+      "type": "hallway",
+      "roomId": null,
+      "connectsRoom": null,
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "1_west_mid",
+      "floor": 1,
+      "x": 74.0,
+      "y": 360.0,
+      "name": "Западный коридор",
+      "nameEn": "West corridor",
+      "type": "hallway",
+      "roomId": null,
+      "connectsRoom": null,
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "1_west_south",
+      "floor": 1,
+      "x": 74.0,
+      "y": 430.0,
+      "name": "Южный коридор",
+      "nameEn": "South corridor",
+      "type": "hallway",
+      "roomId": null,
+      "connectsRoom": null,
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "1_west_162",
+      "floor": 1,
+      "x": 74.0,
+      "y": 435.0,
+      "name": "Коридор у помещения 162",
+      "nameEn": "Room 162 corridor",
+      "type": "hallway",
+      "roomId": null,
+      "connectsRoom": null,
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "1_west_exit",
+      "floor": 1,
+      "x": 74.0,
+      "y": 455.0,
+      "name": "Южный коридор",
+      "nameEn": "South corridor",
+      "type": "hallway",
+      "roomId": null,
+      "connectsRoom": null,
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "1_stairs_west",
+      "floor": 1,
+      "x": 31.0,
+      "y": 354.0,
+      "name": "Западная лестница",
+      "nameEn": "West staircase",
+      "type": "stairs",
+      "roomId": null,
+      "connectsRoom": null,
+      "stairsGroup": "stairs_west",
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "1_stairs_central",
+      "floor": 1,
+      "x": 344.8391151667025,
+      "y": 218.96746980015956,
+      "name": "Центральная лестница",
+      "nameEn": "Central staircase",
+      "type": "stairs",
+      "roomId": null,
+      "connectsRoom": null,
+      "stairsGroup": "stairs_central",
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "1_stairs_east",
+      "floor": 1,
+      "x": 578.7400000000001,
+      "y": 124.39815000000003,
+      "name": "Восточная лестница",
+      "nameEn": "East staircase",
+      "type": "stairs",
+      "roomId": null,
+      "connectsRoom": null,
+      "stairsGroup": "stairs_east",
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "1_elevator",
+      "floor": 1,
+      "x": 536.5,
+      "y": 124.75,
+      "name": "Лифт, доступный маршрут",
+      "nameEn": "Elevator, accessible route",
+      "type": "elevator",
+      "roomId": "room_lift_1",
+      "connectsRoom": "room_lift_1",
+      "stairsGroup": null,
+      "elevatorGroup": "elevator_access",
+      "requiresAccessibility": true
+    },
+    {
+      "id": "1_door_126",
+      "floor": 1,
+      "x": 91.49999999999999,
+      "y": 155.0,
+      "name": "Вход в столовую",
+      "nameEn": "Cafeteria entrance",
+      "type": "door",
+      "roomId": "room_126",
+      "connectsRoom": "room_126",
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "1_door_115",
+      "floor": 1,
+      "x": 229.49999999999983,
+      "y": 155.00000000000017,
+      "name": "Вход в кабинет 115",
+      "nameEn": "Room 115 entrance",
+      "type": "door",
+      "roomId": "room_115",
+      "connectsRoom": "room_115",
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "1_door_114",
+      "floor": 1,
+      "x": 278.5,
+      "y": 155.00000000000017,
+      "name": "Вход в кабинет 114",
+      "nameEn": "Room 114 entrance",
+      "type": "door",
+      "roomId": "room_114",
+      "connectsRoom": "room_114",
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "1_door_148",
+      "floor": 1,
+      "x": 182.49999999999983,
+      "y": 180.00000000000017,
+      "name": "Вход в кабинет 148",
+      "nameEn": "Room 148 entrance",
+      "type": "door",
+      "roomId": "room_148",
+      "connectsRoom": "room_148",
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "1_door_120",
+      "floor": 1,
+      "x": 261.5,
+      "y": 180.00000000000017,
+      "name": "Вход в кабинет 120",
+      "nameEn": "Room 120 entrance",
+      "type": "door",
+      "roomId": "room_120",
+      "connectsRoom": "room_120",
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "1_door_149",
+      "floor": 1,
+      "x": 358.5,
+      "y": 180.0,
+      "name": "Вход в кабинет 149",
+      "nameEn": "Room 149 entrance",
+      "type": "door",
+      "roomId": "room_149",
+      "connectsRoom": "room_149",
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "1_door_cloakroom",
+      "floor": 1,
+      "x": 505.5,
+      "y": 180.0,
+      "name": "Вход в гардероб",
+      "nameEn": "Cloakroom entrance",
+      "type": "door",
+      "roomId": "room_cloakroom",
+      "connectsRoom": "room_cloakroom",
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "1_door_wc_m",
+      "floor": 1,
+      "x": 86.0,
+      "y": 190.5,
+      "name": "Вход в мужской туалет",
+      "nameEn": "Men’s restroom entrance",
+      "type": "door",
+      "roomId": "room_wc_m_1",
+      "connectsRoom": "room_wc_m_1",
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "1_door_wc_w",
+      "floor": 1,
+      "x": 86.0,
+      "y": 222.5,
+      "name": "Вход в женский туалет",
+      "nameEn": "Women’s restroom entrance",
+      "type": "door",
+      "roomId": "room_wc_w_1",
+      "connectsRoom": "room_wc_w_1",
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "1_door_119",
+      "floor": 1,
+      "x": 61.0,
+      "y": 238.5,
+      "name": "Вход в кабинет 119",
+      "nameEn": "Room 119 entrance",
+      "type": "door",
+      "roomId": "room_119",
+      "connectsRoom": "room_119",
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "1_door_118",
+      "floor": 1,
+      "x": 61.0,
+      "y": 279.5,
+      "name": "Вход в кабинет 118",
+      "nameEn": "Room 118 entrance",
+      "type": "door",
+      "roomId": "room_118",
+      "connectsRoom": "room_118",
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "1_door_139",
+      "floor": 1,
+      "x": 86.0,
+      "y": 359.5,
+      "name": "Вход в кабинет 139",
+      "nameEn": "Room 139 entrance",
+      "type": "door",
+      "roomId": "room_139",
+      "connectsRoom": "room_139",
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "1_door_138",
+      "floor": 1,
+      "x": 86.0,
+      "y": 426.5,
+      "name": "Вход в кабинет 138",
+      "nameEn": "Room 138 entrance",
+      "type": "door",
+      "roomId": "room_138",
+      "connectsRoom": "room_138",
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "1_door_162",
+      "floor": 1,
+      "x": 62.0,
+      "y": 435.5,
+      "name": "Вход в помещение 162",
+      "nameEn": "Room 162 entrance",
+      "type": "door",
+      "roomId": "room_162",
+      "connectsRoom": "room_162",
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "1_door_113",
+      "floor": 1,
+      "x": 73.5,
+      "y": 468.0,
+      "name": "Вход в тренажёрный центр",
+      "nameEn": "Fitness center entrance",
+      "type": "door",
+      "roomId": "room_113",
+      "connectsRoom": "room_113",
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "1_door_academic",
+      "floor": 1,
+      "x": 432.0,
+      "y": 156.0,
+      "name": "Предполагаемый вход в учебную часть",
+      "nameEn": "Estimated Academic Office entrance",
+      "type": "door",
+      "roomId": "room_education_department",
+      "connectsRoom": "room_education_department",
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "1_door_104",
+      "floor": 1,
+      "x": 609.665,
+      "y": 168.0,
+      "name": "Предполагаемый вход в актовый зал",
+      "nameEn": "Estimated assembly hall entrance",
+      "type": "door",
+      "roomId": "room_104",
+      "connectsRoom": "room_104",
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_corridor_west",
+      "floor": 2,
+      "x": 74.0,
+      "y": 170.0,
+      "name": "Западный коридор",
+      "nameEn": "West corridor",
+      "type": "hallway",
+      "roomId": null,
+      "connectsRoom": null,
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_corridor_library",
+      "floor": 2,
+      "x": 115.0,
+      "y": 170.0,
+      "name": "Коридор у библиотеки",
+      "nameEn": "Library corridor",
+      "type": "hallway",
+      "roomId": null,
+      "connectsRoom": null,
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_corridor_228",
+      "floor": 2,
+      "x": 217.0,
+      "y": 170.0,
+      "name": "Коридор лаборатории 228",
+      "nameEn": "Room 228 corridor",
+      "type": "hallway",
+      "roomId": null,
+      "connectsRoom": null,
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_corridor_230",
+      "floor": 2,
+      "x": 317.0,
+      "y": 170.0,
+      "name": "Коридор лаборатории 230",
+      "nameEn": "Room 230 corridor",
+      "type": "hallway",
+      "roomId": null,
+      "connectsRoom": null,
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_corridor_central",
+      "floor": 2,
+      "x": 357.0,
+      "y": 170.0,
+      "name": "Центральный коридор",
+      "nameEn": "Central corridor",
+      "type": "hallway",
+      "roomId": null,
+      "connectsRoom": null,
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_corridor_230_assistant",
+      "floor": 2,
+      "x": 390.0,
+      "y": 170.0,
+      "name": "Коридор у лаборантской 230",
+      "nameEn": "Room 230 lab assistant corridor",
+      "type": "hallway",
+      "roomId": null,
+      "connectsRoom": null,
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_corridor_209",
+      "floor": 2,
+      "x": 459.0,
+      "y": 170.0,
+      "name": "Коридор лаборатории 209",
+      "nameEn": "Room 209 corridor",
+      "type": "hallway",
+      "roomId": null,
+      "connectsRoom": null,
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_corridor_east",
+      "floor": 2,
+      "x": 535.0,
+      "y": 170.0,
+      "name": "Восточный коридор",
+      "nameEn": "East corridor",
+      "type": "hallway",
+      "roomId": null,
+      "connectsRoom": null,
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_corridor_stair_east",
+      "floor": 2,
+      "x": 585.0,
+      "y": 170.0,
+      "name": "Коридор у восточной лестницы",
+      "nameEn": "East staircase corridor",
+      "type": "hallway",
+      "roomId": null,
+      "connectsRoom": null,
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_library_west_approach",
+      "floor": 2,
+      "x": 25.5,
+      "y": 150.0,
+      "name": "Подход к библиотеке",
+      "nameEn": "Library approach",
+      "type": "hallway",
+      "roomId": null,
+      "connectsRoom": null,
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_library_east_approach",
+      "floor": 2,
+      "x": 115.5,
+      "y": 150.0,
+      "name": "Подход к библиотеке",
+      "nameEn": "Library approach",
+      "type": "hallway",
+      "roomId": null,
+      "connectsRoom": null,
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_corridor_211_approach",
+      "floor": 2,
+      "x": 249.5,
+      "y": 170.0,
+      "name": "Коридор у кабинета физики",
+      "nameEn": "Physics classroom corridor",
+      "type": "hallway",
+      "roomId": null,
+      "connectsRoom": null,
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_corridor_224_approach",
+      "floor": 2,
+      "x": 408.5,
+      "y": 170.0,
+      "name": "Коридор у кабинета психолога",
+      "nameEn": "Psychologist’s office corridor",
+      "type": "hallway",
+      "roomId": null,
+      "connectsRoom": null,
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_corridor_217_approach",
+      "floor": 2,
+      "x": 439.5,
+      "y": 170.0,
+      "name": "Коридор у кабинета 217",
+      "nameEn": "Room 217 corridor",
+      "type": "hallway",
+      "roomId": null,
+      "connectsRoom": null,
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_corridor_229_approach",
+      "floor": 2,
+      "x": 495.5,
+      "y": 170.0,
+      "name": "Коридор у кабинета 229",
+      "nameEn": "Room 229 corridor",
+      "type": "hallway",
+      "roomId": null,
+      "connectsRoom": null,
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_corridor_222_approach",
+      "floor": 2,
+      "x": 526.5,
+      "y": 170.0,
+      "name": "Коридор у кабинета 222",
+      "nameEn": "Room 222 corridor",
+      "type": "hallway",
+      "roomId": null,
+      "connectsRoom": null,
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_west_wc_m",
+      "floor": 2,
+      "x": 74.0,
+      "y": 198.0,
+      "name": "Западный коридор",
+      "nameEn": "West corridor",
+      "type": "hallway",
+      "roomId": null,
+      "connectsRoom": null,
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_west_wc_w",
+      "floor": 2,
+      "x": 74.0,
+      "y": 230.0,
+      "name": "Западный коридор",
+      "nameEn": "West corridor",
+      "type": "hallway",
+      "roomId": null,
+      "connectsRoom": null,
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_west_spine_low",
+      "floor": 2,
+      "x": 74.0,
+      "y": 260.0,
+      "name": "Западный коридор",
+      "nameEn": "West corridor",
+      "type": "hallway",
+      "roomId": null,
+      "connectsRoom": null,
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_west_spine_202lab",
+      "floor": 2,
+      "x": 74.0,
+      "y": 355.0,
+      "name": "Западный коридор",
+      "nameEn": "West corridor",
+      "type": "hallway",
+      "roomId": null,
+      "connectsRoom": null,
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_west_spine_225practical",
+      "floor": 2,
+      "x": 74.0,
+      "y": 400.0,
+      "name": "Западный коридор",
+      "nameEn": "West corridor",
+      "type": "hallway",
+      "roomId": null,
+      "connectsRoom": null,
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_west_spine_225",
+      "floor": 2,
+      "x": 74.0,
+      "y": 445.0,
+      "name": "Западный коридор",
+      "nameEn": "West corridor",
+      "type": "hallway",
+      "roomId": null,
+      "connectsRoom": null,
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_west_spine_207",
+      "floor": 2,
+      "x": 74.0,
+      "y": 470.0,
+      "name": "Западный коридор",
+      "nameEn": "West corridor",
+      "type": "hallway",
+      "roomId": null,
+      "connectsRoom": null,
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_lower_corridor_center",
+      "floor": 2,
+      "x": 357.0,
+      "y": 260.0,
+      "name": "Южный коридор",
+      "nameEn": "South corridor",
+      "type": "hallway",
+      "roomId": null,
+      "connectsRoom": null,
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_west_stair_approach",
+      "floor": 2,
+      "x": 74.0,
+      "y": 447.0,
+      "name": "Подход к западной лестнице",
+      "nameEn": "West staircase approach",
+      "type": "hallway",
+      "roomId": null,
+      "connectsRoom": null,
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_stairs_west",
+      "floor": 2,
+      "x": 31.0,
+      "y": 447.5,
+      "name": "Западная лестница",
+      "nameEn": "West staircase",
+      "type": "stairs",
+      "roomId": null,
+      "connectsRoom": null,
+      "stairsGroup": "stairs_west",
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_stairs_central",
+      "floor": 2,
+      "x": 357.10107999999974,
+      "y": 213.55252999999988,
+      "name": "Центральная лестница",
+      "nameEn": "Central staircase",
+      "type": "stairs",
+      "roomId": null,
+      "connectsRoom": null,
+      "stairsGroup": "stairs_central",
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_stairs_east",
+      "floor": 2,
+      "x": 585.2678499999997,
+      "y": 126.12850000000003,
+      "name": "Восточная лестница",
+      "nameEn": "East staircase",
+      "type": "stairs",
+      "roomId": null,
+      "connectsRoom": null,
+      "stairsGroup": "stairs_east",
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_elevator",
+      "floor": 2,
+      "x": 547.7897499999997,
+      "y": 126.10529999999969,
+      "name": "Лифт, доступный маршрут",
+      "nameEn": "Elevator, accessible route",
+      "type": "elevator",
+      "roomId": "room_lift_2",
+      "connectsRoom": "room_lift_2",
+      "stairsGroup": null,
+      "elevatorGroup": "elevator_access",
+      "requiresAccessibility": true
+    },
+    {
+      "id": "2_door_214_east",
+      "floor": 2,
+      "x": 115.5,
+      "y": 114.0,
+      "name": "Вход в библиотеку",
+      "nameEn": "Library entrance",
+      "type": "door",
+      "roomId": "room_214",
+      "connectsRoom": "room_214",
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_door_214_west",
+      "floor": 2,
+      "x": 25.5,
+      "y": 114.0,
+      "name": "Западный вход в библиотеку",
+      "nameEn": "West library entrance",
+      "type": "door",
+      "roomId": "room_214",
+      "connectsRoom": "room_214",
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_door_228",
+      "floor": 2,
+      "x": 217.5,
+      "y": 157.0,
+      "name": "Вход в лабораторию 228",
+      "nameEn": "Room 228 entrance",
+      "type": "door",
+      "roomId": "room_228",
+      "connectsRoom": "room_228",
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_door_230_main",
+      "floor": 2,
+      "x": 317.5,
+      "y": 157.0,
+      "name": "Вход в электрорадиомонтажную",
+      "nameEn": "Electrical radio-installation entrance",
+      "type": "door",
+      "roomId": "room_230",
+      "connectsRoom": "room_230",
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_door_230_assistant",
+      "floor": 2,
+      "x": 390.5,
+      "y": 157.0,
+      "name": "Вход в лаборантскую 230",
+      "nameEn": "Room 230 lab assistant entrance",
+      "type": "door",
+      "roomId": "room_230",
+      "connectsRoom": "room_230",
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_door_209",
+      "floor": 2,
+      "x": 459.5,
+      "y": 157.0,
+      "name": "Вход в лабораторию 209",
+      "nameEn": "Room 209 entrance",
+      "type": "door",
+      "roomId": "room_209",
+      "connectsRoom": "room_209",
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_door_211",
+      "floor": 2,
+      "x": 249.5,
+      "y": 182.0,
+      "name": "Вход в кабинет физики",
+      "nameEn": "Physics classroom entrance",
+      "type": "door",
+      "roomId": "room_211",
+      "connectsRoom": "room_211",
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_door_224",
+      "floor": 2,
+      "x": 408.5,
+      "y": 182.0,
+      "name": "Вход в кабинет психолога",
+      "nameEn": "Psychologist’s office entrance",
+      "type": "door",
+      "roomId": "room_224",
+      "connectsRoom": "room_224",
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_door_217",
+      "floor": 2,
+      "x": 439.5,
+      "y": 182.0,
+      "name": "Вход в кабинет 217",
+      "nameEn": "Room 217 entrance",
+      "type": "door",
+      "roomId": "room_217",
+      "connectsRoom": "room_217",
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_door_229",
+      "floor": 2,
+      "x": 495.5,
+      "y": 182.0,
+      "name": "Вход в кабинет 229",
+      "nameEn": "Room 229 entrance",
+      "type": "door",
+      "roomId": "room_229",
+      "connectsRoom": "room_229",
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_door_222",
+      "floor": 2,
+      "x": 526.5,
+      "y": 182.0,
+      "name": "Вход в кабинет информатики",
+      "nameEn": "Computer science classroom entrance",
+      "type": "door",
+      "roomId": "room_222",
+      "connectsRoom": "room_222",
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_door_wc_m",
+      "floor": 2,
+      "x": 87.0,
+      "y": 192.5,
+      "name": "Вход в мужской туалет",
+      "nameEn": "Men’s restroom entrance",
+      "type": "door",
+      "roomId": "room_wc_m_2",
+      "connectsRoom": "room_wc_m_2",
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_door_wc_w",
+      "floor": 2,
+      "x": 87.0,
+      "y": 223.5,
+      "name": "Вход в женский туалет",
+      "nameEn": "Women’s restroom entrance",
+      "type": "door",
+      "roomId": "room_wc_w_2",
+      "connectsRoom": "room_wc_w_2",
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_door_213",
+      "floor": 2,
+      "x": 61.0,
+      "y": 246.5,
+      "name": "Вход в лабораторию метеорологии",
+      "nameEn": "Meteorology laboratory entrance",
+      "type": "door",
+      "roomId": "room_213",
+      "connectsRoom": "room_213",
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_door_202",
+      "floor": 2,
+      "x": 87.0,
+      "y": 262.5,
+      "name": "Вход в кабинет 202",
+      "nameEn": "Room 202 entrance",
+      "type": "door",
+      "roomId": "room_202",
+      "connectsRoom": "room_202",
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_door_202_lab_assistant",
+      "floor": 2,
+      "x": 87.0,
+      "y": 354.5,
+      "name": "Вход в лаборантскую 202",
+      "nameEn": "Room 202 lab assistant entrance",
+      "type": "door",
+      "roomId": "room_202",
+      "connectsRoom": "room_202",
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_door_225_practical",
+      "floor": 2,
+      "x": 87.0,
+      "y": 399.5,
+      "name": "Вход в практическое помещение 225",
+      "nameEn": "Practical room 225 entrance",
+      "type": "door",
+      "roomId": "room_225",
+      "connectsRoom": "room_225",
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_door_225_lab",
+      "floor": 2,
+      "x": 87.0,
+      "y": 449.5,
+      "name": "Вход в лабораторию 225",
+      "nameEn": "Room 225 laboratory entrance",
+      "type": "door",
+      "roomId": "room_225",
+      "connectsRoom": "room_225",
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_door_207",
+      "floor": 2,
+      "x": 78.0,
+      "y": 470.0,
+      "name": "Предполагаемый вход в лабораторию 207",
+      "nameEn": "Estimated room 207 entrance",
+      "type": "door",
+      "roomId": "room_207",
+      "connectsRoom": "room_207",
+      "stairsGroup": null,
+      "elevatorGroup": null,
+      "requiresAccessibility": false
+    }
+  ],
+  "edges": [
+    {
+      "from": "1_corridor_west",
+      "to": "1_corridor_cafe",
+      "weight": 3.8331,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "1_corridor_cafe",
+      "to": "1_corridor_115",
+      "weight": 9.1662,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "1_corridor_115",
+      "to": "1_corridor_114",
+      "weight": 3.9998,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "1_corridor_114",
+      "to": "1_corridor_central",
+      "weight": 5.9747,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "1_corridor_central",
+      "to": "1_corridor_academic",
+      "weight": 6.2747,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "1_corridor_academic",
+      "to": "1_corridor_cloakroom",
+      "weight": 7.4996,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "1_corridor_cloakroom",
+      "to": "1_corridor_east",
+      "weight": 2.6665,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "1_corridor_east",
+      "to": "1_hall_north",
+      "weight": 2.6717,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "1_hall_north",
+      "to": "1_hall_lobby",
+      "weight": 2.5832,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "1_hall_lobby",
+      "to": "1_01",
+      "weight": 3.5025,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "1_corridor_west",
+      "to": "1_west_wc_m",
+      "weight": 2.6665,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "1_west_wc_m",
+      "to": "1_west_wc_w",
+      "weight": 2.6665,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "1_west_wc_w",
+      "to": "1_west_room119",
+      "weight": 1.2499,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "1_west_room119",
+      "to": "1_west_room118",
+      "weight": 3.4998,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "1_west_room118",
+      "to": "1_west_mid",
+      "weight": 6.083,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "1_west_mid",
+      "to": "1_west_south",
+      "weight": 5.833,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "1_west_south",
+      "to": "1_west_162",
+      "weight": 0.4166,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "1_west_162",
+      "to": "1_west_exit",
+      "weight": 1.6666,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "1_corridor_cafe",
+      "to": "1_door_126",
+      "weight": 2.5456,
+      "type": "door",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "1_corridor_115",
+      "to": "1_door_115",
+      "weight": 0.9176,
+      "type": "door",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "1_corridor_114",
+      "to": "1_door_114",
+      "weight": 0.9176,
+      "type": "door",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "1_corridor_academic",
+      "to": "1_door_academic",
+      "weight": 1.0172,
+      "type": "door",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "1_corridor_115",
+      "to": "1_door_148",
+      "weight": 4.1265,
+      "type": "door",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "1_corridor_114",
+      "to": "1_door_120",
+      "weight": 1.8032,
+      "type": "door",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "1_corridor_central",
+      "to": "1_door_149",
+      "weight": 1.3779,
+      "type": "door",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "1_corridor_cloakroom",
+      "to": "1_door_cloakroom",
+      "weight": 1.4098,
+      "type": "door",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "1_west_wc_m",
+      "to": "1_door_wc_m",
+      "weight": 1.1792,
+      "type": "door",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "1_west_wc_w",
+      "to": "1_door_wc_w",
+      "weight": 1.1792,
+      "type": "door",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "1_west_room119",
+      "to": "1_door_119",
+      "weight": 1.2111,
+      "type": "door",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "1_west_room118",
+      "to": "1_door_118",
+      "weight": 1.2506,
+      "type": "door",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "1_west_mid",
+      "to": "1_door_139",
+      "weight": 1.0008,
+      "type": "door",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "1_west_south",
+      "to": "1_door_138",
+      "weight": 1.0416,
+      "type": "door",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "1_west_162",
+      "to": "1_door_162",
+      "weight": 1.0008,
+      "type": "door",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "1_west_exit",
+      "to": "1_door_113",
+      "weight": 1.0841,
+      "type": "door",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "1_hall_north",
+      "to": "1_door_104",
+      "weight": 2.5553,
+      "type": "door",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "1_corridor_central",
+      "to": "1_stairs_central",
+      "weight": 4.4323,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "1_corridor_east",
+      "to": "1_stairs_east",
+      "weight": 4.3604,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "1_corridor_cloakroom",
+      "to": "1_elevator",
+      "weight": 3.8762,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "1_west_mid",
+      "to": "1_stairs_west",
+      "weight": 3.6179,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_corridor_west",
+      "to": "2_corridor_library",
+      "weight": 3.4171,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_corridor_library",
+      "to": "2_corridor_228",
+      "weight": 8.5011,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_corridor_228",
+      "to": "2_corridor_230",
+      "weight": 8.3344,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_corridor_230",
+      "to": "2_corridor_central",
+      "weight": 3.3338,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_corridor_central",
+      "to": "2_corridor_230_assistant",
+      "weight": 2.7504,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_corridor_230_assistant",
+      "to": "2_corridor_209",
+      "weight": 5.7508,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_corridor_209",
+      "to": "2_corridor_east",
+      "weight": 6.3342,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_corridor_east",
+      "to": "2_corridor_stair_east",
+      "weight": 4.1672,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_corridor_west",
+      "to": "2_west_wc_m",
+      "weight": 2.3336,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_west_wc_m",
+      "to": "2_west_wc_w",
+      "weight": 2.667,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_west_wc_w",
+      "to": "2_west_spine_low",
+      "weight": 2.5003,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_west_spine_low",
+      "to": "2_west_spine_202lab",
+      "weight": 7.9177,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_west_spine_202lab",
+      "to": "2_west_spine_225practical",
+      "weight": 3.7505,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_west_spine_225practical",
+      "to": "2_west_spine_225",
+      "weight": 3.7505,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_west_spine_225",
+      "to": "2_west_spine_207",
+      "weight": 2.0836,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_west_spine_low",
+      "to": "2_lower_corridor_center",
+      "weight": 23.5865,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_corridor_west",
+      "to": "2_library_west_approach",
+      "weight": 4.3724,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_library_west_approach",
+      "to": "2_door_214_west",
+      "weight": 3.0004,
+      "type": "door",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_corridor_library",
+      "to": "2_library_east_approach",
+      "weight": 1.6674,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_library_east_approach",
+      "to": "2_door_214_east",
+      "weight": 3.0004,
+      "type": "door",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_corridor_228",
+      "to": "2_door_228",
+      "weight": 1.0843,
+      "type": "door",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_corridor_230",
+      "to": "2_door_230_main",
+      "weight": 1.0843,
+      "type": "door",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_corridor_230_assistant",
+      "to": "2_door_230_assistant",
+      "weight": 1.0843,
+      "type": "door",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_corridor_209",
+      "to": "2_door_209",
+      "weight": 1.0843,
+      "type": "door",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_corridor_211_approach",
+      "to": "2_door_211",
+      "weight": 1.0001,
+      "type": "door",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_corridor_224_approach",
+      "to": "2_door_224",
+      "weight": 1.0001,
+      "type": "door",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_corridor_217_approach",
+      "to": "2_door_217",
+      "weight": 1.0001,
+      "type": "door",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_corridor_229_approach",
+      "to": "2_door_229",
+      "weight": 1.0001,
+      "type": "door",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_corridor_222_approach",
+      "to": "2_door_222",
+      "weight": 1.0001,
+      "type": "door",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_corridor_228",
+      "to": "2_corridor_211_approach",
+      "weight": 2.7087,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_corridor_211_approach",
+      "to": "2_corridor_230",
+      "weight": 5.6257,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_corridor_230_assistant",
+      "to": "2_corridor_224_approach",
+      "weight": 1.5419,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_corridor_224_approach",
+      "to": "2_corridor_217_approach",
+      "weight": 2.5837,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_corridor_217_approach",
+      "to": "2_corridor_229_approach",
+      "weight": 4.6673,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_corridor_229_approach",
+      "to": "2_corridor_222_approach",
+      "weight": 2.5837,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_corridor_222_approach",
+      "to": "2_corridor_east",
+      "weight": 0.7084,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_west_wc_m",
+      "to": "2_door_wc_m",
+      "weight": 1.1765,
+      "type": "door",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_west_wc_w",
+      "to": "2_door_wc_w",
+      "weight": 1.2114,
+      "type": "door",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_west_spine_low",
+      "to": "2_door_213",
+      "weight": 1.562,
+      "type": "door",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_west_spine_low",
+      "to": "2_door_202",
+      "weight": 1.1033,
+      "type": "door",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_west_spine_202lab",
+      "to": "2_door_202_lab_assistant",
+      "weight": 1.0843,
+      "type": "door",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_west_spine_225practical",
+      "to": "2_door_225_practical",
+      "weight": 1.0843,
+      "type": "door",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_west_spine_225",
+      "to": "2_door_225_lab",
+      "weight": 1.1466,
+      "type": "door",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_west_spine_207",
+      "to": "2_door_207",
+      "weight": 0.3334,
+      "type": "door",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_west_stair_approach",
+      "to": "2_stairs_west",
+      "weight": 3.5841,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_west_stair_approach",
+      "to": "2_west_spine_225",
+      "weight": 0.1667,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_corridor_central",
+      "to": "2_stairs_central",
+      "weight": 3.6299,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_lower_corridor_center",
+      "to": "2_stairs_central",
+      "weight": 3.8711,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_corridor_east",
+      "to": "2_elevator",
+      "weight": 3.8105,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_corridor_stair_east",
+      "to": "2_stairs_east",
+      "weight": 3.6565,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "1_stairs_west",
+      "to": "2_stairs_west",
+      "weight": 5.8,
+      "type": "stairs",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "1_stairs_central",
+      "to": "2_stairs_central",
+      "weight": 5.4,
+      "type": "stairs",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "1_stairs_east",
+      "to": "2_stairs_east",
+      "weight": 5.2,
+      "type": "stairs",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "1_elevator",
+      "to": "2_elevator",
+      "weight": 3.6,
+      "type": "elevator",
+      "bidirectional": true,
+      "requiresAccessibility": true
+    }
+  ],
+  "restrictedAreas": [
+    {
+      "id": "restricted_auditorium_2",
+      "floor": 2,
+      "reason": "Серая зона актового зала / смотровой; проход и маршрутизация запрещены.",
+      "reasonEn": "Grey assembly-hall / observation area; routing and traversal are prohibited.",
+      "polygons": [
+        [
+          {
+            "x": 609.788,
+            "y": 94.789
+          },
+          {
+            "x": 766.287,
+            "y": 94.789
+          },
+          {
+            "x": 766.287,
+            "y": 245.104
+          },
+          {
+            "x": 609.788,
+            "y": 245.104
+          }
+        ]
+      ]
+    },
+    {
+      "id": "restricted_service_2a",
+      "floor": 2,
+      "reason": "Закрытая серая область на втором этаже.",
+      "reasonEn": "Restricted grey area on the second floor.",
+      "polygons": [
+        [
+          {
+            "x": 147.79023,
+            "y": 182.20313
+          },
+          {
+            "x": 169.00413,
+            "y": 182.20313
+          },
+          {
+            "x": 169.00413,
+            "y": 244.90193
+          },
+          {
+            "x": 147.79023,
+            "y": 244.90193
+          }
+        ]
+      ]
+    },
+    {
+      "id": "restricted_service_2b",
+      "floor": 2,
+      "reason": "Закрытая серая область западного крыла второго этажа.",
+      "reasonEn": "Restricted grey area in the west wing of the second floor.",
+      "polygons": [
+        [
+          {
+            "x": 0.70713,
+            "y": 280.25913
+          },
+          {
+            "x": 61.52043,
+            "y": 280.25913
+          },
+          {
+            "x": 61.52043,
+            "y": 331.64393
+          },
+          {
+            "x": 0.70713,
+            "y": 331.64393
+          }
+        ]
+      ]
+    }
+  ]
+}
