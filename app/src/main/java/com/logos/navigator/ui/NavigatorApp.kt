@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.weight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Map
@@ -25,8 +24,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
-import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -72,9 +69,7 @@ fun NavigatorApp(viewModel: MainViewModel) {
     val navController = rememberNavController()
     val context = LocalContext.current
     val configuration = LocalConfiguration.current
-    val activity = context.findActivity()
-    val widthClass = activity?.let { runCatching { calculateWindowSizeClass(it).widthSizeClass }.getOrNull() }
-    val isTablet = widthClass?.let { it != WindowWidthSizeClass.Compact } ?: (configuration.screenWidthDp >= 600)
+    val isTablet = configuration.screenWidthDp >= 600
     var splashFinished by remember { mutableStateOf(false) }
     val rootSnackbarHostState = remember { SnackbarHostState() }
     val backStackEntry by navController.currentBackStackEntryAsState()
@@ -375,12 +370,6 @@ private fun navigateTo(navController: NavHostController, route: String) {
 
 private fun navPadding(padding: PaddingValues, route: String?): PaddingValues =
     if (route == ROUTE_ABOUT) PaddingValues(0.dp) else padding
-
-private tailrec fun android.content.Context.findActivity(): android.app.Activity? = when (this) {
-    is android.app.Activity -> this
-    is android.content.ContextWrapper -> baseContext.findActivity()
-    else -> null
-}
 
 private object AppSettingsIntent {
     fun openAppDetails(context: android.content.Context) {

@@ -878,11 +878,17 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val floor = graph.floors.firstOrNull { it.number == position.floor }
         val nearestRoom = _state.value.rooms.asSequence()
             .filter { it.floor == position.floor }
-            .minByOrNull { candidate -> hypot(candidate.x - position.x, candidate.y - position.y) }
-            ?.takeIf { candidate ->
-                val scale = floor?.metersPerUnit ?: DEFAULT_METERS_PER_UNIT
-                hypot(candidate.x - position.x, candidate.y - position.y) * scale <= 3.0
+            .mapNotNull { candidate ->
+                val x = candidate.x ?: return@mapNotNull null
+                val y = candidate.y ?: return@mapNotNull null
+                candidate to hypot(x - position.x.toDouble(), y - position.y.toDouble())
             }
+            .minByOrNull { it.second }
+            ?.takeIf { (_, distanceInSvgUnits) ->
+                val scale = floor?.metersPerUnit ?: DEFAULT_METERS_PER_UNIT
+                distanceInSvgUnits * scale <= 3.0
+            }
+            ?.first
         val timestamp = System.currentTimeMillis()
         val entry = RouteHistoryEntity(
             fromRoomId = nearestRoom?.id,

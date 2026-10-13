@@ -853,6 +853,7 @@ private fun routeActionIcon(action: RouteAction): androidx.compose.ui.graphics.v
     RouteAction.ARRIVAL -> Icons.Default.Flag
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun RoomDetailsSheet(
     room: Room,

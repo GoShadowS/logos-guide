@@ -103,6 +103,7 @@
     <string name="share_location">Поделиться местоположением</string>
     <string name="share_room">Поделиться помещением</string>
     <string name="share_room_text">%1$s: %2$s%3$s, %4$s.</string>
+    <string name="share_room_number_format"> (%1$s)</string>
     <string name="share_location_unknown">Моё местоположение пока не отмечено.</string>
     <string name="share_near_room">Я нахожусь на %1$s, рядом с помещением «%2$s%3$s».</string>
     <string name="share_floor">Я нахожусь на %1$s колледжа.</string>
