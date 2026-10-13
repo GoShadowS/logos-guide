@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Название, авторство и метаданные индивидуального проекта. -->
+    <!-- Название и авторство студенческого проекта. -->
     <string name="app_name">ЛОГОС: Путеводитель</string>
-    <string name="app_tagline">Навигатор по колледжу «Логос»</string>
-    <string name="team_name">Команда ЛОГОС: Путеводитель</string>
-    <string name="project_type">Индивидуальный проект студентов колледжа</string>
-    <string name="project_credits">Разработано студентами колледжа как индивидуальный проект</string>
+    <string name="app_tagline">Студенческий навигатор по колледжу «Логос»</string>
+    <string name="team_name">ЛОГОС: Путеводитель — команда студентов</string>
+    <string name="project_type">Студенческий проект команды колледжа «Логос»</string>
+    <string name="project_credits">Разработано командой студентов Технического колледжа «Логос»</string>
     <string name="college_name">АНО ПО «Технический колледж „Логос“»</string>
 
     <!-- Общие элементы интерфейса. -->
@@ -36,12 +36,12 @@
     <string name="steps_format">≈ %1$d шаг.</string>
 
     <!-- Экран карты и местоположение. -->
-    <string name="map_screen_title">Логос</string>
-    <string name="map_screen_subtitle">Навигатор по колледжу</string>
+    <string name="map_screen_title">Карта колледжа</string>
+    <string name="map_screen_subtitle">Студенческий проект колледжа «Логос»</string>
     <string name="location_gps">GPS</string>
     <string name="location_manual">Вручную</string>
     <string name="location_me_here">Я здесь</string>
-    <string name="location_hint">Нажмите на доступный участок плана, чтобы поставить точку «Я здесь»</string>
+    <string name="location_hint">Нажмите на цель и выберите место на плане, чтобы отметить себя</string>
     <string name="location_hint_other_floor">Точка сейчас на %1$d-м этаже. Нажмите на план, чтобы обновить её.</string>
     <string name="location_on_floor">Маркер GPS на %1$d-м этаже</string>
     <string name="location_accuracy">Точность ±%1$d м</string>
@@ -66,9 +66,15 @@
     <string name="gps_settings_description">Откройте системные настройки приложения, чтобы выдать или отозвать доступ к геопозиции.</string>
     <string name="open_app_settings">Настройки приложения</string>
     <string name="open_location_settings">Настройки геолокации</string>
-    <string name="my_location">Моё местоположение</string>
+    <string name="my_location">Моё место</string>
     <string name="quick_nearest_restroom">Ближайший туалет</string>
     <string name="quick_nearest_stairs">Ближайшая лестница</string>
+    <string name="quick_actions">Быстрые действия</string>
+    <string name="quick_actions_description">Туалет, лестница или отметка места</string>
+    <string name="manual_place_location">Указать или переставить точку</string>
+    <string name="manual_place_hint">Нажмите на карту, в том числе внутри кабинета, чтобы поставить точку</string>
+    <string name="set_location_here">Отметить себя в этом кабинете</string>
+    <string name="manual_location_set">Точка «Я здесь» установлена в выбранном помещении</string>
     <string name="quick_action_location_required">Сначала отметьте своё положение на карте или включите GPS.</string>
     <string name="quick_action_destination_not_found">Не удалось найти доступный маршрут до ближайшего пункта.</string>
     <string name="route_start_in_restricted_area">Точка старта находится в закрытой зоне. Переместите её в доступный коридор.</string>
@@ -118,6 +124,13 @@
     <string name="room_details">Информация о помещении</string>
     <string name="room_not_found">Пункт назначения больше не найден в локальном каталоге.</string>
     <string name="route_to_format">Маршрут до %1$s</string>
+    <string name="route_destination_room">Кабинет %1$s</string>
+    <string name="route_room_floor_detail">%1$s · %2$s</string>
+    <string name="route_card_summary">%1$d мин · %2$s</string>
+    <string name="route_card_location_missing">Сначала отметьте своё место на карте, затем начните маршрут.</string>
+    <string name="route_card_no_path">Путь пока не рассчитан. Проверьте стартовую точку и доступность маршрута.</string>
+    <string name="route_choose_start">Указать точку старта на карте</string>
+    <string name="change_start_location">Изменить точку старта</string>
     <string name="destination_format">Пункт назначения: %1$s</string>
     <string name="route_distance_time">%1$s · около %2$d мин</string>
     <string name="start_route">Проложить маршрут</string>
@@ -147,7 +160,7 @@
     <string name="search_title">Поиск и каталог</string>
     <string name="rooms_count">%1$d помещений в справочнике</string>
     <string name="search_label">Название или номер кабинета</string>
-    <string name="search_hint">Например: каб. 301 или столовая</string>
+    <string name="search_hint">Номер, часть названия или транслитерация: 118, каб 118, kab 118</string>
     <string name="search_clear">Очистить поиск</string>
     <string name="all_categories">Все</string>
     <string name="category_classrooms">Аудитории</string>
@@ -374,7 +387,9 @@
     <!-- Экран «О приложении» и заставка. -->
     <string name="about_title">О приложении</string>
     <string name="about_version">Версия</string>
-    <string name="about_team_label">Разработчик</string>
+    <string name="about_team_label">Команда проекта</string>
+    <string name="about_project_type">Тип проекта</string>
+    <string name="about_project_credits">Разработка</string>
     <string name="about_mode_label">Режим работы</string>
     <string name="about_mode_value">Офлайн — карты и каталог хранятся в приложении</string>
     <string name="about_purpose_label">Назначение</string>
@@ -382,13 +397,13 @@
     <string name="about_project_warning">Маршруты основаны на предоставленных планах. Перед использованием проверьте координаты кабинетов, проходимость, двери и связи между этажами.</string>
     <string name="splash_description">Заставка приложения «ЛОГОС: Путеводитель»</string>
     <string name="splash_title">ЛОГОС: Путеводитель</string>
-    <string name="splash_team">Команда ЛОГОС: Путеводитель</string>
-    <string name="splash_project">Индивидуальный проект студентов колледжа</string>
+    <string name="splash_team">ЛОГОС: Путеводитель — команда студентов</string>
+    <string name="splash_project">Студенческий проект Технического колледжа «Логос»</string>
 
     <!-- Интерактивное обучение: десять шагов. -->
     <string name="onboarding_welcome_title">Добро пожаловать в ЛОГОС: Путеводитель!</string>
     <string name="onboarding_welcome_body">Удобный навигатор по колледжу «Логос».</string>
-    <string name="onboarding_welcome_credit">Разработано командой «Команда ЛОГОС: Путеводитель» как индивидуальный проект.</string>
+    <string name="onboarding_welcome_credit">Создано командой студентов Технического колледжа «Логос» — «ЛОГОС: Путеводитель».</string>
     <string name="onboarding_language_title">Выберите язык</string>
     <string name="onboarding_location_title">Разрешение на геолокацию</string>
     <string name="onboarding_location_body">Для автоматического определения вашего местоположения внутри колледжа приложению требуется доступ к геолокации. Это позволит показывать, где вы находитесь на карте, и строить маршруты автоматически.</string>
@@ -398,17 +413,17 @@
     <string name="onboarding_map_body">Перемещайтесь по плану, увеличивайте нужные участки и открывайте карточки кабинетов.</string>
     <string name="onboarding_map_pan">👆 Один палец — перетаскивание для панорамирования карты.</string>
     <string name="onboarding_map_zoom">🤏 Два пальца — щипок для приближения и отдаления.</string>
-    <string name="onboarding_map_tap">👆 Нажмите на помещение, чтобы открыть его информацию.</string>
+    <string name="onboarding_map_tap">👆 Нажмите на кабинет, чтобы открыть сведения. Чтобы начать изнутри, выберите «Моё место» и нажмите на кабинет.</string>
     <string name="onboarding_map_floors">🔄 Кнопки этажей переключают планы здания.</string>
     <string name="onboarding_modes_title">Два режима определения местоположения</string>
     <string name="onboarding_modes_gps">📡 GPS автоматически определяет положение; возле окон он обычно точнее, чем в глубине здания.</string>
-    <string name="onboarding_modes_manual">👆 В ручном режиме отметьте своё место нажатием на карту — это удобно при слабом сигнале GPS.</string>
+    <string name="onboarding_modes_manual">👆 В ручном режиме нажмите на цель и выберите точку на плане — можно отметить себя и внутри кабинета.</string>
     <string name="onboarding_modes_switch">Переключатель режимов находится на экране карты.</string>
     <string name="onboarding_route_title">Как построить маршрут</string>
     <string name="onboarding_route_step_1">1. Разрешите GPS или отметьте своё положение вручную.</string>
     <string name="onboarding_route_step_2">2. Выберите пункт назначения на карте, через поиск или в избранном.</string>
-    <string name="onboarding_route_step_3">3. Приложение найдёт путь по локальному графу.</string>
-    <string name="onboarding_route_step_4">4. Следуйте подсказкам внизу экрана: направлениям, лестницам и переходам.</string>
+    <string name="onboarding_route_step_3">3. Проверьте предпросмотр маршрута и список шагов.</string>
+    <string name="onboarding_route_step_4">4. Нажмите «Начать маршрут» и следуйте подсвеченным шагам; в ручном режиме доступны «Назад» и «Следующий шаг».</string>
     <string name="onboarding_elevator_title">Использование лифта</string>
     <string name="onboarding_elevator_warning">В колледже «Логос» лифт предназначен только для людей с ограниченными возможностями здоровья. Остальным студентам и преподавателям следует использовать лестницы.</string>
     <string name="onboarding_elevator_question">Нужно ли вам использовать лифт?</string>
@@ -420,7 +435,7 @@
     <string name="onboarding_settings_body">Меняйте тему, язык, цвет маршрута, размер текста и другие параметры. В настройках можно повторно запустить это обучение.</string>
     <string name="onboarding_done_title">Всё готово!</string>
     <string name="onboarding_done_body">Теперь вы знаете основы. Приятного ориентирования в колледже «Логос»!</string>
-    <string name="onboarding_done_signature">С любовью, Команда ЛОГОС: Путеводитель 💙</string>
+    <string name="onboarding_done_signature">С любовью, команда студентов колледжа «Логос» 💙</string>
     <string name="onboarding_back">Назад</string>
     <string name="onboarding_start">Начать пользоваться</string>
     <string name="onboarding_page_format">Шаг %1$d из %2$d</string>
@@ -433,7 +448,9 @@
 
     <!-- Пошаговая навигация. -->
     <string name="step_start">Начните движение от точки старта</string>
-    <string name="step_straight">Идите прямо %1$d метров</string>
+    <string name="step_start_room">Выйдите через дверь из помещения «%1$s»</string>
+    <string name="step_straight">Идите прямо</string>
+    <string name="step_straight_voice">Идите прямо %1$d метров</string>
     <string name="step_turn_left">Поверните налево</string>
     <string name="step_turn_right">Поверните направо</string>
     <string name="step_slight_left">Слегка поверните налево</string>
@@ -447,7 +464,11 @@
     <string name="step_arrival">Вы прибыли в «%1$s»!</string>
     <string name="step_after_format">Затем: %1$s</string>
     <string name="distance_to_turn">до поворота</string>
-    <string name="route_overview">Общее расстояние: %1$s • Время: около %2$d мин • Пройдено: %3$d%%</string>
+    <string name="route_overview">Расстояние: %1$s • Время: около %2$d мин • Пройдено: %3$d%%</string>
+    <string name="start_navigation">Начать маршрут</string>
+    <string name="previous_step">Предыдущий шаг</string>
+    <string name="route_step_count">Шаг %1$d из %2$d</string>
+    <string name="route_preview_hint">Проверьте путь и нажмите «Начать маршрут», когда будете готовы.</string>
     <string name="all_steps">Все шаги</string>
     <string name="next_step">Следующий шаг</string>
     <string name="route_steps_title">Шаги маршрута</string>

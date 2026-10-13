@@ -24,6 +24,7 @@ import com.logos.navigator.data.model.ThemeMode
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 
 private val Context.logosSettingsStore by preferencesDataStore(name = "logos_navigator_settings")
 
@@ -32,6 +33,17 @@ class SettingsDataStore(context: Context) {
     private val store = context.applicationContext.logosSettingsStore
 
     val settingsFlow: Flow<AppSettings> = store.data
+        .onStart {
+            // Переносим только прежнее значение по умолчанию, сохраняя явный выбор пользователя.
+            store.edit { preferences ->
+                if (preferences[ROOM_LABELS_DEFAULT_APPLIED] != true) {
+                    if (preferences[ROOM_LABELS] == null || preferences[ROOM_LABELS] == RoomLabelMode.ON_ZOOM.name) {
+                        preferences[ROOM_LABELS] = RoomLabelMode.NEVER.name
+                    }
+                    preferences[ROOM_LABELS_DEFAULT_APPLIED] = true
+                }
+            }
+        }
         .catch { error ->
             if (error is IOException) emit(androidx.datastore.preferences.core.emptyPreferences())
             else throw error
@@ -87,6 +99,7 @@ class SettingsDataStore(context: Context) {
             val onboardingCompleted = preferences[ONBOARDING_COMPLETED] ?: false
             preferences.clear()
             preferences[ONBOARDING_COMPLETED] = onboardingCompleted
+            preferences[ROOM_LABELS_DEFAULT_APPLIED] = true
         }
     }
 
@@ -115,6 +128,7 @@ class SettingsDataStore(context: Context) {
         internal val ANIMATIONS = booleanPreferencesKey("animations_enabled")
         internal val APP_LANGUAGE = stringPreferencesKey("app_language")
         internal val ROOM_LABELS = stringPreferencesKey("room_label_mode")
+        private val ROOM_LABELS_DEFAULT_APPLIED = booleanPreferencesKey("room_label_default_applied")
         internal val SVG_QUALITY = stringPreferencesKey("svg_render_quality")
         internal val INITIAL_FLOOR = stringPreferencesKey("initial_floor")
         internal val LAST_OPENED_FLOOR = intPreferencesKey("last_opened_floor")
@@ -159,7 +173,7 @@ private fun Preferences.toAppSettings() = AppSettings(
     fontScale = this[SettingsDataStore.FONT_SCALE] ?: 1f,
     animationsEnabled = this[SettingsDataStore.ANIMATIONS] ?: true,
     appLanguage = enumValue(this[SettingsDataStore.APP_LANGUAGE], AppLanguage.SYSTEM),
-    roomLabelMode = enumValue(this[SettingsDataStore.ROOM_LABELS], RoomLabelMode.ON_ZOOM),
+    roomLabelMode = enumValue(this[SettingsDataStore.ROOM_LABELS], RoomLabelMode.NEVER),
     svgRenderQuality = enumValue(this[SettingsDataStore.SVG_QUALITY], SvgRenderQuality.HIGH),
     initialFloor = this[SettingsDataStore.INITIAL_FLOOR] ?: "last",
     lastOpenedFloor = this[SettingsDataStore.LAST_OPENED_FLOOR] ?: 1,

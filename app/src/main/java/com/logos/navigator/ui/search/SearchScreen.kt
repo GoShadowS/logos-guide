@@ -54,7 +54,7 @@ import com.logos.navigator.data.model.Room
 import com.logos.navigator.utils.categoryLabel
 import com.logos.navigator.utils.localizedDescription
 import com.logos.navigator.utils.localizedName
-import com.logos.navigator.utils.searchForms
+import com.logos.navigator.utils.roomSearchScore
 
 private data class CategoryFilter(val id: String, val titleRes: Int)
 
@@ -86,28 +86,39 @@ fun SearchScreen(
         )
     }
     val matchingRooms = remember(rooms, query, category, floorFilter, context) {
-        val normalizedQuery = searchForms(query.trim())
         rooms.asSequence()
             .filter { category == ALL_CATEGORIES || it.category.equals(category, ignoreCase = true) }
             .filter { floorFilter == null || it.floor == floorFilter }
-            .filter { room ->
-                if (normalizedQuery.isEmpty()) return@filter true
-                val searchableValues = sequenceOf(
-                    room.localizedName(context),
-                    room.name,
-                    room.nameEn.orEmpty(),
-                    room.number.orEmpty(),
-                    room.localizedDescription(context).orEmpty(),
-                    room.description.orEmpty(),
-                    room.descriptionEn.orEmpty(),
-                    context.categoryLabel(room.category),
-                    context.getString(R.string.floor_title_format, room.floor),
-                    context.getString(R.string.floor_number_format, room.floor),
-                ) + room.aliasesRu.asSequence() + room.aliasesEn.asSequence()
-                val searchableForms = searchableValues.flatMap { value -> searchForms(value).asSequence() }
-                searchableForms.any { candidate -> normalizedQuery.any { queryForm -> candidate.contains(queryForm) } }
+            .mapNotNull { room ->
+                val searchableValues = buildList {
+                    add(room.localizedName(context))
+                    add(room.name)
+                    add(room.nameEn.orEmpty())
+                    add(room.number.orEmpty())
+                    room.number?.let {
+                        add(context.getString(R.string.cabinet_number_format, it))
+                        add("каб $it")
+                        add("room $it")
+                    }
+                    add(room.localizedDescription(context).orEmpty())
+                    add(room.description.orEmpty())
+                    add(room.descriptionEn.orEmpty())
+                    add(context.categoryLabel(room.category))
+                    add(context.getString(R.string.floor_title_format, room.floor))
+                    add(context.getString(R.string.floor_number_format, room.floor))
+                    addAll(room.aliasesRu)
+                    addAll(room.aliasesEn)
+                }
+                val score = roomSearchScore(query, room.number, searchableValues) ?: return@mapNotNull null
+                room to score
             }
-            .sortedWith(compareBy<Room> { it.floor }.thenBy { it.number.orEmpty().filter(Char::isDigit).toIntOrNull() ?: Int.MAX_VALUE }.thenBy { it.name })
+            .sortedWith(
+                compareByDescending<Pair<Room, Int>> { it.second }
+                    .thenBy { it.first.floor }
+                    .thenBy { it.first.number.orEmpty().filter(Char::isDigit).toIntOrNull() ?: Int.MAX_VALUE }
+                    .thenBy { it.first.name },
+            )
+            .map { it.first }
             .toList()
     }
 

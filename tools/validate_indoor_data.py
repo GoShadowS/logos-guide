@@ -13,6 +13,13 @@ from collections import deque
 from pathlib import Path
 
 NUMBER_RE = re.compile(r"[-+]?(?:\d*\.\d+|\d+\.?\d*)(?:[eE][-+]?\d+)?")
+# Эти зоны являются открытыми проходами либо частью узла перехода, а не закрытой комнатой.
+OPEN_ROUTE_ROLES = {"hall", "entrance", "stairs", "elevator", "restroom", "restricted"}
+# На исходном плане лестничный узел 1 этажа частично совпадает с контуром кабинета 149.
+# Исключение оставлено явным и требует проверки по фактическому плану/на месте.
+KNOWN_ROOM_EDGE_OVERLAPS = {
+    ("room_149", frozenset(("1_corridor_central", "1_stairs_central"))),
+}
 EXPECTED_OFFICIAL_NUMBERS = {
     "104", "113", "114", "115", "118", "119", "120", "126", "138", "139",
     "141", "142", "144", "147", "148", "149", "159", "160", "161",
@@ -46,6 +53,19 @@ def point_in_polygon(x: float, y: float, polygon: list[dict]) -> bool:
                 inside = not inside
         previous = current
     return inside
+
+
+def segment_crosses_polygon(start: dict, end: dict, polygon: list[dict]) -> bool:
+    length = math.hypot(end["x"] - start["x"], end["y"] - start["y"])
+    samples = max(2, math.ceil(length * 4))
+    return any(
+        point_in_polygon(
+            start["x"] + (end["x"] - start["x"]) * step / samples,
+            start["y"] + (end["y"] - start["y"]) * step / samples,
+            polygon,
+        )
+        for step in range(1, samples)
+    )
 
 
 def reachable(start: str, edges: list[dict], node_ids: set[str], include_accessible: bool) -> set[str]:
@@ -198,6 +218,28 @@ def main() -> int:
             if raw_number:
                 official_numbers.update(value for value in re.findall(r"\d+", raw_number) if value in EXPECTED_OFFICIAL_NUMBERS)
             official_numbers.update(value for value in room.get("aliases_ru", []) if value in EXPECTED_OFFICIAL_NUMBERS)
+
+        # Проверяем рёбра коридора по контурам помещений: дверь — отдельный тип ребра,
+        # поэтому обычный проход не должен срезать путь через учебную или служебную комнату.
+        for edge in graph["edges"]:
+            if edge.get("type", "").lower() != "corridor":
+                continue
+            start = node_by_id[edge["from"]]
+            end = node_by_id[edge["to"]]
+            if start["floor"] != end["floor"]:
+                continue
+            edge_nodes = frozenset((start["id"], end["id"]))
+            for room in rooms:
+                if room["floor"] != start["floor"] or room.get("role") in OPEN_ROUTE_ROLES:
+                    continue
+                if (room["id"], edge_nodes) in KNOWN_ROOM_EDGE_OVERLAPS:
+                    continue
+                polygons = list(room.get("polygons", []))
+                if room.get("polygon"):
+                    polygons.append(room["polygon"])
+                for polygon in polygons:
+                    if segment_crosses_polygon(start, end, polygon):
+                        fail(f"Ребро коридора {start['id']}—{end['id']} проходит через помещение {room['id']}")
 
         missing_numbers = EXPECTED_OFFICIAL_NUMBERS - official_numbers
         extra_numbers = official_numbers - EXPECTED_OFFICIAL_NUMBERS

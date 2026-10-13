@@ -971,20 +971,6 @@
       "requiresAccessibility": false
     },
     {
-      "id": "2_lower_corridor_center",
-      "floor": 2,
-      "x": 357.0,
-      "y": 260.0,
-      "name": "Южный коридор",
-      "nameEn": "South corridor",
-      "type": "hallway",
-      "roomId": null,
-      "connectsRoom": null,
-      "stairsGroup": null,
-      "elevatorGroup": null,
-      "requiresAccessibility": false
-    },
-    {
       "id": "2_west_stair_approach",
       "floor": 2,
       "x": 74.0,
@@ -1319,6 +1305,146 @@
       "stairsGroup": null,
       "elevatorGroup": null,
       "requiresAccessibility": false
+    },
+    {
+      "id": "1_corridor_mid_120_230",
+      "floor": 1,
+      "x": 175,
+      "y": 166,
+      "name": "Коридор, 1 этаж — участок между столовой и кабинетом 115",
+      "type": "hallway",
+      "nameEn": "First-floor corridor segment between the cafeteria and room 115",
+      "requiresAccessibility": false
+    },
+    {
+      "id": "1_corridor_mid_278_350",
+      "floor": 1,
+      "x": 313.85,
+      "y": 166,
+      "name": "Коридор, 1 этаж — центральный участок",
+      "type": "hallway",
+      "nameEn": "First-floor corridor, central segment",
+      "requiresAccessibility": false
+    },
+    {
+      "id": "1_corridor_mid_350_425",
+      "floor": 1,
+      "x": 387.35,
+      "y": 166,
+      "name": "Коридор, 1 этаж — участок у учебной части",
+      "type": "hallway",
+      "nameEn": "First-floor corridor segment by the academic office",
+      "requiresAccessibility": false
+    },
+    {
+      "id": "1_corridor_mid_425_515",
+      "floor": 1,
+      "x": 470,
+      "y": 166,
+      "name": "Коридор, 1 этаж — участок у раздевалки",
+      "type": "hallway",
+      "nameEn": "First-floor corridor segment by the cloakroom",
+      "requiresAccessibility": false
+    },
+    {
+      "id": "1_west_spine_mid_287_360",
+      "floor": 1,
+      "x": 74,
+      "y": 323.5,
+      "name": "Западный коридор, 1 этаж — промежуточная точка",
+      "type": "hallway",
+      "nameEn": "West corridor, first floor — intermediate anchor",
+      "requiresAccessibility": false
+    },
+    {
+      "id": "1_west_spine_mid_360_430",
+      "floor": 1,
+      "x": 74,
+      "y": 395,
+      "name": "Западный коридор, 1 этаж — нижний участок",
+      "type": "hallway",
+      "nameEn": "West corridor, first floor — lower segment",
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_corridor_mid_115_217",
+      "floor": 2,
+      "x": 166,
+      "y": 170,
+      "name": "Коридор, 2 этаж — участок у библиотеки",
+      "type": "hallway",
+      "nameEn": "Second-floor corridor segment by the library",
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_corridor_mid_217_317",
+      "floor": 2,
+      "x": 267,
+      "y": 170,
+      "name": "Коридор, 2 этаж — участок между кабинетами 228 и 230",
+      "type": "hallway",
+      "nameEn": "Second-floor corridor between rooms 228 and 230",
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_corridor_mid_390_459",
+      "floor": 2,
+      "x": 424.5,
+      "y": 170,
+      "name": "Коридор, 2 этаж — участок перед кабинетом 209",
+      "type": "hallway",
+      "nameEn": "Second-floor corridor before room 209",
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_corridor_mid_459_535",
+      "floor": 2,
+      "x": 497,
+      "y": 170,
+      "name": "Коридор, 2 этаж — восточный участок",
+      "type": "hallway",
+      "nameEn": "Second-floor corridor, eastern segment",
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_west_spine_mid_260_355",
+      "floor": 2,
+      "x": 74,
+      "y": 307.5,
+      "name": "Западный коридор, 2 этаж — участок у кабинета 202",
+      "type": "hallway",
+      "nameEn": "Second-floor west corridor by room 202",
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_west_spine_mid_355_400",
+      "floor": 2,
+      "x": 74,
+      "y": 377.5,
+      "name": "Западный коридор, 2 этаж — участок у лабораторной 202",
+      "type": "hallway",
+      "nameEn": "Second-floor west corridor by the room 202 lab",
+      "requiresAccessibility": false
+    },
+    {
+      "id": "2_west_spine_mid_400_445",
+      "floor": 2,
+      "x": 74,
+      "y": 422.5,
+      "name": "Западный коридор, 2 этаж — участок у кабинета 225",
+      "type": "hallway",
+      "nameEn": "Second-floor west corridor by room 225",
+      "requiresAccessibility": false
+    },
+    {
+      "id": "1_elevator_approach",
+      "floor": 1,
+      "x": 536.5,
+      "y": 166,
+      "name": "Подход к лифту, 1 этаж",
+      "type": "hallway",
+      "nameEn": "First-floor lift approach",
+      "requiresAccessibility": false
     }
   ],
   "edges": [
@@ -1332,8 +1458,16 @@
     },
     {
       "from": "1_corridor_cafe",
+      "to": "1_corridor_mid_120_230",
+      "weight": 4.5831,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "1_corridor_mid_120_230",
       "to": "1_corridor_115",
-      "weight": 9.1662,
+      "weight": 4.5831,
       "type": "corridor",
       "bidirectional": true,
       "requiresAccessibility": false
@@ -1348,24 +1482,48 @@
     },
     {
       "from": "1_corridor_114",
+      "to": "1_corridor_mid_278_350",
+      "weight": 2.98735,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "1_corridor_mid_278_350",
       "to": "1_corridor_central",
-      "weight": 5.9747,
+      "weight": 2.98735,
       "type": "corridor",
       "bidirectional": true,
       "requiresAccessibility": false
     },
     {
       "from": "1_corridor_central",
+      "to": "1_corridor_mid_350_425",
+      "weight": 3.13735,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "1_corridor_mid_350_425",
       "to": "1_corridor_academic",
-      "weight": 6.2747,
+      "weight": 3.13735,
       "type": "corridor",
       "bidirectional": true,
       "requiresAccessibility": false
     },
     {
       "from": "1_corridor_academic",
+      "to": "1_corridor_mid_425_515",
+      "weight": 3.7498,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "1_corridor_mid_425_515",
       "to": "1_corridor_cloakroom",
-      "weight": 7.4996,
+      "weight": 3.7498,
       "type": "corridor",
       "bidirectional": true,
       "requiresAccessibility": false
@@ -1436,16 +1594,32 @@
     },
     {
       "from": "1_west_room118",
+      "to": "1_west_spine_mid_287_360",
+      "weight": 3.0415,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "1_west_spine_mid_287_360",
       "to": "1_west_mid",
-      "weight": 6.083,
+      "weight": 3.0415,
       "type": "corridor",
       "bidirectional": true,
       "requiresAccessibility": false
     },
     {
       "from": "1_west_mid",
+      "to": "1_west_spine_mid_360_430",
+      "weight": 2.9165,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "1_west_spine_mid_360_430",
       "to": "1_west_south",
-      "weight": 5.833,
+      "weight": 2.9165,
       "type": "corridor",
       "bidirectional": true,
       "requiresAccessibility": false
@@ -1611,22 +1785,6 @@
       "requiresAccessibility": false
     },
     {
-      "from": "1_corridor_east",
-      "to": "1_stairs_east",
-      "weight": 4.3604,
-      "type": "corridor",
-      "bidirectional": true,
-      "requiresAccessibility": false
-    },
-    {
-      "from": "1_corridor_cloakroom",
-      "to": "1_elevator",
-      "weight": 3.8762,
-      "type": "corridor",
-      "bidirectional": true,
-      "requiresAccessibility": false
-    },
-    {
       "from": "1_west_mid",
       "to": "1_stairs_west",
       "weight": 3.6179,
@@ -1644,16 +1802,32 @@
     },
     {
       "from": "2_corridor_library",
+      "to": "2_corridor_mid_115_217",
+      "weight": 4.25055,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_corridor_mid_115_217",
       "to": "2_corridor_228",
-      "weight": 8.5011,
+      "weight": 4.25055,
       "type": "corridor",
       "bidirectional": true,
       "requiresAccessibility": false
     },
     {
       "from": "2_corridor_228",
+      "to": "2_corridor_mid_217_317",
+      "weight": 4.1672,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_corridor_mid_217_317",
       "to": "2_corridor_230",
-      "weight": 8.3344,
+      "weight": 4.1672,
       "type": "corridor",
       "bidirectional": true,
       "requiresAccessibility": false
@@ -1676,16 +1850,32 @@
     },
     {
       "from": "2_corridor_230_assistant",
+      "to": "2_corridor_mid_390_459",
+      "weight": 2.8754,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_corridor_mid_390_459",
       "to": "2_corridor_209",
-      "weight": 5.7508,
+      "weight": 2.8754,
       "type": "corridor",
       "bidirectional": true,
       "requiresAccessibility": false
     },
     {
       "from": "2_corridor_209",
+      "to": "2_corridor_mid_459_535",
+      "weight": 3.1671,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_corridor_mid_459_535",
       "to": "2_corridor_east",
-      "weight": 6.3342,
+      "weight": 3.1671,
       "type": "corridor",
       "bidirectional": true,
       "requiresAccessibility": false
@@ -1724,24 +1914,48 @@
     },
     {
       "from": "2_west_spine_low",
+      "to": "2_west_spine_mid_260_355",
+      "weight": 3.95885,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_west_spine_mid_260_355",
       "to": "2_west_spine_202lab",
-      "weight": 7.9177,
+      "weight": 3.95885,
       "type": "corridor",
       "bidirectional": true,
       "requiresAccessibility": false
     },
     {
       "from": "2_west_spine_202lab",
+      "to": "2_west_spine_mid_355_400",
+      "weight": 1.87525,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_west_spine_mid_355_400",
       "to": "2_west_spine_225practical",
-      "weight": 3.7505,
+      "weight": 1.87525,
       "type": "corridor",
       "bidirectional": true,
       "requiresAccessibility": false
     },
     {
       "from": "2_west_spine_225practical",
+      "to": "2_west_spine_mid_400_445",
+      "weight": 1.87525,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "2_west_spine_mid_400_445",
       "to": "2_west_spine_225",
-      "weight": 3.7505,
+      "weight": 1.87525,
       "type": "corridor",
       "bidirectional": true,
       "requiresAccessibility": false
@@ -1750,14 +1964,6 @@
       "from": "2_west_spine_225",
       "to": "2_west_spine_207",
       "weight": 2.0836,
-      "type": "corridor",
-      "bidirectional": true,
-      "requiresAccessibility": false
-    },
-    {
-      "from": "2_west_spine_low",
-      "to": "2_lower_corridor_center",
-      "weight": 23.5865,
       "type": "corridor",
       "bidirectional": true,
       "requiresAccessibility": false
@@ -2011,14 +2217,6 @@
       "requiresAccessibility": false
     },
     {
-      "from": "2_lower_corridor_center",
-      "to": "2_stairs_central",
-      "weight": 3.8711,
-      "type": "corridor",
-      "bidirectional": true,
-      "requiresAccessibility": false
-    },
-    {
       "from": "2_corridor_east",
       "to": "2_elevator",
       "weight": 3.8105,
@@ -2065,6 +2263,30 @@
       "type": "elevator",
       "bidirectional": true,
       "requiresAccessibility": true
+    },
+    {
+      "from": "1_corridor_cloakroom",
+      "to": "1_elevator_approach",
+      "weight": 1.7916,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "1_elevator_approach",
+      "to": "1_elevator",
+      "weight": 3.4373,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
+    },
+    {
+      "from": "1_hall_north",
+      "to": "1_stairs_east",
+      "weight": 3.6334,
+      "type": "corridor",
+      "bidirectional": true,
+      "requiresAccessibility": false
     }
   ],
   "restrictedAreas": [

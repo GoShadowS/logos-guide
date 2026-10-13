@@ -145,6 +145,7 @@ data class IndoorUiState(
     val selectedRoom: Room? = null,
     val destination: Room? = null,
     val route: List<NavNode>? = null,
+    val isNavigationStarted: Boolean = false,
     val routeSteps: List<RouteInstruction> = emptyList(),
     val currentRouteStepIndex: Int = 0,
     val routeProgress: Float = 0f,
