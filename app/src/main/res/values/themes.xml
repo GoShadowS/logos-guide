@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Тема окна нужна до запуска Compose; цвета и компоненты UI задаются в LogosTheme.kt. -->
-    <style name="Theme.LogosNavigator" parent="android:style/Theme.Material.Light.NoActionBar">
+    <style name="Theme.LogosNavigator" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:fontFamily">sans</item>
         <item name="android:colorAccent">@color/brand_blue</item>
         <item name="android:windowLightStatusBar">true</item>

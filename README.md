@@ -24,7 +24,7 @@ Android-приложение для внутренней навигации АН
 | `maps_and_design/map1lower.svg` | План 1-го этажа | `app/src/main/assets/floors/floor_1.svg` |
 | `maps_and_design/map2lower.svg` | План 2-го этажа | `app/src/main/assets/floors/floor_2.svg` |
 | `maps_and_design/map1lower_cabinet.png`, `map2lower_cabinet.png` | Только справочные растровые исходники | **В APK не включаются** |
-| `maps_and_design/logo.png` | Логотип | `app/src/main/res/drawable-nodpi/logo_college.png` |
+| `maps_and_design/logo.png` | Логотип приложения и адаптивной иконки | `app/src/main/res/drawable-nodpi/logo.png` |
 | `maps_and_design/splash.png` | Заставка | `app/src/main/res/drawable-nodpi/splash_screen.png` |
 
 В `app/src/main/assets/floors/` находятся только `floor_1.svg` и `floor_2.svg`. JSON-файлы лежат рядом с папкой `floors/`: `navigation_graph.json` и `rooms.json`. Их `x/y` — координаты SVG `viewBox`, а не PNG-пиксели и не dp.

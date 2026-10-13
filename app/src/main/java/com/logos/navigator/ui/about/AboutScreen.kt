@@ -60,7 +60,7 @@ fun AboutScreen(onBack: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             Image(
-                painter = painterResource(R.drawable.logo_college),
+                painter = painterResource(R.drawable.logo),
                 contentDescription = stringResource(R.string.splash_description),
                 modifier = Modifier.size(132.dp).clip(CircleShape),
             )

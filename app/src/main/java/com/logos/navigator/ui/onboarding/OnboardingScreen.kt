@@ -260,7 +260,7 @@ private fun OnboardingPage(
     ) {
         if (page == 0) {
             Image(
-                painter = painterResource(R.drawable.logo_college),
+                painter = painterResource(R.drawable.logo),
                 contentDescription = stringResource(R.string.splash_description),
                 modifier = Modifier.size(132.dp).clip(CircleShape),
             )

@@ -98,7 +98,7 @@ app/src/main/assets/navigation_graph.json   # этажи, SVG viewBox, узлы,
 app/src/main/assets/rooms.json              # локальный каталог
 app/src/main/assets/floors/floor_1.svg      # единственная карта 1-го этажа
 app/src/main/assets/floors/floor_2.svg      # единственная карта 2-го этажа
-app/src/main/res/drawable-nodpi/logo_college.png
+app/src/main/res/drawable-nodpi/logo.png
 app/src/main/res/drawable-nodpi/splash_screen.png
 app/src/main/res/drawable/ic_restroom_24.xml # VectorDrawable быстрых действий
 app/src/main/res/drawable/ic_stairs_24.xml   # VectorDrawable быстрых действий
@@ -112,10 +112,10 @@ app/src/main/res/values-en/                  # EN строки
 - `map1lower.svg` → `app/src/main/assets/floors/floor_1.svg`;
 - `map2lower.svg` → `app/src/main/assets/floors/floor_2.svg`;
 - `map1lower_cabinet.png` и `map2lower_cabinet.png` остаются только в `maps_and_design/` как справочные растровые планы; в APK они не копируются и не рендерятся;
-- `logo.png` → `app/src/main/res/drawable-nodpi/logo_college.png`;
+- `maps_and_design/logo.png` → `app/src/main/res/drawable-nodpi/logo.png` (та же PNG используется в иконке приложения, приветственном экране онбординга, шапке карты и разделе «О приложении»);
 - `splash.png` → `app/src/main/res/drawable-nodpi/splash_screen.png`.
 
-Если заменяете SVG-карту, сохраните `.svg`, обновите `mapAsset`, `viewBoxX`, `viewBoxY`, `width` и `height` в `navigation_graph.json`, затем заново проверьте координаты узлов, комнат и GPS-якорей. Для планов текущие viewBox — `0 0 758 552` и `0 0 767 561`. Не экспортируйте план в PNG. Ресурсы в `res` должны быть названы латиницей, строчными буквами, без пробелов; например `logo_college.png`. Пошаговый гайд измерения SVG-координат: [`JSON_DATA_GUIDE.md`](JSON_DATA_GUIDE.md).
+Если заменяете SVG-карту, сохраните `.svg`, обновите `mapAsset`, `viewBoxX`, `viewBoxY`, `width` и `height` в `navigation_graph.json`, затем заново проверьте координаты узлов, комнат и GPS-якорей. Для планов текущие viewBox — `0 0 758 552` и `0 0 767 561`. Не экспортируйте план в PNG. Ресурсы в `res` должны быть названы латиницей, строчными буквами, без пробелов; например `logo.png`. Пошаговый гайд измерения SVG-координат: [`JSON_DATA_GUIDE.md`](JSON_DATA_GUIDE.md).
 
 XML layout в `res/layout` отсутствуют намеренно: пользовательский интерфейс создан с Jetpack Compose. Остальные Android XML — `AndroidManifest.xml`, темы/цвета/строки и адаптивная иконка.
 
