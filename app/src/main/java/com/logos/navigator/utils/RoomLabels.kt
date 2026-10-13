@@ -66,6 +66,45 @@ fun searchForms(value: String): Set<String> {
     }.filter(String::isNotEmpty).toSet()
 }
 
+/** Возвращает релевантность результата либо null, если хотя бы одно слово запроса не совпало. */
+fun roomSearchScore(query: String, roomNumber: String?, searchableValues: Iterable<String>): Int? {
+    val queryTokens = query.trim().split(SEARCH_TOKEN_SPLITTER).filter(String::isNotEmpty)
+    if (queryTokens.isEmpty()) return 0
+
+    val values = searchableValues.filter(String::isNotBlank)
+    val valueForms = values.flatMap(::searchForms).distinct()
+    val numberForms = searchForms(roomNumber.orEmpty())
+    var score = 0
+
+    queryTokens.forEach { token ->
+        val forms = searchForms(token)
+        if (forms.isEmpty()) return null
+        val bestValueMatch = valueForms.maxOfOrNull { candidate ->
+            when {
+                forms.any { it == candidate } -> 120
+                forms.any { candidate.startsWith(it) } -> 90
+                forms.any { candidate.contains(it) } -> 60
+                else -> 0
+            }
+        } ?: 0
+        val bestNumberMatch = numberForms.maxOfOrNull { number ->
+            when {
+                forms.any { it == number } -> 1_000
+                forms.any { number.startsWith(it) } -> 700
+                forms.any { number.contains(it) } -> 450
+                else -> 0
+            }
+        } ?: 0
+        if (bestValueMatch == 0 && bestNumberMatch == 0) return null
+        score += maxOf(bestValueMatch, bestNumberMatch)
+    }
+
+    val compactQueryForms = searchForms(query)
+    if (compactQueryForms.any { queryForm -> valueForms.any { it == queryForm } }) score += 500
+    if (compactQueryForms.any { queryForm -> numberForms.any { it == queryForm } }) score += 1_500
+    return score
+}
+
 /** Нормализует регистр, ё/е, диакритику и пробелы/знаки препинания. */
 fun normalizeSearchText(value: String): String {
     val withoutDiacritics = Normalizer.normalize(value.lowercase(Locale.ROOT).replace('ё', 'е'), Normalizer.Form.NFD)

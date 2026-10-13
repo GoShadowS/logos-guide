@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Individual project name, team and APK metadata. -->
+    <!-- Student project name, team and APK metadata. -->
     <string name="app_name">LOGOS: Guide</string>
-    <string name="app_tagline">Navigation around Logos College</string>
-    <string name="team_name">LOGOS: Guide Team</string>
-    <string name="project_type">College students’ individual project</string>
-    <string name="project_credits">Developed by college students as an individual project</string>
+    <string name="app_tagline">Student-built guide to Logos College</string>
+    <string name="team_name">LOGOS: Guide — a student team</string>
+    <string name="project_type">Student project by a team from Logos College</string>
+    <string name="project_credits">Developed by a team of students from Logos Technical College</string>
     <string name="college_name">Logos Technical College</string>
 
     <!-- Common interface. -->
@@ -36,12 +36,12 @@
     <string name="steps_format">≈ %1$d steps</string>
 
     <!-- Map and location. -->
-    <string name="map_screen_title">Logos</string>
-    <string name="map_screen_subtitle">College guide</string>
+    <string name="map_screen_title">College map</string>
+    <string name="map_screen_subtitle">A student project from Logos College</string>
     <string name="location_gps">GPS</string>
     <string name="location_manual">Manual</string>
     <string name="location_me_here">I’m here</string>
-    <string name="location_hint">Tap an accessible area of the plan to place the “I’m here” marker</string>
+    <string name="location_hint">Tap the target button, then choose your position on the plan</string>
     <string name="location_hint_other_floor">Your position is currently on floor %1$d. Tap the plan to update it.</string>
     <string name="location_on_floor">GPS marker on floor %1$d</string>
     <string name="location_accuracy">Accuracy ±%1$d m</string>
@@ -66,9 +66,15 @@
     <string name="gps_settings_description">Open the app’s system settings to grant or revoke location access.</string>
     <string name="open_app_settings">App settings</string>
     <string name="open_location_settings">Location settings</string>
-    <string name="my_location">My location</string>
+    <string name="my_location">My place</string>
     <string name="quick_nearest_restroom">Nearest restroom</string>
     <string name="quick_nearest_stairs">Nearest stairs</string>
+    <string name="quick_actions">Quick actions</string>
+    <string name="quick_actions_description">Restroom, stairs or set position</string>
+    <string name="manual_place_location">Set or move my position</string>
+    <string name="manual_place_hint">Tap the map, including inside a room, to place your position</string>
+    <string name="set_location_here">Set my position in this room</string>
+    <string name="manual_location_set">Your position is set in this room</string>
     <string name="quick_action_location_required">Mark your position on the map or turn on GPS first.</string>
     <string name="quick_action_destination_not_found">No route to a nearby destination is available.</string>
     <string name="route_start_in_restricted_area">Your start point is inside a restricted area. Move it to an accessible corridor.</string>
@@ -118,6 +124,13 @@
     <string name="room_details">Room information</string>
     <string name="room_not_found">The destination is no longer in the local directory.</string>
     <string name="route_to_format">Route to %1$s</string>
+    <string name="route_destination_room">Room %1$s</string>
+    <string name="route_room_floor_detail">%1$s · %2$s</string>
+    <string name="route_card_summary">%1$d min · %2$s</string>
+    <string name="route_card_location_missing">Mark your position on the map before starting the route.</string>
+    <string name="route_card_no_path">The route is not available yet. Check your starting point and route access.</string>
+    <string name="route_choose_start">Choose a starting point on the map</string>
+    <string name="change_start_location">Change starting point</string>
     <string name="destination_format">Destination: %1$s</string>
     <string name="route_distance_time">%1$s · about %2$d min</string>
     <string name="start_route">Build route</string>
@@ -147,7 +160,7 @@
     <string name="search_title">Search and directory</string>
     <string name="rooms_count">%1$d rooms in directory</string>
     <string name="search_label">Room name or number</string>
-    <string name="search_hint">For example: room 301 or cafeteria</string>
+    <string name="search_hint">Number, part of a name or transliteration: 118, room 118</string>
     <string name="search_clear">Clear search</string>
     <string name="all_categories">All</string>
     <string name="category_classrooms">Classrooms</string>
@@ -374,7 +387,9 @@
     <!-- About screen and splash. -->
     <string name="about_title">About</string>
     <string name="about_version">Version</string>
-    <string name="about_team_label">Developer</string>
+    <string name="about_team_label">Project team</string>
+    <string name="about_project_type">Project type</string>
+    <string name="about_project_credits">Developed by</string>
     <string name="about_mode_label">Operation</string>
     <string name="about_mode_value">Offline — maps and directory are stored in the app</string>
     <string name="about_purpose_label">Purpose</string>
@@ -382,13 +397,13 @@
     <string name="about_project_warning">Routes are based on the supplied plans. Before use, verify room coordinates, passable paths, doors and floor connections in the building.</string>
     <string name="splash_description">LOGOS: Guide splash screen</string>
     <string name="splash_title">LOGOS: Guide</string>
-    <string name="splash_team">LOGOS: Guide Team</string>
-    <string name="splash_project">College students’ individual project</string>
+    <string name="splash_team">LOGOS: Guide — a student team</string>
+    <string name="splash_project">A student project from Logos Technical College</string>
 
     <!-- Ten-step interactive tutorial. -->
     <string name="onboarding_welcome_title">Welcome to LOGOS: Guide!</string>
     <string name="onboarding_welcome_body">A convenient guide to Logos College.</string>
-    <string name="onboarding_welcome_credit">Created by the “LOGOS: Guide Team” as an individual project.</string>
+    <string name="onboarding_welcome_credit">Created by a team of students from Logos Technical College — “LOGOS: Guide”.</string>
     <string name="onboarding_language_title">Choose a language</string>
     <string name="onboarding_location_title">Location permission</string>
     <string name="onboarding_location_body">To automatically estimate your position inside the college, the app needs location access. It lets the map show where you are and builds routes automatically.</string>
@@ -398,17 +413,17 @@
     <string name="onboarding_map_body">Pan the plan, zoom in on an area and open room cards.</string>
     <string name="onboarding_map_pan">👆 One finger — drag to pan the map.</string>
     <string name="onboarding_map_zoom">🤏 Two fingers — pinch to zoom in or out.</string>
-    <string name="onboarding_map_tap">👆 Tap a room to view its information.</string>
+    <string name="onboarding_map_tap">👆 Tap a room for details. To start inside it, choose “My place” and tap the room.</string>
     <string name="onboarding_map_floors">🔄 Floor buttons switch between building plans.</string>
     <string name="onboarding_modes_title">Two location modes</string>
     <string name="onboarding_modes_gps">📡 GPS estimates your position automatically; it usually works better near windows than deep inside the building.</string>
-    <string name="onboarding_modes_manual">👆 In manual mode, tap the map to mark your position — useful when GPS reception is poor indoors.</string>
+    <string name="onboarding_modes_manual">👆 In manual mode, tap the target and choose a point on the plan — you can mark yourself inside a room.</string>
     <string name="onboarding_modes_switch">The mode switch is on the map screen.</string>
     <string name="onboarding_route_title">How to build a route</string>
     <string name="onboarding_route_step_1">1. Allow GPS or mark your position manually.</string>
     <string name="onboarding_route_step_2">2. Choose a destination on the map, in Search or in Favorites.</string>
-    <string name="onboarding_route_step_3">3. The app finds a path using the local navigation graph.</string>
-    <string name="onboarding_route_step_4">4. Follow the instructions at the bottom: directions, stairs and floor transitions.</string>
+    <string name="onboarding_route_step_3">3. Review the route preview and the full list of steps.</string>
+    <string name="onboarding_route_step_4">4. Tap “Start route” and follow the highlighted steps; manual mode has Previous and Next controls.</string>
     <string name="onboarding_elevator_title">Using the elevator</string>
     <string name="onboarding_elevator_warning">At Logos College, the elevator is intended only for people with disabilities. Other students and teachers should use the stairs.</string>
     <string name="onboarding_elevator_question">Do you need to use the elevator?</string>
@@ -420,7 +435,7 @@
     <string name="onboarding_settings_body">Change the theme, language, route color, text size and more. You can restart this tutorial from Settings at any time.</string>
     <string name="onboarding_done_title">All set!</string>
     <string name="onboarding_done_body">You know the basics. Enjoy finding your way around Logos College!</string>
-    <string name="onboarding_done_signature">With love, the LOGOS: Guide Team 💙</string>
+    <string name="onboarding_done_signature">With love, the student team from Logos College 💙</string>
     <string name="onboarding_back">Back</string>
     <string name="onboarding_start">Get started</string>
     <string name="onboarding_page_format">Step %1$d of %2$d</string>
@@ -433,7 +448,9 @@
 
     <!-- Turn-by-turn navigation. -->
     <string name="step_start">Start moving from the starting point</string>
-    <string name="step_straight">Go straight for %1$d metres</string>
+    <string name="step_start_room">Leave “%1$s” through its door</string>
+    <string name="step_straight">Go straight</string>
+    <string name="step_straight_voice">Go straight for %1$d metres</string>
     <string name="step_turn_left">Turn left</string>
     <string name="step_turn_right">Turn right</string>
     <string name="step_slight_left">Slight left</string>
@@ -447,7 +464,11 @@
     <string name="step_arrival">You have arrived at “%1$s”!</string>
     <string name="step_after_format">Then: %1$s</string>
     <string name="distance_to_turn">to turn</string>
-    <string name="route_overview">Total distance: %1$s • Time: about %2$d min • Completed: %3$d%%</string>
+    <string name="route_overview">Distance: %1$s • Time: about %2$d min • Completed: %3$d%%</string>
+    <string name="start_navigation">Start route</string>
+    <string name="previous_step">Previous step</string>
+    <string name="route_step_count">Step %1$d of %2$d</string>
+    <string name="route_preview_hint">Review the route, then tap “Start route” when you are ready.</string>
     <string name="all_steps">All steps</string>
     <string name="next_step">Next step</string>
     <string name="route_steps_title">Route steps</string>

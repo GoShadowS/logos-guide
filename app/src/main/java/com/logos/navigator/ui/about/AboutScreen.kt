@@ -78,6 +78,8 @@ fun AboutScreen(onBack: () -> Unit) {
                 Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(11.dp)) {
                     AboutLine(stringResource(R.string.about_version), BuildConfig.VERSION_NAME)
                     AboutLine(stringResource(R.string.about_team_label), stringResource(R.string.splash_team))
+                    AboutLine(stringResource(R.string.about_project_type), stringResource(R.string.project_type))
+                    AboutLine(stringResource(R.string.about_project_credits), stringResource(R.string.project_credits))
                     AboutLine(stringResource(R.string.about_mode_label), stringResource(R.string.about_mode_value))
                     AboutLine(stringResource(R.string.about_purpose_label), stringResource(R.string.about_purpose_value))
                 }

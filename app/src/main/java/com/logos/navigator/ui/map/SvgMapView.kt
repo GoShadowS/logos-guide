@@ -61,6 +61,7 @@ class SvgMapView @JvmOverloads constructor(
     private var userPosition: MapPoint? = null
     private var accuracyMeters: Float? = null
     private var locationMode: LocationMode = LocationMode.MANUAL
+    private var manualPositionSelectionMode: Boolean = false
     private var route: List<NavNode> = emptyList()
     private var destination: Room? = null
     private var settings: AppSettings = AppSettings()
@@ -80,6 +81,7 @@ class SvgMapView @JvmOverloads constructor(
     private var pendingCenter: MapPoint? = null
 
     var onManualPosition: ((Float, Float) -> Unit)? = null
+    var onManualPositionInRoom: ((Room, Float, Float) -> Unit)? = null
     var onRoomTap: ((Room) -> Unit)? = null
     var onTapCoordinate: ((Double, Double) -> Unit)? = null
 
@@ -128,6 +130,8 @@ class SvgMapView @JvmOverloads constructor(
         onManualPosition: (Float, Float) -> Unit,
         onRoomTap: (Room) -> Unit,
         onTapCoordinate: (Double, Double) -> Unit,
+        manualPositionSelectionMode: Boolean = false,
+        onManualPositionInRoom: (Room, Float, Float) -> Unit = { _, x, y -> onManualPosition(x, y) },
     ) {
         val floorChanged = this.floor?.number != floor?.number
         val geometryChanged = floorChanged || this.rooms != rooms
@@ -141,11 +145,13 @@ class SvgMapView @JvmOverloads constructor(
         this.userPosition = userPosition
         this.accuracyMeters = accuracyMeters
         this.locationMode = locationMode
+        this.manualPositionSelectionMode = manualPositionSelectionMode
         this.route = route.orEmpty()
         this.destination = destination
         this.settings = settings
         this.compassHeadingDegrees = compassHeadingDegrees
         this.onManualPosition = onManualPosition
+        this.onManualPositionInRoom = onManualPositionInRoom
         this.onRoomTap = onRoomTap
         this.onTapCoordinate = onTapCoordinate
         zoom = zoom.coerceIn(settings.minimumZoom, settings.maximumZoom)
@@ -486,8 +492,8 @@ class SvgMapView @JvmOverloads constructor(
             RoomLabelMode.NEVER -> false
         }
         rooms.asSequence().filter { it.floor == floor.number }.forEach { room ->
+            if (!labelsEnabled) return@forEach
             val isTarget = room.id == destination?.id || room.id == selectedRoom?.id
-            if (!labelsEnabled && !isTarget) return@forEach
             val geometry = roomGeometries.firstOrNull { it.room.id == room.id }
             val centerX = room.centerX?.toFloat() ?: room.x?.toFloat() ?: geometry?.bounds?.centerX()
                 ?: return@forEach
@@ -653,8 +659,14 @@ class SvgMapView @JvmOverloads constructor(
                 return true
             }
             val tappedRoom = roomAt(mapPoint)
-            if (tappedRoom != null) onRoomTap?.invoke(tappedRoom)
-            else if (locationMode == LocationMode.MANUAL) onManualPosition?.invoke(mapPoint.x, mapPoint.y)
+            if (locationMode == LocationMode.MANUAL && manualPositionSelectionMode) {
+                if (tappedRoom != null) onManualPositionInRoom?.invoke(tappedRoom, mapPoint.x, mapPoint.y)
+                else onManualPosition?.invoke(mapPoint.x, mapPoint.y)
+            } else if (tappedRoom != null) {
+                onRoomTap?.invoke(tappedRoom)
+            } else if (locationMode == LocationMode.MANUAL) {
+                onManualPosition?.invoke(mapPoint.x, mapPoint.y)
+            }
             invalidate()
             return true
         }

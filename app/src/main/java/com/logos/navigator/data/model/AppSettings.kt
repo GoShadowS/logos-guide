@@ -19,7 +19,7 @@ data class AppSettings(
     val fontScale: Float = 1f,
     val animationsEnabled: Boolean = true,
     val appLanguage: AppLanguage = AppLanguage.SYSTEM,
-    val roomLabelMode: RoomLabelMode = RoomLabelMode.ON_ZOOM,
+    val roomLabelMode: RoomLabelMode = RoomLabelMode.NEVER,
     val svgRenderQuality: SvgRenderQuality = SvgRenderQuality.HIGH,
     /** Число этажа в виде строки или специальное значение "last". */
     val initialFloor: String = "last",

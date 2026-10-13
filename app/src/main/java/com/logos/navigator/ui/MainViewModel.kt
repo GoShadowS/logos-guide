@@ -77,6 +77,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private var gpsTimeoutJob: Job? = null
     private var gpsAttempt = 0
     private var arrivalRoomId: String? = null
+    /** Если ручную точку поставили внутри комнаты, маршрут начинается у её двери. */
+    private var manualStartRoomId: String? = null
     private var lastRouteRecalculationAt = 0L
     private var routeSession = 0L
     private var recordedRouteSession = -1L
@@ -133,6 +135,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         selectedRoom = null,
                         destination = null,
                         route = null,
+                        isNavigationStarted = false,
                         routeSteps = emptyList(),
                         currentRouteStepIndex = 0,
                         routeProgress = 0f,
@@ -228,8 +231,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         _state.update {
             it.copy(
                 destination = room,
-                selectedRoom = room,
+                selectedRoom = null,
                 route = null,
+                isNavigationStarted = false,
                 routeSteps = emptyList(),
                 currentRouteStepIndex = 0,
                 routeProgress = 0f,
@@ -242,10 +246,19 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun setManualPosition(x: Float, y: Float) {
+        updateManualPosition(x, y, startRoom = null)
+    }
+
+    /** Устанавливает старт внутри выбранного помещения и сохраняет его дверь как точку выхода. */
+    fun setManualPositionInRoom(room: Room, x: Float, y: Float) {
+        if (room.floor != _state.value.selectedFloor) selectFloor(room.floor, userSelected = false)
+        updateManualPosition(x, y, startRoom = room)
+    }
+
+    private fun updateManualPosition(x: Float, y: Float, startRoom: Room?) {
         val current = _state.value
         val floor = navigationData?.floors?.firstOrNull { it.number == current.selectedFloor } ?: return
         if (current.locationMode != LocationMode.MANUAL) return
-        lastPositionFloor = floor.number
         val point = MapPoint(
             floor = floor.number,
             x = x.coerceIn(floor.viewBoxX.toFloat(), (floor.viewBoxX + floor.width).toFloat()),
@@ -256,6 +269,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             showMessage(appContext.getString(R.string.route_start_in_restricted_area))
             return
         }
+        manualStartRoomId = startRoom
+            ?.takeIf { it.floor == point.floor && it.routeAvailable }
+            ?.takeIf { room ->
+                (room.doorNodeIds + listOfNotNull(room.doorNodeId, room.nodeId))
+                    .any { doorId -> graph.nodes.any { it.id == doorId && it.floor == point.floor } }
+            }
+            ?.id
+        lastPositionFloor = floor.number
         _state.update {
             it.copy(
                 userPosition = point,
@@ -264,7 +285,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 gpsWarning = null,
             )
         }
-        if (_state.value.settings.automaticRouteOnSelection) current.destination?.let(::buildRoute)
+        current.destination?.let(::buildRoute)
     }
 
     fun setLocationMode(mode: LocationMode) {
@@ -287,6 +308,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         stopRouteSpeech()
+        manualStartRoomId = null
         val current = _state.value
         gpsFloorNumber = when {
             current.locationMode == LocationMode.MANUAL && current.isManualPositionConfirmed -> current.userPosition?.floor
@@ -302,6 +324,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 userPosition = null,
                 isManualPositionConfirmed = false,
                 route = null,
+                isNavigationStarted = false,
                 routeSteps = emptyList(),
                 currentRouteStepIndex = 0,
                 routeProgress = 0f,
@@ -438,7 +461,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
         if (_state.value.settings.automaticRouteOnSelection) {
             _state.value.destination?.let { destination ->
-                if (_state.value.route == null) buildRoute(destination) else updateRouteProgress(point)
+                val latest = _state.value
+                when {
+                    latest.route == null -> buildRoute(destination)
+                    latest.isNavigationStarted -> updateRouteProgress(point)
+                }
             }
         }
         maybeNotifyArrival(point, accuracy)
@@ -500,6 +527,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     destination = null,
                     selectedRoom = room,
                     route = null,
+                    isNavigationStarted = false,
                     routeSteps = emptyList(),
                     currentRouteStepIndex = 0,
                     routeProgress = 0f,
@@ -515,6 +543,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 destination = room,
                 selectedRoom = null,
                 route = null,
+                isNavigationStarted = false,
                 routeSteps = emptyList(),
                 currentRouteStepIndex = 0,
                 routeProgress = 0f,
@@ -583,11 +612,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         clearRoute()
         setLocationMode(LocationMode.MANUAL)
         val startRoom = fromRoomId?.let { id -> _state.value.rooms.firstOrNull { it.id == id } }
-        val startX = startRoom?.x
-        val startY = startRoom?.y
+        val startX = startRoom?.centerX ?: startRoom?.x
+        val startY = startRoom?.centerY ?: startRoom?.y
         if (startRoom != null && startX != null && startY != null) {
             selectFloor(startRoom.floor, userSelected = false)
-            setManualPosition(startX.toFloat(), startY.toFloat())
+            setManualPositionInRoom(startRoom, startX.toFloat(), startY.toFloat())
         }
         navigateTo(destination)
     }
@@ -614,11 +643,22 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             showMessage(appContext.getString(R.string.room_route_unavailable, room.localizedName(appContext)))
             return
         }
-        val start = AStarPathfinder.nearestNode(graph, position.floor, position.x.toDouble(), position.y.toDouble())
-        if (start == null) {
+        val selectedStartRoom = manualStartRoomId
+            ?.let { id -> _state.value.rooms.firstOrNull { it.id == id && it.floor == position.floor } }
+        val startRoomDoorIds = selectedStartRoom?.let { startRoom ->
+            (startRoom.doorNodeIds + listOfNotNull(startRoom.doorNodeId, startRoom.nodeId)).distinct()
+        }.orEmpty()
+        val roomDoorNodes = graph.nodes.filter { node ->
+            node.floor == position.floor && node.id in startRoomDoorIds && node.type.equals("door", ignoreCase = true)
+        }
+        val startCandidates = roomDoorNodes.ifEmpty {
+            listOfNotNull(AStarPathfinder.nearestNode(graph, position.floor, position.x.toDouble(), position.y.toDouble()))
+        }
+        if (startCandidates.isEmpty()) {
             _state.update {
                 it.copy(
                     route = null,
+                    isNavigationStarted = false,
                     routeSteps = emptyList(),
                     currentRouteStepIndex = 0,
                     routeProgress = 0f,
@@ -629,17 +669,27 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
             return
         }
-        val route = AStarPathfinder.findPath(
-            graph,
-            start.id,
-            goalId,
-            _state.value.settings.routePreference,
-            useElevator = _state.value.settings.useElevator,
-        )
-        if (route == null) {
+        val metersPerUnit = graph.floors.firstOrNull { it.number == position.floor }?.metersPerUnit
+            ?: DEFAULT_METERS_PER_UNIT
+        val routeCandidates = startCandidates.mapNotNull { startNode ->
+            val candidatePath = AStarPathfinder.findPath(
+                graph,
+                startNode.id,
+                goalId,
+                _state.value.settings.routePreference,
+                useElevator = _state.value.settings.useElevator,
+            ) ?: return@mapNotNull null
+            val distanceToDoor = hypot(startNode.x - position.x, startNode.y - position.y) * metersPerUnit
+            Triple(startNode, candidatePath, graphPathCost(graph, candidatePath) + distanceToDoor)
+        }
+        val selectedRoute = routeCandidates.minByOrNull { it.third }
+        val start = selectedRoute?.first
+        val route = selectedRoute?.second
+        if (start == null || route == null) {
             _state.update {
                 it.copy(
                     route = null,
+                    isNavigationStarted = false,
                     routeSteps = emptyList(),
                     currentRouteStepIndex = 0,
                     routeProgress = 0f,
@@ -653,12 +703,23 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val distance = calculateRouteDistance(graph, route, position, room)
         val speedMetersPerMinute = _state.value.settings.walkingSpeedKmh * 1_000.0 / 60.0
         val minutes = ceil(distance / speedMetersPerMinute).toInt().coerceAtLeast(1)
-        val routeSteps = RouteStepGenerator.generate(
+        val generatedSteps = RouteStepGenerator.generate(
             graph = graph,
             path = route,
             destinationName = room.localizedName(appContext),
             totalDistanceMeters = distance,
         )
+        val routeSteps = if (selectedStartRoom != null && start.id in roomDoorNodes.map(NavNode::id)) {
+            val distanceToDoor = hypot(start.x - position.x, start.y - position.y) * metersPerUnit
+            generatedSteps.mapIndexed { index, instruction ->
+                if (index == 0 && instruction.action == RouteAction.START) {
+                    instruction.copy(
+                        destinationName = selectedStartRoom.localizedName(appContext),
+                        distanceMeters = distanceToDoor,
+                    )
+                } else instruction
+            }
+        } else generatedSteps
         _state.update {
             it.copy(
                 destination = room,
@@ -672,9 +733,31 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 message = null,
             )
         }
-        recordRouteHistory(room, position, distance, minutes)
-        writeDebugLog("Route built for destination ${room.id}; units=${route.size}; distanceMeters=${distance.toInt()}")
-        announceRoute(room, distance, minutes)
+        writeDebugLog("Route preview built for destination ${room.id}; units=${route.size}; distanceMeters=${distance.toInt()}")
+    }
+
+    /** Начинает пошаговое ведение только после явного подтверждения пользователя. */
+    fun startNavigation() {
+        val destination = _state.value.destination ?: return
+        val position = _state.value.userPosition
+        if (position == null) {
+            showMessage(appContext.getString(R.string.manual_start_hint))
+            return
+        }
+        if (_state.value.isNavigationStarted) return
+        // Для GPS предпросмотр мог устареть, поэтому перед стартом строим путь от свежей точки.
+        buildRoute(destination)
+        val current = _state.value
+        if (current.route == null) return
+        _state.update { it.copy(isNavigationStarted = true) }
+        recordRouteHistory(
+            room = destination,
+            position = position,
+            distanceMeters = current.routeDistanceMeters ?: 0.0,
+            minutes = current.routeMinutes ?: 1,
+        )
+        announceRoute(destination, current.routeDistanceMeters ?: 0.0, current.routeMinutes ?: 1)
+        writeDebugLog("Navigation started for destination ${destination.id}")
     }
 
     private fun announceRoute(room: Room, distanceMeters: Double, minutes: Int) {
@@ -703,8 +786,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         if (instruction == null) return appContext.getString(R.string.route_no_steps)
         val floor = instruction.targetFloor ?: _state.value.destination?.floor ?: _state.value.selectedFloor
         return when (instruction.action) {
-            RouteAction.START -> appContext.getString(R.string.step_start)
-            RouteAction.STRAIGHT -> appContext.getString(R.string.step_straight, instruction.distanceMeters.toInt().coerceAtLeast(1))
+            RouteAction.START -> instruction.destinationName?.let { appContext.getString(R.string.step_start_room, it) }
+                ?: appContext.getString(R.string.step_start)
+            RouteAction.STRAIGHT -> appContext.getString(R.string.step_straight_voice, instruction.distanceMeters.toInt().coerceAtLeast(1))
             RouteAction.TURN_LEFT -> appContext.getString(R.string.step_turn_left)
             RouteAction.TURN_RIGHT -> appContext.getString(R.string.step_turn_right)
             RouteAction.SLIGHT_LEFT -> appContext.getString(R.string.step_slight_left)
@@ -729,7 +813,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     /** В ручном режиме пользователь сам отмечает выполнение текущей подсказки. */
     fun advanceRouteStep() {
         val current = _state.value
-        if (current.locationMode != LocationMode.MANUAL || current.routeSteps.isEmpty()) return
+        if (!current.isNavigationStarted || current.locationMode != LocationMode.MANUAL || current.routeSteps.isEmpty()) return
         val nextIndex = (current.currentRouteStepIndex + 1).coerceAtMost(current.routeSteps.lastIndex)
         if (nextIndex == current.currentRouteStepIndex) return
         val step = current.routeSteps[nextIndex]
@@ -742,9 +826,26 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         announceCurrentRouteStep()
     }
 
+    /** Возвращает ручное пошаговое ведение к предыдущей подсказке. */
+    fun previousRouteStep() {
+        val current = _state.value
+        if (!current.isNavigationStarted || current.locationMode != LocationMode.MANUAL || current.routeSteps.isEmpty()) return
+        val previousIndex = (current.currentRouteStepIndex - 1).coerceAtLeast(0)
+        if (previousIndex == current.currentRouteStepIndex) return
+        val step = current.routeSteps[previousIndex]
+        _state.update {
+            it.copy(
+                currentRouteStepIndex = previousIndex,
+                routeProgress = step.progress.coerceIn(0f, 1f),
+            )
+        }
+        announceCurrentRouteStep()
+    }
+
     /** Сопоставляет GPS-точку с ближайшим сегментом пути; порог отклонения задан в метрах. */
     private fun updateRouteProgress(point: MapPoint) {
         val current = _state.value
+        if (!current.isNavigationStarted) return
         val path = current.route ?: return
         val destination = current.destination ?: return
         val graph = navigationData ?: return
@@ -1035,6 +1136,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         _state.update {
             it.copy(
                 route = null,
+                isNavigationStarted = false,
                 routeSteps = emptyList(),
                 currentRouteStepIndex = 0,
                 routeProgress = 0f,
