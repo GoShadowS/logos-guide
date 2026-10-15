@@ -16,6 +16,7 @@ class SvgRenderProfileTest {
         assertTrue(medium.maximumBitmapPixels < high.maximumBitmapPixels)
         assertTrue(low.oversampling < medium.oversampling)
         assertTrue(medium.oversampling < high.oversampling)
+        assertEquals(2f, high.oversampling)
     }
 
     @Test
