@@ -773,6 +773,7 @@ private fun RouteBottomSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
+        scrimColor = Color.Transparent,
     ) {
         Column(
             modifier = Modifier.fillMaxWidth().fillMaxHeight(0.78f),
@@ -1072,7 +1073,10 @@ private fun RoomDetailsSheet(
     } else {
         stringResource(R.string.room_number_floor_category, cabinetLabel, floorLabel, roomCategory)
     }
-    ModalBottomSheet(onDismissRequest = onDismiss) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        scrimColor = Color.Transparent,
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
