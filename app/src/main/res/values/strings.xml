@@ -68,7 +68,9 @@
     <string name="quick_nearest_stairs">Ближайшая лестница</string>
     <string name="quick_actions">Быстрые действия</string>
     <string name="quick_actions_description">Туалет, лестница или отметка места</string>
-    <string name="manual_place_location">Указать или переставить точку</string>
+    <string name="manual_place_location">Указать место</string>
+    <string name="manual_move_location">Переместить точку</string>
+    <string name="cancel_manual_placement">Отменить</string>
     <string name="manual_place_hint">Нажмите на карту, в том числе внутри кабинета, чтобы поставить точку</string>
     <string name="set_location_here">Отметить себя в этом кабинете</string>
     <string name="manual_location_set">Точка «Я здесь» установлена в выбранном помещении</string>
@@ -146,7 +148,6 @@
     <string name="favorite_star_add">Добавить в избранное</string>
     <string name="favorite_star_remove">Убрать из избранного</string>
     <string name="room_number_floor_category">%1$s · %2$s · %3$s</string>
-    <string name="room_label_always">Подписи кабинетов: всегда</string>
 
     <!-- Карточка помещения. -->
     <string name="room_floor_category">%1$s · %2$s · %3$s</string>
@@ -289,12 +290,9 @@
     <string name="accent_purple">Фиолетовый</string>
     <string name="accent_red">Красный</string>
     <string name="settings_text_size">Размер текста · %1$d%%</string>
+    <string name="settings_text_preview">Пример текста</string>
     <string name="settings_animations">Анимации</string>
     <string name="settings_animations_description">Плавное выделение маршрута и переходы</string>
-    <string name="settings_room_labels">Подписи помещений</string>
-    <string name="labels_always">Всегда</string>
-    <string name="labels_on_zoom">При увеличении</string>
-    <string name="labels_never">Скрыть</string>
     <string name="settings_initial_floor">Начальный этаж</string>
     <string name="settings_last_floor">Последний открытый</string>
     <string name="settings_max_zoom">Максимальный масштаб · %1$.1f×</string>

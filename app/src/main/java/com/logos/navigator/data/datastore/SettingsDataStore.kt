@@ -14,7 +14,6 @@ import com.logos.navigator.data.model.AppLanguage
 import com.logos.navigator.data.model.DistanceUnit
 import com.logos.navigator.data.model.LocationAccuracyMode
 import com.logos.navigator.data.model.LocationMode
-import com.logos.navigator.data.model.RoomLabelMode
 import com.logos.navigator.data.model.RouteLineStyle
 import com.logos.navigator.data.model.RoutePreference
 import com.logos.navigator.data.model.StartupLocationMode
@@ -34,13 +33,11 @@ class SettingsDataStore(context: Context) {
 
     val settingsFlow: Flow<AppSettings> = store.data
         .onStart {
-            // Переносим только прежнее значение по умолчанию, сохраняя явный выбор пользователя.
+            // Удаляем сохранённые ключи прежней функции динамических подписей.
             store.edit { preferences ->
-                if (preferences[ROOM_LABELS_DEFAULT_APPLIED] != true) {
-                    if (preferences[ROOM_LABELS] == null || preferences[ROOM_LABELS] == RoomLabelMode.ON_ZOOM.name) {
-                        preferences[ROOM_LABELS] = RoomLabelMode.NEVER.name
-                    }
-                    preferences[ROOM_LABELS_DEFAULT_APPLIED] = true
+                if (preferences[LEGACY_ROOM_LABELS] != null) preferences.remove(LEGACY_ROOM_LABELS)
+                if (preferences[LEGACY_ROOM_LABELS_DEFAULT_APPLIED] != null) {
+                    preferences.remove(LEGACY_ROOM_LABELS_DEFAULT_APPLIED)
                 }
             }
         }
@@ -61,7 +58,6 @@ class SettingsDataStore(context: Context) {
     suspend fun setAccentColor(value: Int) = update { it.copy(accentColorArgb = value) }
     suspend fun setFontScale(value: Float) = update { it.copy(fontScale = value) }
     suspend fun setAnimationsEnabled(value: Boolean) = update { it.copy(animationsEnabled = value) }
-    suspend fun setRoomLabelMode(value: RoomLabelMode) = update { it.copy(roomLabelMode = value) }
     suspend fun setSvgRenderQuality(value: SvgRenderQuality) = update { it.copy(svgRenderQuality = value) }
     suspend fun setInitialFloor(value: String) = update { it.copy(initialFloor = value) }
     suspend fun setLastOpenedFloor(value: Int) = update { it.copy(lastOpenedFloor = value) }
@@ -99,7 +95,6 @@ class SettingsDataStore(context: Context) {
             val onboardingCompleted = preferences[ONBOARDING_COMPLETED] ?: false
             preferences.clear()
             preferences[ONBOARDING_COMPLETED] = onboardingCompleted
-            preferences[ROOM_LABELS_DEFAULT_APPLIED] = true
         }
     }
 
@@ -127,8 +122,8 @@ class SettingsDataStore(context: Context) {
         internal val FONT_SCALE = floatPreferencesKey("font_scale")
         internal val ANIMATIONS = booleanPreferencesKey("animations_enabled")
         internal val APP_LANGUAGE = stringPreferencesKey("app_language")
-        internal val ROOM_LABELS = stringPreferencesKey("room_label_mode")
-        private val ROOM_LABELS_DEFAULT_APPLIED = booleanPreferencesKey("room_label_default_applied")
+        private val LEGACY_ROOM_LABELS = stringPreferencesKey("room_label_mode")
+        private val LEGACY_ROOM_LABELS_DEFAULT_APPLIED = booleanPreferencesKey("room_label_default_applied")
         internal val SVG_QUALITY = stringPreferencesKey("svg_render_quality")
         internal val INITIAL_FLOOR = stringPreferencesKey("initial_floor")
         internal val LAST_OPENED_FLOOR = intPreferencesKey("last_opened_floor")
@@ -173,7 +168,6 @@ private fun Preferences.toAppSettings() = AppSettings(
     fontScale = this[SettingsDataStore.FONT_SCALE] ?: 1f,
     animationsEnabled = this[SettingsDataStore.ANIMATIONS] ?: true,
     appLanguage = enumValue(this[SettingsDataStore.APP_LANGUAGE], AppLanguage.SYSTEM),
-    roomLabelMode = enumValue(this[SettingsDataStore.ROOM_LABELS], RoomLabelMode.NEVER),
     svgRenderQuality = enumValue(this[SettingsDataStore.SVG_QUALITY], SvgRenderQuality.HIGH),
     initialFloor = this[SettingsDataStore.INITIAL_FLOOR] ?: "last",
     lastOpenedFloor = this[SettingsDataStore.LAST_OPENED_FLOOR] ?: 1,
@@ -217,7 +211,6 @@ private fun AppSettings.writeTo(preferences: androidx.datastore.preferences.core
     preferences[SettingsDataStore.FONT_SCALE] = fontScale
     preferences[SettingsDataStore.ANIMATIONS] = animationsEnabled
     preferences[SettingsDataStore.APP_LANGUAGE] = appLanguage.name
-    preferences[SettingsDataStore.ROOM_LABELS] = roomLabelMode.name
     preferences[SettingsDataStore.SVG_QUALITY] = svgRenderQuality.name
     preferences[SettingsDataStore.INITIAL_FLOOR] = initialFloor
     preferences[SettingsDataStore.LAST_OPENED_FLOOR] = lastOpenedFloor

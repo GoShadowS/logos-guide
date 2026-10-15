@@ -2,7 +2,6 @@ package com.logos.navigator.data.model
 
 /** Режим выбора цветовой схемы приложения. */
 enum class ThemeMode { SYSTEM, LIGHT, DARK }
-enum class RoomLabelMode { ALWAYS, ON_ZOOM, NEVER }
 enum class SvgRenderQuality { LOW, MEDIUM, HIGH }
 enum class RouteLineStyle { SOLID, DASHED, ANIMATED }
 enum class StartupLocationMode { GPS, MANUAL, LAST }
@@ -19,7 +18,6 @@ data class AppSettings(
     val fontScale: Float = 1f,
     val animationsEnabled: Boolean = true,
     val appLanguage: AppLanguage = AppLanguage.SYSTEM,
-    val roomLabelMode: RoomLabelMode = RoomLabelMode.NEVER,
     val svgRenderQuality: SvgRenderQuality = SvgRenderQuality.HIGH,
     /** Число этажа в виде строки или специальное значение "last". */
     val initialFloor: String = "last",

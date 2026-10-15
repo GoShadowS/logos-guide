@@ -1188,9 +1188,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun goToMyLocation() {
-        val position = _state.value.userPosition
-        if (position == null) showMessage(appContext.getString(R.string.manual_position_required))
-        else if (position.floor != _state.value.selectedFloor) {
+        val current = _state.value
+        val position = current.userPosition
+        if (position == null) {
+            if (current.locationMode == LocationMode.GPS) {
+                if (current.isGpsActive) showMessage(appContext.getString(R.string.gps_determining))
+                else setLocationMode(LocationMode.GPS)
+            } else {
+                showMessage(appContext.getString(R.string.manual_position_required))
+            }
+        } else if (position.floor != current.selectedFloor) {
             showMessage(appContext.getString(R.string.location_on_other_floor, position.floor))
         }
     }

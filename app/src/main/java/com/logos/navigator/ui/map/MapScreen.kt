@@ -332,14 +332,26 @@ fun MapScreen(
                             selectedMode = state.locationMode,
                             onSelectGps = {
                                 isPlacingManualPosition = false
+                                if (state.destination != null) isRouteSheetVisible = true
                                 if (state.locationMode == LocationMode.GPS) viewModel.setLocationMode(LocationMode.MANUAL)
                                 else requestGpsPermissionOrStart()
                             },
                             onSelectManual = {
                                 isPlacingManualPosition = false
+                                if (state.destination != null) isRouteSheetVisible = true
                                 viewModel.setLocationMode(LocationMode.MANUAL)
                             },
                         )
+                        if (state.locationMode == LocationMode.MANUAL && state.userPosition != null && !isPlacingManualPosition) {
+                            AssistChip(
+                                onClick = {
+                                    isPlacingManualPosition = true
+                                    viewModel.showMessage(context.getString(R.string.manual_place_hint))
+                                },
+                                leadingIcon = { Icon(Icons.Default.MyLocation, contentDescription = null) },
+                                label = { Text(stringResource(R.string.manual_move_location)) },
+                            )
+                        }
                         if (state.locationMode == LocationMode.GPS && !gpsProviderEnabled) {
                             GpsProviderWarning(
                                 onOpenSettings = {
@@ -478,36 +490,60 @@ fun MapScreen(
                         }
                     }
 
+                    val transitionHint = viewModel.transitionHint(state.selectedFloor)
                     ExtendedFloatingActionButton(
                         onClick = {
-                            if (state.locationMode == LocationMode.MANUAL) {
-                                if (state.destination != null && !isRouteSheetVisible && !isPlacingManualPosition) {
-                                    isRouteSheetVisible = true
-                                } else {
-                                    isPlacingManualPosition = !isPlacingManualPosition
-                                    if (isPlacingManualPosition) viewModel.showMessage(context.getString(R.string.manual_place_hint))
+                            when {
+                                state.locationMode == LocationMode.MANUAL && isPlacingManualPosition -> {
+                                    isPlacingManualPosition = false
+                                    if (state.destination != null) isRouteSheetVisible = true
                                 }
-                            } else {
-                                val point = state.userPosition
-                                if (point == null) viewModel.goToMyLocation()
-                                else if (point.floor != state.selectedFloor) {
-                                    pendingCameraCenter = point
-                                    viewModel.selectFloor(point.floor)
-                                } else mapView?.centerOn(point)
+                                state.locationMode == LocationMode.MANUAL && state.userPosition == null -> {
+                                    isPlacingManualPosition = true
+                                    viewModel.showMessage(context.getString(R.string.manual_place_hint))
+                                }
+                                else -> {
+                                    val point = state.userPosition
+                                    if (point == null) viewModel.goToMyLocation()
+                                    else if (point.floor != state.selectedFloor) {
+                                        pendingCameraCenter = point
+                                        viewModel.selectFloor(point.floor)
+                                    } else mapView?.centerOn(point)
+                                }
                             }
                         },
-                        icon = { Icon(Icons.Default.MyLocation, contentDescription = null) },
+                        icon = {
+                            Icon(
+                                if (isPlacingManualPosition) Icons.Default.Close else Icons.Default.MyLocation,
+                                contentDescription = null,
+                            )
+                        },
                         text = {
                             Text(
                                 stringResource(
-                                    if (isPlacingManualPosition) R.string.manual_place_location else R.string.my_location,
+                                    when {
+                                        isPlacingManualPosition -> R.string.cancel_manual_placement
+                                        state.locationMode == LocationMode.MANUAL && state.userPosition == null -> R.string.manual_place_location
+                                        else -> R.string.my_location
+                                    },
                                 ),
                             )
                         },
-                        modifier = Modifier.align(Alignment.TopEnd).padding(12.dp),
+                        modifier = Modifier.align(Alignment.BottomEnd).padding(
+                            end = 16.dp,
+                            bottom = if (transitionHint != null) 148.dp else 16.dp,
+                        ),
+                        containerColor = if (isPlacingManualPosition) {
+                            MaterialTheme.colorScheme.secondaryContainer
+                        } else {
+                            MaterialTheme.colorScheme.primary
+                        },
+                        contentColor = if (isPlacingManualPosition) {
+                            MaterialTheme.colorScheme.onSecondaryContainer
+                        } else {
+                            MaterialTheme.colorScheme.onPrimary
+                        },
                     )
-
-                    val transitionHint = viewModel.transitionHint(state.selectedFloor)
                     if (transitionHint != null) {
                         Card(
                             modifier = Modifier
