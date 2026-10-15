@@ -1,5 +1,7 @@
 package com.logos.navigator.utils
 
+import com.logos.navigator.data.model.Room
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -56,5 +58,51 @@ class RoomLabelsTest {
         )
 
         assertNotNull(score)
+    }
+
+    @Test
+    fun roomNumberLabelsPreserveEveryMergedCabinetNumber() {
+        val room = Room(
+            id = "room_education_department",
+            name = "Учебная часть",
+            number = "141, 142, 147, 159, 160",
+            floor = 1,
+            category = "administrative",
+        )
+
+        assertEquals(listOf("141", "142", "147", "159", "160"), room.numberLabels())
+    }
+
+    @Test
+    fun matchingNumberLabelKeepsTheEnteredMergedRoomNumberRelevant() {
+        val room = Room(
+            id = "room_education_department",
+            name = "Учебная часть",
+            nameEn = "Academic Office",
+            number = "141, 142, 147, 159, 160",
+            floor = 1,
+            category = "administrative",
+        )
+
+        assertEquals("142", room.matchingNumberLabel("142"))
+        assertEquals("142", room.matchingNumberLabel("кабинет 142"))
+        assertEquals("141", room.matchingNumberLabel("14"))
+        assertNull(room.matchingNumberLabel("бухгалтерия"))
+    }
+
+    @Test
+    fun mergedAcademicOfficeMatchesEachCabinetNumber() {
+        val number = "141, 142, 147, 159, 160"
+        val searchableValues = listOf(
+            "Учебная часть",
+            "Academic Office",
+            "Каб. 141, 142, 147, 159, 160",
+            "Room 141, 142, 147, 159, 160",
+        )
+
+        listOf("141", "142", "147", "159", "160").forEach { cabinetNumber ->
+            assertNotNull(roomSearchScore(cabinetNumber, number, searchableValues))
+        }
+        assertNotNull(roomSearchScore("kab 142", number, searchableValues))
     }
 }

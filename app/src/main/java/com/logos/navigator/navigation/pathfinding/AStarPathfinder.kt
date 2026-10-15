@@ -27,21 +27,7 @@ object AStarPathfinder {
         val goal = nodesById[goalId] ?: return null
         if (startId == goalId) return listOf(start)
 
-        val accessibleFloorPairs = graph.edges.mapNotNull { edge ->
-            val from = nodesById[edge.from] ?: return@mapNotNull null
-            val to = nodesById[edge.to] ?: return@mapNotNull null
-            val isAccessibleTransition = edge.type.equals("elevator", ignoreCase = true) || edge.requiresAccessibility == true
-            if (isAccessibleTransition && from.floor != to.floor) setOf(from.floor, to.floor) else null
-        }.toSet()
-        val validEdges = graph.edges.filter { edge ->
-            val from = nodesById[edge.from]
-            val to = nodesById[edge.to]
-            val isElevatorEdge = edge.type.equals("elevator", ignoreCase = true) || edge.requiresAccessibility == true
-            val elevatorReplacesStairs = useElevator && edge.type.equals("stairs", ignoreCase = true) &&
-                from != null && to != null && from.floor != to.floor && setOf(from.floor, to.floor) in accessibleFloorPairs
-            (useElevator || !isElevatorEdge) && !elevatorReplacesStairs && edge.weight.isFinite() && edge.weight > 0.0 &&
-                edge.from != edge.to && edge.from in nodesById && edge.to in nodesById
-        }
+        val validEdges = validEdges(graph, nodesById, useElevator)
         val adjacency = HashMap<String, MutableList<Neighbour>>(graph.nodes.size)
         validEdges.forEach { edge ->
             adjacency.getOrPut(edge.from) { mutableListOf() }.add(Neighbour(edge.to, edge))
@@ -88,12 +74,60 @@ object AStarPathfinder {
         return null
     }
 
+    /** Стоимость уже найденного пути с теми же ограничениями и предпочтениями, что применяет A*. */
+    fun pathCost(
+        graph: NavigationData,
+        path: List<NavNode>,
+        preference: RoutePreference = RoutePreference.SHORTEST,
+        useElevator: Boolean = false,
+    ): Double {
+        if (path.size < 2) return 0.0
+        val nodesById = graph.nodes.associateBy(NavNode::id)
+        val validEdges = validEdges(graph, nodesById, useElevator)
+        var totalCost = 0.0
+        for (index in 0 until path.lastIndex) {
+            val from = path[index]
+            val to = path[index + 1]
+            val edgeCost = validEdges.asSequence()
+                .filter {
+                    (it.from == from.id && it.to == to.id) ||
+                        (it.bidirectional != false && it.from == to.id && it.to == from.id)
+                }
+                .minOfOrNull { effectiveWeight(it, preference, nodesById) }
+                ?: return Double.POSITIVE_INFINITY
+            totalCost += edgeCost
+        }
+        return totalCost
+    }
+
     /** Ближайшая точка дорожного графа на выбранном этаже к ручной/GPS-точке. */
     fun nearestNode(graph: NavigationData, floor: Int, x: Double, y: Double): NavNode? {
         if (!x.isFinite() || !y.isFinite()) return null
         return graph.nodes.asSequence()
             .filter { it.floor == floor && it.x.isFinite() && it.y.isFinite() }
             .minByOrNull { node -> hypot(node.x - x, node.y - y) }
+    }
+
+    private fun validEdges(
+        graph: NavigationData,
+        nodesById: Map<String, NavNode>,
+        useElevator: Boolean,
+    ): List<NavEdge> {
+        val accessibleFloorPairs = graph.edges.mapNotNull { edge ->
+            val from = nodesById[edge.from] ?: return@mapNotNull null
+            val to = nodesById[edge.to] ?: return@mapNotNull null
+            val isAccessibleTransition = edge.type.equals("elevator", ignoreCase = true) || edge.requiresAccessibility == true
+            if (isAccessibleTransition && from.floor != to.floor) setOf(from.floor, to.floor) else null
+        }.toSet()
+        return graph.edges.filter { edge ->
+            val from = nodesById[edge.from]
+            val to = nodesById[edge.to]
+            val isElevatorEdge = edge.type.equals("elevator", ignoreCase = true) || edge.requiresAccessibility == true
+            val elevatorReplacesStairs = useElevator && edge.type.equals("stairs", ignoreCase = true) &&
+                from != null && to != null && from.floor != to.floor && setOf(from.floor, to.floor) in accessibleFloorPairs
+            (useElevator || !isElevatorEdge) && !elevatorReplacesStairs && edge.weight.isFinite() && edge.weight > 0.0 &&
+                edge.from != edge.to && edge.from in nodesById && edge.to in nodesById
+        }
     }
 
     private fun effectiveWeight(

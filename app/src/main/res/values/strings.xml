@@ -47,6 +47,7 @@
     <string name="gps_no_anchors">Для этажа «%1$s» нет достаточных GPS-опорных точек. Установите маркер вручную.</string>
     <string name="gps_accuracy_too_low">GPS-точка не показана: погрешность ±%1$d м выше порога %2$d м. Уточните место вручную.</string>
     <string name="gps_accuracy_missing">GPS не сообщил оценку точности. Проверьте положение на плане и при необходимости перейдите в ручной режим.</string>
+    <string name="gps_position_outside_map">GPS преобразовал координаты за пределы плана этого этажа. Дождитесь более точного сигнала или отметьте положение вручную.</string>
     <string name="gps_unavailable">Службы определения местоположения не видят свежий сигнал. Можно выбрать ручной режим.</string>
     <string name="gps_error">GPS недоступен: %1$s Переключитесь на ручной режим.</string>
     <string name="gps_permission_denied">Разрешение не выдано. Вы можете отметить положение вручную.</string>
@@ -87,6 +88,7 @@
     <string name="floor_map_error_message">SVG-карта этажа «%1$s» отсутствует или не читается. Проверьте файл %2$s и его viewBox.</string>
     <string name="manual_start_hint">Сначала отметьте «Я здесь» на карте или включите GPS.</string>
     <string name="manual_position_required">Сначала отметьте своё положение на карте.</string>
+    <string name="manual_position_outside_map">Выберите точку внутри видимой области плана этажа.</string>
     <string name="location_on_other_floor">Ваш маркер находится на %1$d-м этаже. Откройте этот этаж, чтобы увидеть его.</string>
     <string name="no_location_to_center">Сначала отметьте своё положение на плане.</string>
     <string name="no_graph_nodes">На этом этаже пока нет узлов навигационного графа.</string>
@@ -159,6 +161,8 @@
     <string name="search_label">Название или номер кабинета</string>
     <string name="search_hint">Номер, часть названия или транслитерация: 118, каб 118, kab 118</string>
     <string name="search_clear">Очистить поиск</string>
+    <string name="search_similar_queries">Похожие запросы</string>
+    <string name="search_build_route">Построить маршрут</string>
     <string name="all_categories">Все</string>
     <string name="category_classrooms">Аудитории</string>
     <string name="category_laboratories">Лаборатории</string>
@@ -420,7 +424,7 @@
     <string name="onboarding_route_step_3">3. Проверьте предпросмотр маршрута и список шагов.</string>
     <string name="onboarding_route_step_4">4. Нажмите «Начать маршрут» и следуйте подсвеченным шагам; в ручном режиме доступны «Назад» и «Следующий шаг».</string>
     <string name="onboarding_elevator_title">Использование лифта</string>
-    <string name="onboarding_elevator_warning">В колледже «Логос» лифт предназначен только для людей с ограниченными возможностями здоровья. Остальным студентам и преподавателям следует использовать лестницы.</string>
+    <string name="onboarding_elevator_warning">Лифт предназначен для людей, которым нужен доступный маршрут. Остальным пользователям следует воспользоваться лестницей.</string>
     <string name="onboarding_elevator_question">Нужно ли вам использовать лифт?</string>
     <string name="onboarding_elevator_no">Нет, я буду пользоваться лестницей</string>
     <string name="onboarding_elevator_yes">Да, мне необходим лифт по медицинским показаниям</string>

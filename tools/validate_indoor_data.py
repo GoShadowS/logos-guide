@@ -130,6 +130,8 @@ def main() -> int:
                 fail(f"Некорректный узел {node.get('id')}")
             if not inside_box(node["x"], node["y"], floor):
                 fail(f"Узел {node['id']} вне viewBox")
+            if node.get("type", "").lower() == "elevator" and node.get("requiresAccessibility") is not True:
+                fail(f"Узел лифта {node['id']} должен требовать доступный маршрут")
 
         edge_pairs: set[tuple[str, str, str]] = set()
         for edge in graph["edges"]:
@@ -137,7 +139,12 @@ def main() -> int:
                 fail(f"Неверная ссылка ребра {edge}")
             if not math.isfinite(edge["weight"]) or edge["weight"] <= 0:
                 fail(f"Некорректный вес ребра {edge}")
-            edge_pairs.add((edge["from"], edge["to"], edge.get("type", "")))
+            if edge.get("type", "").lower() == "elevator" and edge.get("requiresAccessibility") is not True:
+                fail(f"Ребро лифта {edge['from']}—{edge['to']} должно требовать доступный маршрут")
+            edge_key = (edge["from"], edge["to"], edge.get("type", ""))
+            if edge_key in edge_pairs:
+                fail(f"Повторяется ребро {edge['from']}—{edge['to']} типа {edge.get('type', '')}")
+            edge_pairs.add(edge_key)
 
         areas = graph.get("restrictedAreas", [])
         for area in areas:
@@ -168,6 +175,17 @@ def main() -> int:
         room_by_id = {room["id"]: room for room in rooms}
         if len(room_by_id) != len(rooms):
             fail("Повторяются ID помещений")
+        assembly_hall = room_by_id.get("room_104")
+        if assembly_hall is not None:
+            if assembly_hall.get("route_available") or assembly_hall.get("nodeId") is not None:
+                fail("Зона актового зала 104 не должна быть маршрутизируемым пунктом")
+            if assembly_hall.get("doorNodeId") or assembly_hall.get("doorNodeIds"):
+                fail("У актового зала 104 не должно быть дверных узлов маршрута")
+            if any(
+                node.get("roomId") == "room_104" or node.get("connectsRoom") == "room_104"
+                for node in nodes
+            ):
+                fail("Для актового зала 104 не должно быть узлов прохода/входа")
         allowed_categories = {"classroom", "laboratory", "administrative", "medical", "common", "entrance"}
         official_numbers: set[str] = set()
         for room in rooms:
@@ -176,6 +194,8 @@ def main() -> int:
                 fail(f"Нет этажа и полного RU/EN имени/описания у {room.get('id')}")
             if room.get("category") not in allowed_categories:
                 fail(f"Неизвестная категория у {room['id']}: {room.get('category')}")
+            if room.get("role", "").lower() == "elevator" and room.get("requiresAccessibility") is not True:
+                fail(f"Помещение-лифт {room['id']} должно требовать доступный маршрут")
             for field in ("aliases_ru", "aliases_en"):
                 if not isinstance(room.get(field), list):
                     fail(f"Поле {field} отсутствует/не список у {room['id']}")
@@ -202,6 +222,12 @@ def main() -> int:
                 for point in polygon:
                     if not inside_box(point["x"], point["y"], floor):
                         fail(f"Контур {room['id']} выходит за viewBox")
+                if not room.get("route_available"):
+                    if any(
+                        node["floor"] == room["floor"] and point_in_polygon(node["x"], node["y"], polygon)
+                        for node in nodes
+                    ):
+                        fail(f"Узел графа находится внутри немаршрутизируемого помещения {room['id']}")
             element_ids = list(room.get("svgElementIds", []))
             if room.get("svgElementId"):
                 element_ids.append(room["svgElementId"])

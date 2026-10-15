@@ -47,6 +47,7 @@
     <string name="gps_no_anchors">There are not enough GPS reference points for “%1$s”. Place the marker manually.</string>
     <string name="gps_accuracy_too_low">GPS position hidden: accuracy ±%1$d m is worse than the %2$d m threshold. Adjust it manually.</string>
     <string name="gps_accuracy_missing">GPS did not report its accuracy. Check the map and switch to manual mode if needed.</string>
+    <string name="gps_position_outside_map">GPS mapped your position outside this floor plan. Wait for a better fix or mark your position manually.</string>
     <string name="gps_unavailable">Location services cannot see a fresh signal. You can switch to manual mode.</string>
     <string name="gps_error">GPS is unavailable: %1$s Switch to manual mode.</string>
     <string name="gps_permission_denied">Permission was not granted. You can place your position manually.</string>
@@ -87,6 +88,7 @@
     <string name="floor_map_error_message">The SVG map for “%1$s” is missing or unreadable. Check %2$s and its viewBox.</string>
     <string name="manual_start_hint">Mark “I’m here” on the map or turn on GPS first.</string>
     <string name="manual_position_required">Mark your position on the map first.</string>
+    <string name="manual_position_outside_map">Choose a point inside the visible floor plan.</string>
     <string name="location_on_other_floor">Your marker is on floor %1$d. Open that floor to see it.</string>
     <string name="no_location_to_center">Mark your position on the plan first.</string>
     <string name="no_graph_nodes">There are no navigation nodes on this floor yet.</string>
@@ -159,6 +161,8 @@
     <string name="search_label">Room name or number</string>
     <string name="search_hint">Number, part of a name or transliteration: 118, room 118</string>
     <string name="search_clear">Clear search</string>
+    <string name="search_similar_queries">Related searches</string>
+    <string name="search_build_route">Build route</string>
     <string name="all_categories">All</string>
     <string name="category_classrooms">Classrooms</string>
     <string name="category_laboratories">Laboratories</string>
@@ -420,7 +424,7 @@
     <string name="onboarding_route_step_3">3. Review the route preview and the full list of steps.</string>
     <string name="onboarding_route_step_4">4. Tap “Start route” and follow the highlighted steps; manual mode has Previous and Next controls.</string>
     <string name="onboarding_elevator_title">Using the elevator</string>
-    <string name="onboarding_elevator_warning">At Logos College, the elevator is intended only for people with disabilities. Other students and teachers should use the stairs.</string>
+    <string name="onboarding_elevator_warning">The elevator is reserved for people who need an accessible route. Other users should take the stairs.</string>
     <string name="onboarding_elevator_question">Do you need to use the elevator?</string>
     <string name="onboarding_elevator_no">No, I will use the stairs</string>
     <string name="onboarding_elevator_yes">Yes, I need the elevator for medical reasons</string>

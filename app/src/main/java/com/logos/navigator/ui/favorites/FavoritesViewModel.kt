@@ -93,12 +93,15 @@ class FavoritesViewModel(application: Application) : AndroidViewModel(applicatio
 
     fun toggleFavorite(room: Room) {
         viewModelScope.launch {
-            runCatching { repository.toggleFavorite(room.id) }
-                .onSuccess { added ->
-                    val messageId = if (added) R.string.favorite_added_format else R.string.favorite_removed_format
-                    setMessage(appContext.getString(messageId, room.localizedName(appContext)))
-                }
-                .onFailure { exception -> setError(appContext.getString(R.string.favorite_error, exceptionMessage(exception))) }
+            try {
+                val added = repository.toggleFavorite(room.id)
+                val messageId = if (added) R.string.favorite_added_format else R.string.favorite_removed_format
+                setMessage(appContext.getString(messageId, room.localizedName(appContext)))
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (exception: Exception) {
+                setError(appContext.getString(R.string.favorite_error, exceptionMessage(exception)))
+            }
         }
     }
 
@@ -106,6 +109,8 @@ class FavoritesViewModel(application: Application) : AndroidViewModel(applicatio
         viewModelScope.launch {
             try {
                 onRemoved(repository.removeFavorite(roomId))
+            } catch (cancelled: CancellationException) {
+                throw cancelled
             } catch (exception: Exception) {
                 setError(appContext.getString(R.string.favorite_remove_error, exceptionMessage(exception)))
                 onRemoved(null)
@@ -153,6 +158,8 @@ class FavoritesViewModel(application: Application) : AndroidViewModel(applicatio
         viewModelScope.launch {
             try {
                 onRemoved(repository.removeHistoryEntry(id))
+            } catch (cancelled: CancellationException) {
+                throw cancelled
             } catch (exception: Exception) {
                 setError(appContext.getString(R.string.history_remove_error, exceptionMessage(exception)))
                 onRemoved(null)
@@ -201,6 +208,8 @@ class FavoritesViewModel(application: Application) : AndroidViewModel(applicatio
         viewModelScope.launch {
             try {
                 onRemoved(repository.removeSavedRoute(id))
+            } catch (cancelled: CancellationException) {
+                throw cancelled
             } catch (exception: Exception) {
                 setError(appContext.getString(R.string.saved_route_remove_error, exceptionMessage(exception)))
                 onRemoved(null)

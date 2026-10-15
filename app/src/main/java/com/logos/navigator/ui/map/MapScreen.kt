@@ -44,12 +44,9 @@ import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.ListAlt
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MyLocation
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material.icons.filled.Share
@@ -113,7 +110,6 @@ import com.logos.navigator.data.model.MapPoint
 import com.logos.navigator.data.model.RouteAction
 import com.logos.navigator.data.model.RouteInstruction
 import com.logos.navigator.data.model.Room
-import com.logos.navigator.data.model.StartupLocationMode
 import com.logos.navigator.ui.MainViewModel
 import com.logos.navigator.utils.categoryLabel
 import com.logos.navigator.utils.formatDistance
@@ -131,10 +127,7 @@ fun MapScreen(
     onToggleFavorite: (Room) -> Unit = {},
     onOpenFavoriteRoom: (Room) -> Unit = {},
     onSaveCurrentRoute: (Room) -> Unit = {},
-    onOpenSearch: () -> Unit,
-    onOpenFavorites: () -> Unit,
     onOpenAbout: () -> Unit,
-    onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -216,19 +209,6 @@ fun MapScreen(
         }
     }
 
-    var startupLocationHandled by remember { mutableStateOf(false) }
-    LaunchedEffect(state.navigation, startupLocationHandled) {
-        if (state.navigation == null || startupLocationHandled) return@LaunchedEffect
-        startupLocationHandled = true
-        val settings = state.settings
-        val startGps = when (settings.startupLocationMode) {
-            StartupLocationMode.GPS -> true
-            StartupLocationMode.MANUAL -> false
-            StartupLocationMode.LAST -> settings.gpsEnabledOnLaunch && settings.lastLocationMode == LocationMode.GPS
-        }
-        if (startGps) requestGpsPermissionOrStart() else viewModel.setLocationMode(LocationMode.MANUAL)
-    }
-
     Scaffold(
         modifier = modifier,
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -248,12 +228,6 @@ fun MapScreen(
                     )
                 },
                 actions = {
-                    IconButton(onClick = onOpenSearch) {
-                        Icon(Icons.Default.Search, contentDescription = stringResource(R.string.search_rooms))
-                    }
-                    IconButton(onClick = onOpenFavorites) {
-                        Icon(Icons.Default.ListAlt, contentDescription = stringResource(R.string.open_favorites))
-                    }
                     Box {
                         IconButton(onClick = { menuExpanded = true }) {
                             Icon(Icons.Default.Menu, contentDescription = stringResource(R.string.menu))
@@ -263,11 +237,6 @@ fun MapScreen(
                                 text = { Text(stringResource(R.string.about_app)) },
                                 leadingIcon = { Icon(Icons.Default.Info, contentDescription = null) },
                                 onClick = { menuExpanded = false; onOpenAbout() },
-                            )
-                            DropdownMenuItem(
-                                text = { Text(stringResource(R.string.settings_title)) },
-                                leadingIcon = { Icon(Icons.Default.Settings, contentDescription = null) },
-                                onClick = { menuExpanded = false; onOpenSettings() },
                             )
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.share_location)) },
@@ -613,8 +582,8 @@ fun MapScreen(
         RoomDetailsSheet(
             room = room,
             isFavorite = room.id in favoriteRoomIds,
-            canSetPosition = state.locationMode == LocationMode.MANUAL &&
-                (room.centerX ?: room.x) != null && (room.centerY ?: room.y) != null,
+            canSetPosition = state.locationMode == LocationMode.MANUAL && room.routeAvailable &&
+                !room.nodeId.isNullOrBlank() && (room.centerX ?: room.x) != null && (room.centerY ?: room.y) != null,
             onToggleFavorite = { onToggleFavorite(room) },
             onDismiss = viewModel::dismissRoomDetails,
             onSetPosition = {
@@ -1099,7 +1068,9 @@ private fun RoomDetailsSheet(
                     Text(stringResource(R.string.set_location_here))
                 }
             }
-            Button(onClick = onRoute, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.start_route)) }
+            if (room.routeAvailable && !room.nodeId.isNullOrBlank()) {
+                Button(onClick = onRoute, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.start_route)) }
+            }
             OutlinedButton(onClick = onShare, modifier = Modifier.fillMaxWidth()) {
                 Icon(Icons.Default.Share, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
