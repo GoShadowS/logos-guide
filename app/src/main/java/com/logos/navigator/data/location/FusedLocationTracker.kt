@@ -20,6 +20,7 @@ class FusedLocationTracker(context: Context) {
     private val appContext = context.applicationContext
     private var client: com.google.android.gms.location.FusedLocationProviderClient? = null
     private var callback: LocationCallback? = null
+    @Volatile private var generation = 0
 
     private fun getClient(): com.google.android.gms.location.FusedLocationProviderClient =
         client ?: LocationServices.getFusedLocationProviderClient(appContext).also { client = it }
@@ -33,6 +34,7 @@ class FusedLocationTracker(context: Context) {
         onError: (String) -> Unit,
     ) {
         stop()
+        val requestGeneration = generation
         val hasFine = appContext.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) ==
             PackageManager.PERMISSION_GRANTED
         val hasCoarse = appContext.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) ==
@@ -62,34 +64,45 @@ class FusedLocationTracker(context: Context) {
 
         val newCallback = object : LocationCallback() {
             override fun onLocationResult(result: LocationResult) {
-                result.lastLocation?.let(onLocation)
+                if (requestGeneration == generation) result.lastLocation?.let(onLocation)
             }
 
             override fun onLocationAvailability(availability: LocationAvailability) {
-                onAvailability(availability.isLocationAvailable)
+                if (requestGeneration == generation) onAvailability(availability.isLocationAvailable)
             }
         }
         callback = newCallback
 
         try {
             locationClient.lastLocation
-                .addOnSuccessListener { location -> location?.let(onLocation) }
+                .addOnSuccessListener { location ->
+                    if (requestGeneration == generation) location?.let(onLocation)
+                }
                 // Отказ в чтении кэшированной точки не отменяет запрос новых GPS-измерений.
-                .addOnFailureListener { onAvailability(false) }
+                .addOnFailureListener {
+                    if (requestGeneration == generation) onAvailability(false)
+                }
             locationClient.requestLocationUpdates(request, newCallback, Looper.getMainLooper())
                 .addOnFailureListener {
-                    onError(appContext.getString(R.string.location_provider_unavailable))
+                    if (requestGeneration == generation) {
+                        onError(appContext.getString(R.string.location_provider_unavailable))
+                    }
                 }
         } catch (exception: SecurityException) {
-            callback = null
-            onError(appContext.getString(R.string.location_no_access))
+            if (requestGeneration == generation) {
+                callback = null
+                onError(appContext.getString(R.string.location_no_access))
+            }
         } catch (_: Exception) {
-            callback = null
-            onError(appContext.getString(R.string.location_start_error, appContext.getString(R.string.location_check_device_settings)))
+            if (requestGeneration == generation) {
+                callback = null
+                onError(appContext.getString(R.string.location_start_error, appContext.getString(R.string.location_check_device_settings)))
+            }
         }
     }
 
     fun stop() {
+        generation++
         callback?.let { oldCallback -> client?.removeLocationUpdates(oldCallback) }
         callback = null
     }

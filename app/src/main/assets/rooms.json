@@ -7,19 +7,17 @@
       "number": "104",
       "floor": 1,
       "category": "common",
-      "description_ru": "Актовый зал на первом этаже. Вход на плане не отмечен отдельно и требует полевой проверки.",
-      "description_en": "Assembly hall on the first floor. Its entrance is not explicitly marked on the plan and needs an on-site check.",
-      "nodeId": "1_door_104",
+      "description_ru": "Зона актового зала показана на SVG-плане, но не используется как точка назначения или проход в маршруте. Доступность входа не подтверждена.",
+      "description_en": "The assembly-hall area is shown on the SVG plan but is not used as a route destination or passage. Entrance accessibility has not been verified.",
+      "nodeId": null,
       "x": 683.3734999999999,
       "y": 167.4141,
       "svgElementId": "room_104",
       "svgElementIds": [
         "room_104"
       ],
-      "doorNodeId": "1_door_104",
-      "doorNodeIds": [
-        "1_door_104"
-      ],
+      "doorNodeId": null,
+      "doorNodeIds": [],
       "centerX": 683.3734999999999,
       "centerY": 167.4141,
       "polygon": [],
@@ -56,8 +54,8 @@
         "auditorium"
       ],
       "role": "assembly_hall",
-      "route_available": true,
-      "geometry_status": "door_to_verify",
+      "route_available": false,
+      "geometry_status": "display_only_non_routeable",
       "expected_geometry_parts": null,
       "requiresAccessibility": false
     },

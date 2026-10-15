@@ -32,6 +32,7 @@ import com.logos.navigator.data.model.SvgPoint
 import com.logos.navigator.data.repository.FavoritesRepository
 import com.logos.navigator.data.repository.IndoorRepository
 import com.logos.navigator.navigation.GeoReferencer
+import com.logos.navigator.navigation.RouteProgressCalculator
 import com.logos.navigator.navigation.RouteStepGenerator
 import com.logos.navigator.navigation.pathfinding.AStarPathfinder
 import com.logos.navigator.utils.localizedName
@@ -135,6 +136,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         selectedRoom = null,
                         destination = null,
                         route = null,
+                        routeOriginPosition = null,
                         isNavigationStarted = false,
                         routeSteps = emptyList(),
                         currentRouteStepIndex = 0,
@@ -228,11 +230,30 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         arrivalRoomId = null
         routeSession++
         selectFloor(room.floor, userSelected = false)
+        if (!room.routeAvailable || room.nodeId.isNullOrBlank()) {
+            _state.update {
+                it.copy(
+                    destination = null,
+                    selectedRoom = room,
+                    route = null,
+                    routeOriginPosition = null,
+                    isNavigationStarted = false,
+                    routeSteps = emptyList(),
+                    currentRouteStepIndex = 0,
+                    routeProgress = 0f,
+                    routeDistanceMeters = null,
+                    routeMinutes = null,
+                    message = appContext.getString(R.string.room_route_unavailable, room.localizedName(appContext)),
+                )
+            }
+            return
+        }
         _state.update {
             it.copy(
                 destination = room,
                 selectedRoom = null,
                 route = null,
+                routeOriginPosition = null,
                 isNavigationStarted = false,
                 routeSteps = emptyList(),
                 currentRouteStepIndex = 0,
@@ -249,8 +270,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         updateManualPosition(x, y, startRoom = null)
     }
 
-    /** Устанавливает старт внутри выбранного помещения и сохраняет его дверь как точку выхода. */
+    /** Устанавливает старт внутри выбранного маршрутизируемого помещения у известной двери. */
     fun setManualPositionInRoom(room: Room, x: Float, y: Float) {
+        if (!room.routeAvailable || room.nodeId.isNullOrBlank()) {
+            showMessage(appContext.getString(R.string.room_route_unavailable, room.localizedName(appContext)))
+            return
+        }
         if (room.floor != _state.value.selectedFloor) selectFloor(room.floor, userSelected = false)
         updateManualPosition(x, y, startRoom = room)
     }
@@ -259,11 +284,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val current = _state.value
         val floor = navigationData?.floors?.firstOrNull { it.number == current.selectedFloor } ?: return
         if (current.locationMode != LocationMode.MANUAL) return
-        val point = MapPoint(
-            floor = floor.number,
-            x = x.coerceIn(floor.viewBoxX.toFloat(), (floor.viewBoxX + floor.width).toFloat()),
-            y = y.coerceIn(floor.viewBoxY.toFloat(), (floor.viewBoxY + floor.height).toFloat()),
-        )
+        if (!isWithinFloorViewBox(floor, x.toDouble(), y.toDouble())) {
+            showMessage(appContext.getString(R.string.manual_position_outside_map))
+            return
+        }
+        val point = MapPoint(floor = floor.number, x = x, y = y)
+        nonRouteableRoomAt(point)?.let { room ->
+            showMessage(appContext.getString(R.string.room_route_unavailable, room.localizedName(appContext)))
+            return
+        }
         val graph = navigationData ?: return
         if (isInsideRestrictedArea(graph, point.floor, point.x.toDouble(), point.y.toDouble())) {
             showMessage(appContext.getString(R.string.route_start_in_restricted_area))
@@ -324,6 +353,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 userPosition = null,
                 isManualPositionConfirmed = false,
                 route = null,
+                routeOriginPosition = null,
                 isNavigationStarted = false,
                 routeSteps = emptyList(),
                 currentRouteStepIndex = 0,
@@ -413,6 +443,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         if (svgPoint == null) {
             _state.update {
                 it.copy(
+                    userPosition = null,
+                    isManualPositionConfirmed = false,
                     gpsWarning = appContext.getString(
                         R.string.gps_no_anchors,
                         appContext.getString(R.string.floor_number_format, floor.number),
@@ -443,11 +475,19 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
             return
         }
-        val point = MapPoint(
-            floor = floorNumber,
-            x = svgPoint.first.toFloat().coerceIn(floor.viewBoxX.toFloat(), (floor.viewBoxX + floor.width).toFloat()),
-            y = svgPoint.second.toFloat().coerceIn(floor.viewBoxY.toFloat(), (floor.viewBoxY + floor.height).toFloat()),
-        )
+        if (!isWithinFloorViewBox(floor, svgPoint.first, svgPoint.second)) {
+            _state.update {
+                it.copy(
+                    userPosition = null,
+                    isManualPositionConfirmed = false,
+                    gpsAccuracyMeters = accuracy,
+                    gpsWarning = appContext.getString(R.string.gps_position_outside_map),
+                    isGpsActive = true,
+                )
+            }
+            return
+        }
+        val point = MapPoint(floor = floorNumber, x = svgPoint.first.toFloat(), y = svgPoint.second.toFloat())
         lastPositionFloor = floorNumber
         val warning = if (accuracy == null) appContext.getString(R.string.gps_accuracy_missing) else null
         _state.update {
@@ -477,6 +517,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         if (!hasFreshFix) {
             _state.update {
                 it.copy(
+                    userPosition = null,
+                    isManualPositionConfirmed = false,
                     isGpsActive = false,
                     gpsWarning = appContext.getString(R.string.gps_unavailable),
                 )
@@ -527,6 +569,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     destination = null,
                     selectedRoom = room,
                     route = null,
+                    routeOriginPosition = null,
                     isNavigationStarted = false,
                     routeSteps = emptyList(),
                     currentRouteStepIndex = 0,
@@ -543,6 +586,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 destination = room,
                 selectedRoom = null,
                 route = null,
+                routeOriginPosition = null,
                 isNavigationStarted = false,
                 routeSteps = emptyList(),
                 currentRouteStepIndex = 0,
@@ -591,7 +635,24 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     preference = state.settings.routePreference,
                     useElevator = state.settings.useElevator,
                 ) ?: return@mapNotNull null
-                room to graphPathCost(graph, path)
+                val networkCost = AStarPathfinder.pathCost(
+                    graph = graph,
+                    path = path,
+                    preference = state.settings.routePreference,
+                    useElevator = state.settings.useElevator,
+                )
+                val startScale = graph.floors.firstOrNull { it.number == position.floor }?.metersPerUnit
+                    ?.takeIf { it.isFinite() && it > 0.0 } ?: DEFAULT_METERS_PER_UNIT
+                val startConnector = hypot(start.x - position.x, start.y - position.y) * startScale
+                val destinationNode = path.last()
+                val destinationConnector = if (destinationNode.floor == room.floor && room.x != null && room.y != null) {
+                    val destinationScale = graph.floors.firstOrNull { it.number == room.floor }?.metersPerUnit
+                        ?.takeIf { it.isFinite() && it > 0.0 } ?: DEFAULT_METERS_PER_UNIT
+                    hypot(destinationNode.x - room.x, destinationNode.y - room.y) * destinationScale
+                } else {
+                    0.0
+                }
+                room to (networkCost + startConnector + destinationConnector)
             }
             .minByOrNull { it.second }
             ?.first
@@ -624,10 +685,36 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private fun buildRoute(room: Room) {
         val graph = navigationData ?: return
         val position = _state.value.userPosition ?: return
-        if (isInsideRestrictedArea(graph, position.floor, position.x.toDouble(), position.y.toDouble())) {
+        val nonRouteableRoom = nonRouteableRoomAt(position)
+        if (nonRouteableRoom != null) {
+            stopRouteSpeech()
+            announcedRouteSession = -1L
             _state.update {
                 it.copy(
                     route = null,
+                    routeOriginPosition = null,
+                    isNavigationStarted = false,
+                    routeSteps = emptyList(),
+                    currentRouteStepIndex = 0,
+                    routeProgress = 0f,
+                    routeDistanceMeters = null,
+                    routeMinutes = null,
+                    message = appContext.getString(
+                        R.string.room_route_unavailable,
+                        nonRouteableRoom.localizedName(appContext),
+                    ),
+                )
+            }
+            return
+        }
+        if (isInsideRestrictedArea(graph, position.floor, position.x.toDouble(), position.y.toDouble())) {
+            stopRouteSpeech()
+            announcedRouteSession = -1L
+            _state.update {
+                it.copy(
+                    route = null,
+                    routeOriginPosition = null,
+                    isNavigationStarted = false,
                     routeSteps = emptyList(),
                     currentRouteStepIndex = 0,
                     routeProgress = 0f,
@@ -655,9 +742,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             listOfNotNull(AStarPathfinder.nearestNode(graph, position.floor, position.x.toDouble(), position.y.toDouble()))
         }
         if (startCandidates.isEmpty()) {
+            stopRouteSpeech()
+            announcedRouteSession = -1L
             _state.update {
                 it.copy(
                     route = null,
+                    routeOriginPosition = null,
                     isNavigationStarted = false,
                     routeSteps = emptyList(),
                     currentRouteStepIndex = 0,
@@ -680,15 +770,24 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 useElevator = _state.value.settings.useElevator,
             ) ?: return@mapNotNull null
             val distanceToDoor = hypot(startNode.x - position.x, startNode.y - position.y) * metersPerUnit
-            Triple(startNode, candidatePath, graphPathCost(graph, candidatePath) + distanceToDoor)
+            val routeCost = AStarPathfinder.pathCost(
+                graph = graph,
+                path = candidatePath,
+                preference = _state.value.settings.routePreference,
+                useElevator = _state.value.settings.useElevator,
+            )
+            Triple(startNode, candidatePath, routeCost + distanceToDoor)
         }
         val selectedRoute = routeCandidates.minByOrNull { it.third }
         val start = selectedRoute?.first
         val route = selectedRoute?.second
         if (start == null || route == null) {
+            stopRouteSpeech()
+            announcedRouteSession = -1L
             _state.update {
                 it.copy(
                     route = null,
+                    routeOriginPosition = null,
                     isNavigationStarted = false,
                     routeSteps = emptyList(),
                     currentRouteStepIndex = 0,
@@ -700,7 +799,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
             return
         }
-        val distance = calculateRouteDistance(graph, route, position, room)
+        val routeDistances = RouteProgressCalculator.distances(graph, route, position, room)
+        val distance = routeDistances.totalMeters
         val speedMetersPerMinute = _state.value.settings.walkingSpeedKmh * 1_000.0 / 60.0
         val minutes = ceil(distance / speedMetersPerMinute).toInt().coerceAtLeast(1)
         val generatedSteps = RouteStepGenerator.generate(
@@ -708,23 +808,25 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             path = route,
             destinationName = room.localizedName(appContext),
             totalDistanceMeters = distance,
+            startConnectorMeters = routeDistances.startConnectorMeters,
         )
-        val routeSteps = if (selectedStartRoom != null && start.id in roomDoorNodes.map(NavNode::id)) {
-            val distanceToDoor = hypot(start.x - position.x, start.y - position.y) * metersPerUnit
-            generatedSteps.mapIndexed { index, instruction ->
-                if (index == 0 && instruction.action == RouteAction.START) {
-                    instruction.copy(
-                        destinationName = selectedStartRoom.localizedName(appContext),
-                        distanceMeters = distanceToDoor,
-                    )
-                } else instruction
-            }
-        } else generatedSteps
+        val startRoomName = selectedStartRoom
+            ?.takeIf { start.id in roomDoorNodes.map(NavNode::id) }
+            ?.localizedName(appContext)
+        val routeSteps = generatedSteps.mapIndexed { index, instruction ->
+            if (index == 0 && instruction.action == RouteAction.START) {
+                instruction.copy(
+                    destinationName = startRoomName,
+                    distanceMeters = routeDistances.startConnectorMeters,
+                )
+            } else instruction
+        }
         _state.update {
             it.copy(
                 destination = room,
                 selectedRoom = null,
                 route = route,
+                routeOriginPosition = position,
                 routeSteps = routeSteps,
                 currentRouteStepIndex = 0,
                 routeProgress = 0f,
@@ -842,82 +944,40 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         announceCurrentRouteStep()
     }
 
-    /** Сопоставляет GPS-точку с ближайшим сегментом пути; порог отклонения задан в метрах. */
+    /** Сопоставляет GPS-точку с ближайшим отрезком связанной линии маршрута. */
     private fun updateRouteProgress(point: MapPoint) {
         val current = _state.value
         if (!current.isNavigationStarted) return
         val path = current.route ?: return
         val destination = current.destination ?: return
         val graph = navigationData ?: return
-        if (path.size < 2) return
-        val metersPerUnit = graph.floors.firstOrNull { it.number == point.floor }?.metersPerUnit
-            ?: DEFAULT_METERS_PER_UNIT
-        val metersAtNode = DoubleArray(path.size)
-        for (index in 0 until path.lastIndex) {
-            metersAtNode[index + 1] = metersAtNode[index] + routeEdgeMeters(graph, path[index], path[index + 1])
-        }
+        val projection = RouteProgressCalculator.project(
+            graph = graph,
+            route = path,
+            origin = current.routeOriginPosition,
+            destination = destination,
+            point = point,
+        ) ?: return
 
-        var nearestDistanceMeters = Double.POSITIVE_INFINITY
-        var traveledMeters = 0.0
-        var foundProjection = false
-        for (index in 0 until path.lastIndex) {
-            val from = path[index]
-            val to = path[index + 1]
-            if (from.floor != point.floor || to.floor != point.floor) continue
-            val deltaX = to.x - from.x
-            val deltaY = to.y - from.y
-            val segmentLengthSquared = deltaX * deltaX + deltaY * deltaY
-            if (segmentLengthSquared <= 0.0001) continue
-            val ratio = (((point.x - from.x) * deltaX + (point.y - from.y) * deltaY) / segmentLengthSquared)
-                .coerceIn(0.0, 1.0)
-            val projectedX = from.x + ratio * deltaX
-            val projectedY = from.y + ratio * deltaY
-            val deviation = hypot(point.x - projectedX, point.y - projectedY) * metersPerUnit
-            if (deviation < nearestDistanceMeters) {
-                nearestDistanceMeters = deviation
-                traveledMeters = metersAtNode[index] + routeEdgeMeters(graph, from, to) * ratio
-                foundProjection = true
-            }
-        }
-        if (!foundProjection) {
-            val nearest = path.withIndex()
-                .filter { it.value.floor == point.floor }
-                .minByOrNull { (_, node) -> hypot(point.x - node.x, point.y - node.y) }
-            if (nearest != null) {
-                nearestDistanceMeters = hypot(point.x - nearest.value.x, point.y - nearest.value.y) * metersPerUnit
-                traveledMeters = metersAtNode[nearest.index]
-                foundProjection = true
-            }
-        }
-        if (!foundProjection) return
-
-        if (nearestDistanceMeters > OFF_ROUTE_DISTANCE_METERS) {
+        if (projection.deviationMeters > OFF_ROUTE_DISTANCE_METERS) {
             val now = SystemClock.elapsedRealtime()
             if (lastRouteRecalculationAt == 0L || now - lastRouteRecalculationAt >= ROUTE_RECALCULATION_COOLDOWN_MS) {
                 lastRouteRecalculationAt = now
                 buildRoute(destination)
-                showMessage(appContext.getString(R.string.route_recalculated_status))
+                if (_state.value.route != null) {
+                    showMessage(appContext.getString(R.string.route_recalculated_status))
+                }
             }
             return
         }
 
-        val totalDistance = current.routeDistanceMeters?.takeIf { it > 0.0 } ?: 1.0
-        val progress = (traveledMeters / totalDistance).toFloat().coerceIn(0f, 1f)
+        val progress = projection.progress
         val nextIndex = current.routeSteps.indexOfLast { it.progress <= progress + ROUTE_STEP_PROGRESS_EPSILON }
             .coerceAtLeast(0)
         val changedStep = nextIndex != current.currentRouteStepIndex
         _state.update { it.copy(routeProgress = progress, currentRouteStepIndex = nextIndex) }
         if (changedStep && nextIndex > 0) announceCurrentRouteStep()
     }
-
-    private fun routeEdgeMeters(graph: NavigationData, from: NavNode, to: NavNode): Double =
-        graph.edges.asSequence()
-            .firstOrNull {
-                (it.from == from.id && it.to == to.id) ||
-                    (it.bidirectional != false && it.from == to.id && it.to == from.id)
-            }?.weight?.takeIf { it.isFinite() && it > 0.0 }
-            ?: hypot(to.x - from.x, to.y - from.y) *
-            (graph.floors.firstOrNull { it.number == from.floor }?.metersPerUnit ?: DEFAULT_METERS_PER_UNIT)
 
     private fun stopRouteSpeech() {
         pendingSpeech = null
@@ -968,7 +1028,19 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         if (!textToSpeechReady) return
         val text = pendingSpeech ?: return
         pendingSpeech = null
-        runCatching { engine.speak(text, TextToSpeech.QUEUE_FLUSH, null, "route-summary") }
+        val status = try {
+            engine.speak(text, TextToSpeech.QUEUE_FLUSH, null, "route-summary")
+        } catch (_: Exception) {
+            TextToSpeech.ERROR
+        }
+        if (status == TextToSpeech.ERROR) {
+            showMessage(
+                appContext.getString(
+                    R.string.tts_start_error,
+                    appContext.getString(R.string.tts_unavailable),
+                ),
+            )
+        }
     }
 
     private fun recordRouteHistory(room: Room, position: MapPoint, distanceMeters: Double, minutes: Int) {
@@ -1002,34 +1074,31 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             fromFloor = position.floor,
         )
         viewModelScope.launch {
-            runCatching { favoritesRepository.recordRoute(entry, settings.maximumHistoryRecords) }
-                .onFailure { _ ->
-                    showMessage(
-                        appContext.getString(
-                            R.string.favorite_history_error,
-                            appContext.getString(R.string.operation_failed),
-                        ),
-                    )
-                }
-        }
-    }
-
-    private fun graphPathCost(graph: NavigationData, route: List<NavNode>): Double {
-        val metersPerUnit = graph.floors.associate { it.number to it.metersPerUnit }
-        return route.zipWithNext().sumOf { (from, to) ->
-            val edge = graph.edges.asSequence()
-                .filter {
-                    (it.from == from.id && it.to == to.id) ||
-                        (it.bidirectional != false && it.from == to.id && it.to == from.id)
-                }
-                .minOfOrNull { it.weight }
-            edge ?: if (from.floor == to.floor) {
-                hypot(to.x - from.x, to.y - from.y) * (metersPerUnit[from.floor] ?: DEFAULT_METERS_PER_UNIT)
-            } else {
-                DEFAULT_FLOOR_TRANSITION_METERS
+            try {
+                favoritesRepository.recordRoute(entry, settings.maximumHistoryRecords)
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                showMessage(
+                    appContext.getString(
+                        R.string.favorite_history_error,
+                        appContext.getString(R.string.operation_failed),
+                    ),
+                )
             }
         }
     }
+
+    private fun nonRouteableRoomAt(point: MapPoint): Room? = _state.value.rooms.firstOrNull { room ->
+        if (room.floor != point.floor || room.routeAvailable) return@firstOrNull false
+        val polygons = if (room.polygon.isEmpty()) room.polygons else room.polygons + listOf(room.polygon)
+        polygons.any { polygon -> pointInPolygonOrBoundary(point.x.toDouble(), point.y.toDouble(), polygon) }
+    }
+
+    private fun isWithinFloorViewBox(floor: FloorPlan, x: Double, y: Double): Boolean =
+        x.isFinite() && y.isFinite() &&
+            x in floor.viewBoxX..(floor.viewBoxX + floor.width) &&
+            y in floor.viewBoxY..(floor.viewBoxY + floor.height)
 
     /** Запрещает начинать маршрут из наблюдательной и прочих закрытых серых областей. */
     private fun isInsideRestrictedArea(graph: NavigationData, floor: Int, x: Double, y: Double): Boolean =
@@ -1057,38 +1126,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             previous = current
         }
         return inside
-    }
-
-    private fun calculateRouteDistance(
-        graph: NavigationData,
-        route: List<NavNode>,
-        position: MapPoint,
-        destination: Room,
-    ): Double {
-        val floors = graph.floors.associateBy(FloorPlan::number)
-        var distance = 0.0
-        route.zipWithNext().forEach { (from, to) ->
-            val edgeWeight = graph.edges.asSequence()
-                .filter {
-                    (it.from == from.id && it.to == to.id) ||
-                        (it.bidirectional != false && it.from == to.id && it.to == from.id)
-                }
-                .minOfOrNull { it.weight }
-            distance += edgeWeight ?: 0.0
-        }
-        route.firstOrNull()?.let { first ->
-            val metersPerUnit = floors[position.floor]?.metersPerUnit ?: DEFAULT_METERS_PER_UNIT
-            distance += hypot(first.x - position.x, first.y - position.y) * metersPerUnit
-        }
-        route.lastOrNull()?.let { last ->
-            val destinationX = destination.x
-            val destinationY = destination.y
-            if (destinationX != null && destinationY != null) {
-                val metersPerUnit = floors[destination.floor]?.metersPerUnit ?: DEFAULT_METERS_PER_UNIT
-                distance += hypot(last.x - destinationX, last.y - destinationY) * metersPerUnit
-            }
-        }
-        return distance.coerceAtLeast(0.0)
     }
 
     private fun maybeNotifyArrival(point: MapPoint, accuracy: Float?) {
@@ -1136,6 +1173,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         _state.update {
             it.copy(
                 route = null,
+                routeOriginPosition = null,
                 isNavigationStarted = false,
                 routeSteps = emptyList(),
                 currentRouteStepIndex = 0,
@@ -1216,13 +1254,35 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val previous = _state.value.settings
         val updated = transform(previous)
         _state.update { it.copy(settings = updated) }
+        applySettingsToRuntime(previous, updated)
+        viewModelScope.launch {
+            try {
+                settingsStore.update(transform)
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                showMessage(
+                    appContext.getString(
+                        R.string.settings_save_error,
+                        appContext.getString(R.string.settings_store_error),
+                    ),
+                )
+            }
+        }
+    }
+
+    /** Обновляет текущую GPS-сессию, маршрут и озвучивание после изменения настроек. */
+    private fun applySettingsToRuntime(previous: AppSettings, updated: AppSettings) {
         if ((previous.locationAccuracyMode != updated.locationAccuracyMode ||
                 previous.locationUpdateIntervalSeconds != updated.locationUpdateIntervalSeconds) &&
             _state.value.locationMode == LocationMode.GPS
         ) {
             startGpsTracking()
         }
-        if (previous.routePreference != updated.routePreference || previous.walkingSpeedKmh != updated.walkingSpeedKmh) {
+        if (previous.routePreference != updated.routePreference ||
+            previous.walkingSpeedKmh != updated.walkingSpeedKmh ||
+            previous.useElevator != updated.useElevator
+        ) {
             _state.value.destination?.let(::buildRoute)
         }
         if (previous.speechLanguage != updated.speechLanguage) {
@@ -1233,32 +1293,37 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             pendingSpeech = null
             if (updated.voiceGuidanceEnabled && _state.value.routeSteps.isNotEmpty()) announceCurrentRouteStep()
         }
-        if (previous.voiceGuidanceEnabled && !updated.voiceGuidanceEnabled) stopRouteSpeech()
+        if (previous.voiceGuidanceEnabled && !updated.voiceGuidanceEnabled) {
+            stopRouteSpeech()
+        }
         if (!previous.voiceGuidanceEnabled && updated.voiceGuidanceEnabled) {
+            announcedRouteSession = -1L
             _state.value.destination?.let { destination ->
                 val distance = _state.value.routeDistanceMeters
                 val minutes = _state.value.routeMinutes
                 if (distance != null && minutes != null) announceRoute(destination, distance, minutes)
             }
         }
-        viewModelScope.launch {
-            runCatching { settingsStore.update(transform) }
-                .onFailure { _ ->
-                    showMessage(
-                        appContext.getString(
-                            R.string.settings_save_error,
-                            appContext.getString(R.string.settings_store_error),
-                        ),
-                    )
-                }
-        }
     }
 
     fun resetSettings() {
         viewModelScope.launch {
-            settingsStore.resetToDefaults()
-            val defaults = settingsStore.settingsFlow.first()
-            _state.update { it.copy(settings = defaults) }
+            try {
+                val previous = _state.value.settings
+                settingsStore.resetToDefaults()
+                val defaults = settingsStore.settingsFlow.first()
+                _state.update { it.copy(settings = defaults) }
+                applySettingsToRuntime(previous, defaults)
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                showMessage(
+                    appContext.getString(
+                        R.string.settings_save_error,
+                        appContext.getString(R.string.settings_store_error),
+                    ),
+                )
+            }
         }
     }
 
@@ -1315,7 +1380,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private companion object {
         const val DEFAULT_METERS_PER_UNIT = 0.083333
-        const val DEFAULT_FLOOR_TRANSITION_METERS = 4.0
         const val RESTRICTED_BOUNDARY_EPSILON = 1e-6
         const val MAX_DEBUG_LOG_BYTES = 256_000L
         const val GPS_FIRST_FIX_TIMEOUT_MS = 12_000L

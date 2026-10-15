@@ -16,11 +16,12 @@ object RouteStepGenerator {
         path: List<NavNode>,
         destinationName: String,
         totalDistanceMeters: Double,
+        startConnectorMeters: Double = 0.0,
     ): List<RouteInstruction> {
         if (path.isEmpty()) return emptyList()
         val steps = mutableListOf<RouteInstruction>()
         val edgeByPair = graph.edges.associateBy { directedKey(it.from, it.to) }
-        var completedMeters = 0.0
+        var completedMeters = startConnectorMeters.takeIf { it.isFinite() && it > 0.0 } ?: 0.0
         var straightMeters = 0.0
         var straightTarget: NavNode? = null
         val total = totalDistanceMeters.takeIf { it.isFinite() && it > 0.0 } ?: 1.0

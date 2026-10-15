@@ -47,9 +47,15 @@ class AStarPathfinderTest {
             ),
         )
 
+        val shortestPath = AStarPathfinder.findPath(graph, "start", "goal")
+        val stairsAvoidingPath = AStarPathfinder.findPath(graph, "start", "goal", RoutePreference.AVOID_STAIRS)
+        assertEquals(listOf("start", "stairs", "goal"), shortestPath?.map { it.id })
+        assertEquals(listOf("start", "hall", "goal"), stairsAvoidingPath?.map { it.id })
+        assertEquals(2.0, AStarPathfinder.pathCost(graph, shortestPath.orEmpty()), 0.0001)
         assertEquals(
-            listOf("start", "hall", "goal"),
-            AStarPathfinder.findPath(graph, "start", "goal", RoutePreference.AVOID_STAIRS)?.map { it.id },
+            4.4,
+            AStarPathfinder.pathCost(graph, stairsAvoidingPath.orEmpty(), RoutePreference.AVOID_STAIRS),
+            0.0001,
         )
     }
 
@@ -93,14 +99,13 @@ class AStarPathfinderTest {
             ),
         )
 
-        assertEquals(
-            listOf("start", "stairs1", "stairs2", "goal"),
-            AStarPathfinder.findPath(graph, "start", "goal")?.map { it.id },
-        )
-        assertEquals(
-            listOf("start", "lift1", "lift2", "goal"),
-            AStarPathfinder.findPath(graph, "start", "goal", useElevator = true)?.map { it.id },
-        )
+        val stairsPath = AStarPathfinder.findPath(graph, "start", "goal")
+        val elevatorPath = AStarPathfinder.findPath(graph, "start", "goal", useElevator = true)
+        assertEquals(listOf("start", "stairs1", "stairs2", "goal"), stairsPath?.map { it.id })
+        assertEquals(listOf("start", "lift1", "lift2", "goal"), elevatorPath?.map { it.id })
+        assertEquals(5.0, AStarPathfinder.pathCost(graph, stairsPath.orEmpty()), 0.0001)
+        assertEquals(5.0, AStarPathfinder.pathCost(graph, elevatorPath.orEmpty(), useElevator = true), 0.0001)
+        assertEquals(Double.POSITIVE_INFINITY, AStarPathfinder.pathCost(graph, elevatorPath.orEmpty()), 0.0)
     }
 
     @Test

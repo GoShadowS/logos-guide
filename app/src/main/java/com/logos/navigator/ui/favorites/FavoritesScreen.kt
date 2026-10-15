@@ -90,7 +90,9 @@ import com.logos.navigator.data.database.entity.SavedRouteEntity
 import com.logos.navigator.data.model.Room
 import com.logos.navigator.utils.categoryLabel
 import com.logos.navigator.utils.formatDistance
+import com.logos.navigator.utils.localizedDescription
 import com.logos.navigator.utils.localizedName
+import com.logos.navigator.utils.roomSearchScore
 import java.text.DateFormat
 import java.util.Date
 import kotlinx.coroutines.launch
@@ -165,24 +167,60 @@ fun FavoritesScreen(
                 UNCATEGORIZED_KEY -> favorite.categoryId == null
                 else -> favorite.categoryId?.toString() == selectedCategory
             }
-            val normalized = query.trim().lowercase()
-            categoryMatches && (normalized.isBlank() || listOf(
-                favorite.customName.orEmpty(), room.localizedName(context), room.name, room.number.orEmpty(),
-                room.description.orEmpty(), context.categoryLabel(room.category),
-            ).any { it.lowercase().contains(normalized) })
+            val searchableValues = buildList {
+                add(favorite.customName.orEmpty())
+                add(room.localizedName(context))
+                add(room.name)
+                add(room.nameEn.orEmpty())
+                add(room.number.orEmpty())
+                add(room.localizedDescription(context).orEmpty())
+                add(room.description.orEmpty())
+                add(room.descriptionEn.orEmpty())
+                add(context.categoryLabel(room.category))
+                addAll(room.aliasesRu)
+                addAll(room.aliasesEn)
+            }
+            categoryMatches && roomSearchScore(query, room.number, searchableValues) != null
         }
     }
     val historyEntries = remember(state.history, state.rooms, query, context) {
-        val normalized = query.trim().lowercase()
+        val roomsById = state.rooms.associateBy(Room::id)
         state.history.filter { entry ->
-            val destination = state.rooms.firstOrNull { it.id == entry.toRoomId }
-            normalized.isBlank() || listOfNotNull(entry.fromLabel, destination?.localizedName(context), destination?.name, destination?.number)
-                .any { it.lowercase().contains(normalized) }
+            val relatedRooms = listOfNotNull(entry.fromRoomId?.let(roomsById::get), roomsById[entry.toRoomId])
+            val searchableValues = buildList {
+                add(entry.fromLabel)
+                relatedRooms.forEach { room ->
+                    add(room.localizedName(context))
+                    add(room.name)
+                    add(room.nameEn.orEmpty())
+                    add(room.number.orEmpty())
+                    add(room.localizedDescription(context).orEmpty())
+                    add(room.description.orEmpty())
+                    add(room.descriptionEn.orEmpty())
+                    addAll(room.aliasesRu)
+                    addAll(room.aliasesEn)
+                }
+            }
+            roomSearchScore(query, null, searchableValues) != null
         }
     }
-    val savedEntries = remember(state.savedRoutes, query) {
-        val normalized = query.trim().lowercase()
-        state.savedRoutes.filter { normalized.isBlank() || it.name.lowercase().contains(normalized) }
+    val savedEntries = remember(state.savedRoutes, state.rooms, query, context) {
+        val roomsById = state.rooms.associateBy(Room::id)
+        state.savedRoutes.filter { route ->
+            val relatedRooms = listOfNotNull(route.fromRoomId?.let(roomsById::get), roomsById[route.toRoomId])
+            val searchableValues = buildList {
+                add(route.name)
+                relatedRooms.forEach { room ->
+                    add(room.localizedName(context))
+                    add(room.name)
+                    add(room.nameEn.orEmpty())
+                    add(room.number.orEmpty())
+                    addAll(room.aliasesRu)
+                    addAll(room.aliasesEn)
+                }
+            }
+            roomSearchScore(query, null, searchableValues) != null
+        }
     }
 
     Scaffold(

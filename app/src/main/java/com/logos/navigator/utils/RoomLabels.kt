@@ -44,6 +44,21 @@ fun Room.localizedDescription(context: Context): String? {
         ?.takeIf(String::isNotBlank)
 }
 
+/** Возвращает все номера кабинетов, если одна зона объединяет несколько записей справочника. */
+fun Room.numberLabels(): List<String> = number.orEmpty().split(ROOM_NUMBER_SPLITTER).filter(String::isNotBlank)
+
+/** Возвращает номер помещения, который лучше всего соответствует введённому запросу. */
+fun Room.matchingNumberLabel(query: String): String? {
+    val numberQuery = query.split(SEARCH_TOKEN_SPLITTER)
+        .filter { token -> token.any(Char::isDigit) }
+        .joinToString(" ")
+    if (numberQuery.isBlank()) return null
+    return numberLabels()
+        .mapNotNull { label -> roomSearchScore(numberQuery, label, listOf(label))?.let { label to it } }
+        .maxByOrNull { it.second }
+        ?.first
+}
+
 /** Возвращает варианты строки для поиска на русском и в распространённых вариантах транслитерации. */
 fun searchForms(value: String): Set<String> {
     val normalized = normalizeSearchText(value)
@@ -146,6 +161,7 @@ fun Context.formatDistance(meters: Double?, unit: DistanceUnit = DistanceUnit.ME
 }
 
 private val MARKS = Regex("\\p{M}+")
+private val ROOM_NUMBER_SPLITTER = Regex("[,;\\s]+")
 private val SEARCH_TOKEN_SPLITTER = Regex("[^\\p{L}\\p{N}]+")
 private val RU_TO_LATIN = mapOf(
     'а' to "a", 'б' to "b", 'в' to "v", 'г' to "g", 'д' to "d", 'е' to "e", 'ё' to "yo",
