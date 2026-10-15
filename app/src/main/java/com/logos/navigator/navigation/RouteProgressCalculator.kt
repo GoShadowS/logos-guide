@@ -7,6 +7,8 @@ import com.logos.navigator.data.model.NavNode
 import com.logos.navigator.data.model.Room
 import kotlin.math.hypot
 
+private const val DISTANCE_EPSILON = 1e-9
+
 /** Измерения связующих отрезков и графового пути в метрах. */
 data class RouteDistanceBreakdown(
     val startConnectorMeters: Double,
@@ -208,7 +210,6 @@ object RouteProgressCalculator {
     ): Double = hypot(endX - startX, endY - startY) *
         (floors[floor]?.metersPerUnit?.takeIf { it.isFinite() && it > 0.0 } ?: DEFAULT_METERS_PER_UNIT)
 
-    private const val DISTANCE_EPSILON = 1e-9
     private const val COORDINATE_EPSILON = 1e-12
     private const val DEFAULT_METERS_PER_UNIT = 0.083333
     private const val DEFAULT_FLOOR_TRANSITION_METERS = 4.0

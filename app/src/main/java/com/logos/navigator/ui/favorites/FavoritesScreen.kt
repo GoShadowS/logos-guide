@@ -188,7 +188,7 @@ fun FavoritesScreen(
         state.history.filter { entry ->
             val relatedRooms = listOfNotNull(entry.fromRoomId?.let(roomsById::get), roomsById[entry.toRoomId])
             val searchableValues = buildList {
-                add(entry.fromLabel)
+                add(entry.fromLabel.orEmpty())
                 relatedRooms.forEach { room ->
                     add(room.localizedName(context))
                     add(room.name)
