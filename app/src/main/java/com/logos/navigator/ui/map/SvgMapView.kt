@@ -34,6 +34,7 @@ import com.logos.navigator.svg.SvgCoordinateConverter
 import com.logos.navigator.svg.SvgGeometryExtractor
 import com.logos.navigator.svg.SvgRenderer
 import com.logos.navigator.svg.isPointInPolygon
+import com.logos.navigator.svg.polygonBounds
 import com.logos.navigator.svg.renderProfile
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
