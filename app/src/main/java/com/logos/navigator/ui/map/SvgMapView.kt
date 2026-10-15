@@ -725,11 +725,16 @@ class SvgMapView @JvmOverloads constructor(
             geometry.paths.forEach { path ->
                 selectionFillPaint.color = fillColor
                 canvas.drawPath(path, selectionFillPaint)
-                selectionHaloPaint.strokeWidth = 5f * screenDensity
+
+                // Обрезаем обводку по полигону комнаты, чтобы рамка не увеличивала её контур.
+                val highlightSaveCount = canvas.save()
+                canvas.clipPath(path)
+                selectionHaloPaint.strokeWidth = 2.4f * screenDensity
                 canvas.drawPath(path, selectionHaloPaint)
                 selectionOutlinePaint.color = outlineColor
-                selectionOutlinePaint.strokeWidth = 2.4f * screenDensity
+                selectionOutlinePaint.strokeWidth = 1.5f * screenDensity
                 canvas.drawPath(path, selectionOutlinePaint)
+                canvas.restoreToCount(highlightSaveCount)
             }
         }
     }
