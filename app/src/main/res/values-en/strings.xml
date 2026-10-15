@@ -68,7 +68,9 @@
     <string name="quick_nearest_stairs">Nearest stairs</string>
     <string name="quick_actions">Quick actions</string>
     <string name="quick_actions_description">Restroom, stairs or set position</string>
-    <string name="manual_place_location">Set or move my position</string>
+    <string name="manual_place_location">Set place</string>
+    <string name="manual_move_location">Move place</string>
+    <string name="cancel_manual_placement">Cancel</string>
     <string name="manual_place_hint">Tap the map, including inside a room, to place your position</string>
     <string name="set_location_here">Set my position in this room</string>
     <string name="manual_location_set">Your position is set in this room</string>
@@ -146,7 +148,6 @@
     <string name="favorite_star_add">Add to favorites</string>
     <string name="favorite_star_remove">Remove from favorites</string>
     <string name="room_number_floor_category">%1$s · %2$s · %3$s</string>
-    <string name="room_label_always">Room labels: always</string>
 
     <!-- Room details. -->
     <string name="room_floor_category">%1$s · %2$s · %3$s</string>
@@ -289,12 +290,9 @@
     <string name="accent_purple">Purple</string>
     <string name="accent_red">Red</string>
     <string name="settings_text_size">Text size · %1$d%%</string>
+    <string name="settings_text_preview">Text preview</string>
     <string name="settings_animations">Animations</string>
     <string name="settings_animations_description">Smooth route highlighting and screen transitions</string>
-    <string name="settings_room_labels">Room labels</string>
-    <string name="labels_always">Always</string>
-    <string name="labels_on_zoom">When zoomed in</string>
-    <string name="labels_never">Hidden</string>
     <string name="settings_initial_floor">Starting floor</string>
     <string name="settings_last_floor">Last opened</string>
     <string name="settings_max_zoom">Maximum zoom · %1$.1f×</string>

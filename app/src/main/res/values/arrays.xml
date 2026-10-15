@@ -10,9 +10,4 @@
         <item>@string/theme_light</item>
         <item>@string/theme_dark</item>
     </string-array>
-    <string-array name="room_label_mode_entries">
-        <item>@string/labels_always</item>
-        <item>@string/labels_on_zoom</item>
-        <item>@string/labels_never</item>
-    </string-array>
 </resources>
