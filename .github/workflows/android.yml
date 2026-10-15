@@ -27,4 +27,23 @@ jobs:
       - name: Install Android SDK 34
         run: sdkmanager "platforms;android-34" "build-tools;34.0.0"
       - name: Run unit tests and assemble debug APK
-        run: ./gradlew --no-daemon testDebugUnitTest assembleDebug
+        run: ./gradlew --no-daemon testDebugUnitTest assembleDebug 2>&1 | tee "$RUNNER_TEMP/gradle.log"
+      - name: Summarize Gradle failure
+        if: failure()
+        shell: bash
+        run: |
+          if [[ ! -s "$RUNNER_TEMP/gradle.log" ]]; then
+            exit 0
+          fi
+
+          report=$(grep -E 'FAILURE:|What went wrong:|Try:|Execution failed for task|FAILED|e: |Exception:|error:' "$RUNNER_TEMP/gradle.log" | tail -n 30 || true)
+          if [[ -z "$report" ]]; then
+            report=$(tail -n 30 "$RUNNER_TEMP/gradle.log")
+          fi
+
+          echo "## Gradle failure details" >> "$GITHUB_STEP_SUMMARY"
+          while IFS= read -r line; do
+            echo "$line" >> "$GITHUB_STEP_SUMMARY"
+            safe=${line//%/%25}
+            echo "::error title=Gradle failure::$safe"
+          done <<< "$report"
