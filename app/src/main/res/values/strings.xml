@@ -1,12 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Название и авторство студенческого проекта. -->
+    <!-- Название приложения. -->
     <string name="app_name">ЛОГОС: Путеводитель</string>
-    <string name="app_tagline">Студенческий навигатор по колледжу «Логос»</string>
-    <string name="team_name">ЛОГОС: Путеводитель — команда студентов</string>
-    <string name="project_type">Студенческий проект команды колледжа «Логос»</string>
-    <string name="project_credits">Разработано командой студентов Технического колледжа «Логос»</string>
-    <string name="college_name">АНО ПО «Технический колледж „Логос“»</string>
+    <string name="app_tagline">Навигация по колледжу «Логос»</string>
 
     <!-- Общие элементы интерфейса. -->
     <string name="nav_map">Карта</string>
@@ -37,7 +33,7 @@
 
     <!-- Экран карты и местоположение. -->
     <string name="map_screen_title">Карта колледжа</string>
-    <string name="map_screen_subtitle">Студенческий проект колледжа «Логос»</string>
+    <string name="map_screen_subtitle">Найдите кабинет и проложите маршрут</string>
     <string name="location_gps">GPS</string>
     <string name="location_manual">Вручную</string>
     <string name="location_me_here">Я здесь</string>
@@ -84,6 +80,7 @@
     <string name="zoom_out">Уменьшить карту</string>
     <string name="floor_select">Выбор этажа</string>
     <string name="map_loading_svg">Загружаем SVG-план этажа…</string>
+    <string name="map_render_error">Не удалось подготовить план этажа. Коснитесь, чтобы повторить.</string>
     <string name="map_load_error_title">Не удалось открыть навигационные данные</string>
     <string name="map_load_error_message">Проверьте локальные файлы navigation_graph.json и rooms.json.</string>
     <string name="floor_map_error_title">Карта этажа недоступна</string>
@@ -387,23 +384,21 @@
     <!-- Экран «О приложении» и заставка. -->
     <string name="about_title">О приложении</string>
     <string name="about_version">Версия</string>
-    <string name="about_team_label">Команда проекта</string>
     <string name="about_project_type">Тип проекта</string>
-    <string name="about_project_credits">Разработка</string>
+    <string name="about_project_type_value">Индивидуальный проект</string>
+    <string name="about_project_credits">Авторство</string>
+    <string name="about_project_credits_value">Разработано студентами Технического колледжа «Логос»</string>
     <string name="about_mode_label">Режим работы</string>
     <string name="about_mode_value">Офлайн — карты и каталог хранятся в приложении</string>
     <string name="about_purpose_label">Назначение</string>
     <string name="about_purpose_value">Ориентирование внутри здания колледжа</string>
     <string name="about_project_warning">Маршруты основаны на предоставленных планах. Перед использованием проверьте координаты кабинетов, проходимость, двери и связи между этажами.</string>
     <string name="splash_description">Заставка приложения «ЛОГОС: Путеводитель»</string>
-    <string name="splash_title">ЛОГОС: Путеводитель</string>
-    <string name="splash_team">ЛОГОС: Путеводитель — команда студентов</string>
-    <string name="splash_project">Студенческий проект Технического колледжа «Логос»</string>
 
     <!-- Интерактивное обучение: десять шагов. -->
     <string name="onboarding_welcome_title">Добро пожаловать в ЛОГОС: Путеводитель!</string>
     <string name="onboarding_welcome_body">Удобный навигатор по колледжу «Логос».</string>
-    <string name="onboarding_welcome_credit">Создано командой студентов Технического колледжа «Логос» — «ЛОГОС: Путеводитель».</string>
+    <string name="onboarding_welcome_tip">Карта этажей, поиск кабинетов и офлайн-маршруты.</string>
     <string name="onboarding_language_title">Выберите язык</string>
     <string name="onboarding_location_title">Разрешение на геолокацию</string>
     <string name="onboarding_location_body">Для автоматического определения вашего местоположения внутри колледжа приложению требуется доступ к геолокации. Это позволит показывать, где вы находитесь на карте, и строить маршруты автоматически.</string>
@@ -435,7 +430,7 @@
     <string name="onboarding_settings_body">Меняйте тему, язык, цвет маршрута, размер текста и другие параметры. В настройках можно повторно запустить это обучение.</string>
     <string name="onboarding_done_title">Всё готово!</string>
     <string name="onboarding_done_body">Теперь вы знаете основы. Приятного ориентирования в колледже «Логос»!</string>
-    <string name="onboarding_done_signature">С любовью, команда студентов колледжа «Логос» 💙</string>
+    <string name="onboarding_done_tip">Начните с карты или найдите кабинет через поиск.</string>
     <string name="onboarding_back">Назад</string>
     <string name="onboarding_start">Начать пользоваться</string>
     <string name="onboarding_page_format">Шаг %1$d из %2$d</string>

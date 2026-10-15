@@ -292,7 +292,7 @@ private fun OnboardingPage(
         when (page) {
             0 -> {
                 Text(stringResource(R.string.onboarding_welcome_body), style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center)
-                Text(stringResource(R.string.onboarding_welcome_credit), style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(stringResource(R.string.onboarding_welcome_tip), style = MaterialTheme.typography.bodySmall, textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             1 -> Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedButton(onClick = { onLanguageSelected(AppLanguage.SYSTEM) }, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.language_system)) }
@@ -338,7 +338,7 @@ private fun OnboardingPage(
             8 -> Text(stringResource(R.string.onboarding_settings_body), style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center)
             else -> {
                 Text(stringResource(R.string.onboarding_done_body), style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center)
-                Text(stringResource(R.string.onboarding_done_signature), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.primary)
+                Text(stringResource(R.string.onboarding_done_tip), style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.primary)
             }
         }
         Spacer(Modifier.height(8.dp))

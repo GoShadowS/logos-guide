@@ -24,9 +24,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.LogosNavigator">
 
-        <meta-data android:name="com.logos.navigator.project.team" android:value="@string/team_name" />
-        <meta-data android:name="com.logos.navigator.project.type" android:value="@string/project_type" />
-
         <service
             android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"
             android:enabled="false"

@@ -2,6 +2,7 @@ package com.logos.navigator.ui.map
 
 import android.content.Context
 import android.content.res.Configuration
+import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.DashPathEffect
@@ -18,6 +19,7 @@ import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 import android.view.View
 import com.caverock.androidsvg.SVG
+import com.logos.navigator.R
 import com.logos.navigator.data.model.AppSettings
 import com.logos.navigator.data.model.FloorPlan
 import com.logos.navigator.data.model.LocationMode
@@ -25,26 +27,28 @@ import com.logos.navigator.data.model.MapPoint
 import com.logos.navigator.data.model.NavEdge
 import com.logos.navigator.data.model.NavNode
 import com.logos.navigator.data.model.Room
-import com.logos.navigator.data.model.SvgPoint
-import com.logos.navigator.data.model.RouteLineStyle
 import com.logos.navigator.data.model.RoomLabelMode
+import com.logos.navigator.data.model.RouteLineStyle
 import com.logos.navigator.data.model.SvgRenderQuality
 import com.logos.navigator.data.model.ThemeMode
-import com.logos.navigator.R
 import com.logos.navigator.svg.SvgCoordinateConverter
 import com.logos.navigator.svg.SvgGeometryExtractor
-import com.logos.navigator.utils.localizedName
+import com.logos.navigator.svg.SvgRenderer
 import com.logos.navigator.svg.isPointInPolygon
 import com.logos.navigator.svg.polygonBounds
-import com.logos.navigator.svg.SvgRenderer
+import com.logos.navigator.utils.localizedName
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.Future
 import kotlin.math.abs
 import kotlin.math.hypot
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.sqrt
 
 /**
- * Векторная карта этажа на Android Canvas. SVG остаётся вектором при любом масштабе;
- * маркеры, граф, точка пользователя и A* маршрут рисуются поверх него.
+ * Исходная карта и координаты остаются SVG/viewBox; для плавного pan/zoom создаётся
+ * ограниченный по памяти кэш кадра в RAM, поверх которого рисуются маршрут и маркеры.
  */
 class SvgMapView @JvmOverloads constructor(
     context: Context,
@@ -54,9 +58,24 @@ class SvgMapView @JvmOverloads constructor(
     private var floor: FloorPlan? = null
     private var rooms: List<Room> = emptyList()
     private var roomGeometries: List<RoomGeometry> = emptyList()
+    private var roomGeometriesById: Map<String, RoomGeometry> = emptyMap()
+    private var routeSegments: List<RouteFloorSegment> = emptyList()
     private var selectedRoom: Room? = null
+
+    private var mapBitmap: Bitmap? = null
+    private var mapBitmapSvg: SVG? = null
+    private var mapBitmapFloor: FloorPlan? = null
+    private var mapBitmapScale = 0f
+    private var bitmapRenderFailed = false
+    private var bitmapRenderVersion = 0L
+    private var bitmapRenderFuture: Future<*>? = null
+    private var pendingBitmapSvg: SVG? = null
+    private var pendingBitmapFloor: FloorPlan? = null
+    private var pendingBitmapScale = 0f
+    private val bitmapBounds = RectF()
     private var hoveredRoomId: String? = null
     private var nodes: List<NavNode> = emptyList()
+    private var nodesById: Map<String, NavNode> = emptyMap()
     private var edges: List<NavEdge> = emptyList()
     private var userPosition: MapPoint? = null
     private var accuracyMeters: Float? = null
@@ -73,10 +92,15 @@ class SvgMapView @JvmOverloads constructor(
     private var panY = 0f
     private var fitScale = 1f
     private val mapMatrix = Matrix()
-    private var converter = SvgCoordinateConverter(mapMatrix)
+    private val matrixValues = FloatArray(9)
+    private val converter = SvgCoordinateConverter(mapMatrix)
     private var pointerOnMarker = false
     private var movedSinceDown = false
     private var dashPhase = 0f
+    private var dashedRouteWidth = Float.NaN
+    private var dashedRouteEffect: DashPathEffect? = null
+    private var animatedRouteWidth = Float.NaN
+    private var animatedDashIntervals = FloatArray(2)
     private var lastFrameTime = 0L
     private var pendingCenter: MapPoint? = null
 
@@ -133,20 +157,37 @@ class SvgMapView @JvmOverloads constructor(
         manualPositionSelectionMode: Boolean = false,
         onManualPositionInRoom: (Room, Float, Float) -> Unit = { _, x, y -> onManualPosition(x, y) },
     ) {
-        val floorChanged = this.floor?.number != floor?.number
-        val geometryChanged = floorChanged || this.rooms != rooms
+        val floorChanged = this.floor != floor
+        val svgChanged = this.svg !== svg
+        val geometryChanged = floorChanged || this.rooms !== rooms
+        val nextRoute = route.orEmpty()
+        val routeChanged = this.route != nextRoute
+        val positionChanged = this.userPosition != userPosition
+        val accuracyChanged = this.accuracyMeters != accuracyMeters
+        val locationModeChanged = this.locationMode != locationMode
+        val selectionChanged = this.selectedRoom != selectedRoom || this.destination != destination
+        val nodesChanged = this.nodes != nodes
+        val edgesChanged = this.edges != edges
+        val compassChanged = settings.compassRotationEnabled && this.compassHeadingDegrees != compassHeadingDegrees
+        val compassModeChanged = this.settings.compassRotationEnabled != settings.compassRotationEnabled
+        val settingsChanged = this.settings != settings
+        val oldZoom = zoom
+
+        if (floorChanged || svgChanged) releaseMapBitmap()
         this.svg = svg
         this.floor = floor
         this.rooms = rooms
         this.selectedRoom = selectedRoom
         if (geometryChanged && floor != null) updateRoomGeometries(floor, rooms)
+        if (nodesChanged) nodesById = nodes.associateBy(NavNode::id)
         this.nodes = nodes
         this.edges = edges
         this.userPosition = userPosition
         this.accuracyMeters = accuracyMeters
         this.locationMode = locationMode
         this.manualPositionSelectionMode = manualPositionSelectionMode
-        this.route = route.orEmpty()
+        if (routeChanged) routeSegments = buildRouteSegments(nextRoute)
+        this.route = nextRoute
         this.destination = destination
         this.settings = settings
         this.compassHeadingDegrees = compassHeadingDegrees
@@ -160,8 +201,14 @@ class SvgMapView @JvmOverloads constructor(
             panX = 0f
             panY = 0f
         }
-        updateMatrix()
-        invalidate()
+        val zoomChanged = zoom != oldZoom
+        if (floorChanged || zoomChanged || compassModeChanged || compassChanged) updateMatrix()
+        if (svgChanged || floorChanged || zoomChanged) requestMapBitmapRender()
+
+        val visualsChanged = svgChanged || floorChanged || geometryChanged || routeChanged || positionChanged ||
+            accuracyChanged || locationModeChanged || selectionChanged || nodesChanged || edgesChanged ||
+            settingsChanged || compassChanged || compassModeChanged
+        if (visualsChanged) invalidate()
     }
 
     fun zoomIn() = zoomAt(zoom * 1.25f, width / 2f, height / 2f)
@@ -192,6 +239,123 @@ class SvgMapView @JvmOverloads constructor(
 
     fun zoomLevel(): Float = zoom
 
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        requestMapBitmapRender()
+    }
+
+    override fun onDetachedFromWindow() {
+        bitmapRenderVersion++
+        bitmapRenderFuture?.cancel(true)
+        bitmapRenderFuture = null
+        pendingBitmapSvg = null
+        pendingBitmapFloor = null
+        pendingBitmapScale = 0f
+        releaseMapBitmap()
+        super.onDetachedFromWindow()
+    }
+
+    private fun requestMapBitmapRender() {
+        val sourceSvg = svg ?: return
+        val currentFloor = floor ?: return
+        if (!isAttachedToWindow || width <= 0 || height <= 0) return
+        updateMatrix()
+
+        val mapArea = currentFloor.width.toDouble() * currentFloor.height.toDouble()
+        if (mapArea <= 0.0) return
+        val maximumScale = sqrt(MAX_BITMAP_CACHE_PIXELS.toDouble() / mapArea).toFloat()
+        val desiredScale = min(fitScale * max(zoom, 1f) * BITMAP_OVERSAMPLE, maximumScale)
+            .coerceAtLeast(min(MIN_BITMAP_SCALE, maximumScale))
+        val existingIsSharpEnough = mapBitmap != null && mapBitmapSvg === sourceSvg &&
+            mapBitmapFloor == currentFloor && mapBitmapScale >= desiredScale - BITMAP_SCALE_EPSILON
+        if (existingIsSharpEnough) return
+        val requestAlreadyRunning = bitmapRenderFuture?.isDone == false &&
+            pendingBitmapSvg === sourceSvg && pendingBitmapFloor == currentFloor &&
+            pendingBitmapScale >= desiredScale - BITMAP_SCALE_EPSILON
+        if (requestAlreadyRunning) return
+
+        bitmapRenderVersion++
+        val requestVersion = bitmapRenderVersion
+        bitmapRenderFuture?.cancel(true)
+        pendingBitmapSvg = sourceSvg
+        pendingBitmapFloor = currentFloor
+        pendingBitmapScale = desiredScale
+        bitmapRenderFailed = false
+        bitmapRenderFuture = MAP_RENDER_EXECUTOR.submit {
+            val renderedMap = renderMapBitmap(sourceSvg, currentFloor, desiredScale)
+            if (Thread.currentThread().isInterrupted) {
+                renderedMap?.bitmap?.recycle()
+                return@submit
+            }
+            if (renderedMap == null) {
+                post {
+                    if (requestVersion == bitmapRenderVersion) {
+                        bitmapRenderFuture = null
+                        pendingBitmapSvg = null
+                        pendingBitmapFloor = null
+                        pendingBitmapScale = 0f
+                        bitmapRenderFailed = true
+                        invalidate()
+                    }
+                }
+                return@submit
+            }
+            val rendered = renderedMap.bitmap
+            val posted = post {
+                if (requestVersion != bitmapRenderVersion || svg !== sourceSvg || floor != currentFloor) {
+                    rendered.recycle()
+                    return@post
+                }
+                val previous = mapBitmap
+                mapBitmap = rendered
+                mapBitmapSvg = sourceSvg
+                mapBitmapFloor = currentFloor
+                mapBitmapScale = renderedMap.scale
+                bitmapRenderFuture = null
+                pendingBitmapSvg = null
+                pendingBitmapFloor = null
+                pendingBitmapScale = 0f
+                bitmapRenderFailed = false
+                if (previous !== rendered) previous?.recycle()
+                invalidate()
+            }
+            if (!posted) rendered.recycle()
+        }
+    }
+
+    /** При нехватке памяти пробует уменьшить разрешение, не рендеря SVG на UI-потоке. */
+    private fun renderMapBitmap(sourceSvg: SVG, floor: FloorPlan, desiredScale: Float): RenderedMapBitmap? {
+        var scale = desiredScale
+        val minimumScale = min(desiredScale, MIN_BITMAP_FALLBACK_SCALE)
+        repeat(MAX_BITMAP_RENDER_ATTEMPTS) {
+            if (Thread.currentThread().isInterrupted) return null
+            try {
+                return RenderedMapBitmap(SvgRenderer.renderToBitmap(sourceSvg, floor, scale), scale)
+            } catch (error: Throwable) {
+                if (error !is OutOfMemoryError) return null
+                val lowerScale = max(minimumScale, scale * BITMAP_RETRY_SCALE_FACTOR)
+                if (lowerScale >= scale) return null
+                scale = lowerScale
+            }
+        }
+        return null
+    }
+
+    private fun releaseMapBitmap() {
+        bitmapRenderVersion++
+        bitmapRenderFuture?.cancel(true)
+        bitmapRenderFuture = null
+        pendingBitmapSvg = null
+        pendingBitmapFloor = null
+        pendingBitmapScale = 0f
+        bitmapRenderFailed = false
+        mapBitmap?.recycle()
+        mapBitmap = null
+        mapBitmapSvg = null
+        mapBitmapFloor = null
+        mapBitmapScale = 0f
+    }
+
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         val systemDark = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
@@ -204,16 +368,24 @@ class SvgMapView @JvmOverloads constructor(
             return
         }
 
-        updateMatrix()
+        val cachedMap = mapBitmap?.takeIf { mapBitmapSvg === currentSvg && mapBitmapFloor == currentFloor }
+        if (cachedMap == null) {
+            val message = if (bitmapRenderFailed) R.string.map_render_error else R.string.map_loading_svg
+            drawCenteredMessage(canvas, context.getString(message))
+            return
+        }
+
         val saveCount = canvas.save()
         canvas.setDrawFilter(drawFilterFor(settings.svgRenderQuality))
         canvas.concat(mapMatrix)
-        val highlightRoom = destination?.takeIf { it.floor == currentFloor.number }
-            ?: selectedRoom?.takeIf { it.floor == currentFloor.number }
-        val highlightElementIds = highlightRoom?.let { room ->
-            (room.svgElementIds + listOfNotNull(room.svgElementId)).distinct()
-        }.orEmpty()
-        SvgRenderer.render(canvas, currentSvg, currentFloor, highlightElementIds)
+        bitmapBounds.set(
+            currentFloor.viewBoxX.toFloat(),
+            currentFloor.viewBoxY.toFloat(),
+            (currentFloor.viewBoxX + currentFloor.width).toFloat(),
+            (currentFloor.viewBoxY + currentFloor.height).toFloat(),
+        )
+        mapPaint.isFilterBitmap = settings.svgRenderQuality != SvgRenderQuality.LOW
+        canvas.drawBitmap(cachedMap, null, bitmapBounds, mapPaint)
         val mapScale = fitScale * zoom
         if (settings.showCoordinateGrid) drawCoordinateGrid(canvas, currentFloor)
         if (settings.showNavigationEdges) drawDebugEdges(canvas, currentFloor)
@@ -225,7 +397,9 @@ class SvgMapView @JvmOverloads constructor(
         canvas.restoreToCount(saveCount)
         drawTapCoordinateOverlay(canvas)
 
-        if (settings.animationsEnabled && settings.routeLineStyle == RouteLineStyle.ANIMATED && route.isNotEmpty()) {
+        if (settings.animationsEnabled && settings.routeLineStyle == RouteLineStyle.ANIMATED &&
+            routeSegments.any { it.floor == currentFloor.number }
+        ) {
             val now = SystemClock.uptimeMillis()
             val elapsed = if (lastFrameTime == 0L) 0L else now - lastFrameTime
             lastFrameTime = now
@@ -241,10 +415,15 @@ class SvgMapView @JvmOverloads constructor(
         super.onSizeChanged(w, h, oldw, oldh)
         updateMatrix()
         pendingCenter?.takeIf { it.floor == floor?.number }?.let(::centerOn)
+        requestMapBitmapRender()
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
         if (!isEnabled) return false
+        if (bitmapRenderFailed) {
+            if (event.actionMasked == MotionEvent.ACTION_UP) requestMapBitmapRender()
+            return true
+        }
         scaleDetector.onTouchEvent(event)
         if (event.pointerCount == 1 && !scaleDetector.isInProgress) {
             gestureDetector.onTouchEvent(event)
@@ -264,21 +443,31 @@ class SvgMapView @JvmOverloads constructor(
         val rawTx = baseLeft * zoom + width / 2f * (1f - zoom) + panX - currentFloor.viewBoxX.toFloat() * scaled
         val rawTy = baseTop * zoom + height / 2f * (1f - zoom) + panY - currentFloor.viewBoxY.toFloat() * scaled
         val rotation = if (settings.compassRotationEnabled) -compassHeadingDegrees else 0f
-        val radians = Math.toRadians(rotation.toDouble())
-        val cosine = kotlin.math.cos(radians).toFloat()
-        val sine = kotlin.math.sin(radians).toFloat()
+        val cosine: Float
+        val sine: Float
+        if (rotation == 0f) {
+            cosine = 1f
+            sine = 0f
+        } else {
+            val radians = Math.toRadians(rotation.toDouble())
+            cosine = kotlin.math.cos(radians).toFloat()
+            sine = kotlin.math.sin(radians).toFloat()
+        }
         val centerX = width / 2f
         val centerY = height / 2f
         val tx = centerX + cosine * (rawTx - centerX) - sine * (rawTy - centerY)
         val ty = centerY + sine * (rawTx - centerX) + cosine * (rawTy - centerY)
-        mapMatrix.setValues(
-            floatArrayOf(
-                cosine * scaled, -sine * scaled, tx,
-                sine * scaled, cosine * scaled, ty,
-                0f, 0f, 1f,
-            ),
-        )
-        converter = SvgCoordinateConverter(mapMatrix)
+        matrixValues[0] = cosine * scaled
+        matrixValues[1] = -sine * scaled
+        matrixValues[2] = tx
+        matrixValues[3] = sine * scaled
+        matrixValues[4] = cosine * scaled
+        matrixValues[5] = ty
+        matrixValues[6] = 0f
+        matrixValues[7] = 0f
+        matrixValues[8] = 1f
+        mapMatrix.setValues(matrixValues)
+        converter.refreshInverse()
     }
 
     private fun zoomAt(target: Float, focusX: Float, focusY: Float) {
@@ -292,6 +481,7 @@ class SvgMapView @JvmOverloads constructor(
             updateMatrix()
         }
         invalidate()
+        requestMapBitmapRender()
     }
 
     private fun updateRoomGeometries(floor: FloorPlan, floorRooms: List<Room>) {
@@ -301,12 +491,13 @@ class SvgMapView @JvmOverloads constructor(
                 val catalogPolygons = room.polygons.ifEmpty {
                     listOfNotNull(room.polygon.takeIf { it.size >= 3 })
                 }.map { polygon -> polygon.map { point -> PointF(point.x.toFloat(), point.y.toFloat()) } }
-                val elementIds = (room.svgElementIds + listOfNotNull(room.svgElementId)).distinct()
-                val extractedPolygons = elementIds.mapNotNull { id ->
-                    runCatching { SvgGeometryExtractor.polygon(context.assets, floor.mapAsset, id) }.getOrNull()
-                }
-                val polygons = (catalogPolygons.ifEmpty { extractedPolygons })
-                    .filter { it.size >= 3 }
+                val polygons = if (catalogPolygons.isNotEmpty()) {
+                    catalogPolygons
+                } else {
+                    // Разбираем SVG только для редких записей без полигонов в JSON.
+                    (room.svgElementIds + listOfNotNull(room.svgElementId)).distinct()
+                        .mapNotNull { id -> runCatching { SvgGeometryExtractor.polygon(context.assets, floor.mapAsset, id) }.getOrNull() }
+                }.filter { it.size >= 3 }
                 if (polygons.isEmpty()) return@mapNotNull null
                 val bounds = polygons.mapNotNull(::polygonBounds).reduceOrNull { result, next ->
                     result.union(next)
@@ -317,10 +508,41 @@ class SvgMapView @JvmOverloads constructor(
                     val next = polygon[(index + 1) % polygon.size]
                     current.x.toDouble() * next.y.toDouble() - next.x.toDouble() * current.y.toDouble()
                 }) / 2.0 }.toFloat()
-                RoomGeometry(room = room, polygons = polygons, bounds = bounds, area = area)
+                val paths = polygons.map { polygon ->
+                    Path().apply {
+                        moveTo(polygon.first().x, polygon.first().y)
+                        polygon.drop(1).forEach { lineTo(it.x, it.y) }
+                        close()
+                    }
+                }
+                RoomGeometry(room = room, polygons = polygons, paths = paths, bounds = bounds, area = area)
             }
             .sortedBy(RoomGeometry::area)
             .toList()
+        roomGeometriesById = roomGeometries.associateBy { it.room.id }
+    }
+
+    private fun buildRouteSegments(route: List<NavNode>): List<RouteFloorSegment> {
+        if (route.isEmpty()) return emptyList()
+        val groups = mutableListOf<MutableList<NavNode>>()
+        var activeFloor: Int? = null
+        var activeNodes: MutableList<NavNode>? = null
+        route.forEach { node ->
+            if (activeNodes == null || activeFloor != node.floor) {
+                activeFloor = node.floor
+                val newSegment = mutableListOf<NavNode>()
+                groups += newSegment
+                activeNodes = newSegment
+            }
+            activeNodes?.add(node)
+        }
+        return groups.map { segmentNodes ->
+            val path = Path().apply {
+                moveTo(segmentNodes.first().x.toFloat(), segmentNodes.first().y.toFloat())
+                segmentNodes.drop(1).forEach { lineTo(it.x.toFloat(), it.y.toFloat()) }
+            }
+            RouteFloorSegment(segmentNodes.first().floor, segmentNodes, path)
+        }
     }
 
     private fun roomAt(point: PointF): Room? = roomGeometries.asSequence()
@@ -336,7 +558,7 @@ class SvgMapView @JvmOverloads constructor(
         when (event.actionMasked) {
             MotionEvent.ACTION_HOVER_MOVE -> {
                 val point = converter.viewToSvg(event.x, event.y)
-                val hovered = point?.let { roomAt(PointF(it.x, it.y)) }?.id
+                val hovered = if (point == null) null else roomAt(point)?.id
                 if (hoveredRoomId != hovered) {
                     hoveredRoomId = hovered
                     invalidate()
@@ -371,12 +593,11 @@ class SvgMapView @JvmOverloads constructor(
     }
 
     private fun drawDebugEdges(canvas: Canvas, floor: FloorPlan) {
-        val byId = nodes.associateBy(NavNode::id)
         debugPaint.color = 0xAA8E44AD.toInt()
         debugPaint.strokeWidth = 1.6f / max(fitScale * zoom, 0.0001f)
         edges.forEach { edge ->
-            val from = byId[edge.from]?.takeIf { it.floor == floor.number } ?: return@forEach
-            val to = byId[edge.to]?.takeIf { it.floor == floor.number } ?: return@forEach
+            val from = nodesById[edge.from]?.takeIf { it.floor == floor.number } ?: return@forEach
+            val to = nodesById[edge.to]?.takeIf { it.floor == floor.number } ?: return@forEach
             canvas.drawLine(from.x.toFloat(), from.y.toFloat(), to.x.toFloat(), to.y.toFloat(), debugPaint)
         }
     }
@@ -384,70 +605,67 @@ class SvgMapView @JvmOverloads constructor(
     private fun drawDebugNodes(canvas: Canvas, floor: FloorPlan, mapScale: Float) {
         val radius = 3.5f * resources.displayMetrics.density / max(mapScale, 0.0001f)
         debugPaint.style = Paint.Style.FILL
-        nodes.asSequence()
-            .filter { it.floor == floor.number }
-            .filter { settings.showNavigationNodes || (settings.showDoorNodes && it.type.equals("door", ignoreCase = true)) }
-            .forEach { node ->
-                debugPaint.color = if (node.type.equals("door", ignoreCase = true)) 0xFFE53935.toInt() else 0xFFAF236F.toInt()
-                canvas.drawCircle(node.x.toFloat(), node.y.toFloat(), radius * if (node.type.equals("door", true)) 1.6f else 1f, debugPaint)
-            }
+        for (node in nodes) {
+            if (node.floor != floor.number) continue
+            val isDoor = node.type.equals("door", ignoreCase = true)
+            if (!settings.showNavigationNodes && !(settings.showDoorNodes && isDoor)) continue
+            debugPaint.color = if (isDoor) 0xFFE53935.toInt() else 0xFFAF236F.toInt()
+            canvas.drawCircle(node.x.toFloat(), node.y.toFloat(), radius * if (isDoor) 1.6f else 1f, debugPaint)
+        }
         debugPaint.style = Paint.Style.STROKE
     }
 
+    /** Использует заранее собранные пути: на жестах не создаются списки и новые Path. */
     private fun drawRoute(canvas: Canvas, floor: FloorPlan, mapScale: Float) {
-        if (route.isEmpty()) return
-        val segments = mutableListOf<MutableList<NavNode>>()
-        var active: MutableList<NavNode>? = null
-        route.forEach { node ->
-            if (node.floor == floor.number) {
-                if (active == null) {
-                    val newSegment = mutableListOf<NavNode>()
-                    active = newSegment
-                    segments.add(newSegment)
-                }
-                active?.add(node)
-            } else active = null
-        }
+        if (routeSegments.isEmpty()) return
         val widthInSvgUnits = settings.routeLineWidthDp * resources.displayMetrics.density / max(mapScale, 0.0001f)
         routePaint.color = settings.routeColorArgb
         routePaint.strokeWidth = widthInSvgUnits
         routePaint.pathEffect = when (settings.routeLineStyle) {
             RouteLineStyle.SOLID -> null
-            RouteLineStyle.DASHED -> DashPathEffect(floatArrayOf(widthInSvgUnits * 2.5f, widthInSvgUnits * 1.7f), 0f)
+            RouteLineStyle.DASHED -> {
+                if (dashedRouteEffect == null || dashedRouteWidth != widthInSvgUnits) {
+                    dashedRouteWidth = widthInSvgUnits
+                    dashedRouteEffect = DashPathEffect(floatArrayOf(widthInSvgUnits * 2.5f, widthInSvgUnits * 1.7f), 0f)
+                }
+                dashedRouteEffect
+            }
             RouteLineStyle.ANIMATED -> if (settings.animationsEnabled) {
-                DashPathEffect(floatArrayOf(widthInSvgUnits * 0.8f, widthInSvgUnits * 2.1f), dashPhase)
+                if (animatedRouteWidth != widthInSvgUnits) {
+                    animatedRouteWidth = widthInSvgUnits
+                    animatedDashIntervals[0] = widthInSvgUnits * 0.8f
+                    animatedDashIntervals[1] = widthInSvgUnits * 2.1f
+                }
+                DashPathEffect(animatedDashIntervals, dashPhase)
             } else null
         }
-        segments.forEach { segment ->
-            val points = segment.map { PointF(it.x.toFloat(), it.y.toFloat()) }.toMutableList()
-            if (segment.firstOrNull()?.id == route.firstOrNull()?.id) {
-                userPosition?.takeIf { it.floor == floor.number }?.let { points.add(0, PointF(it.x, it.y)) }
+        val firstRouteNode = route.firstOrNull()
+        val lastRouteNode = route.lastOrNull()
+        routeSegments.forEach { segment ->
+            if (segment.floor != floor.number) return@forEach
+            val firstNode = segment.nodes.firstOrNull() ?: return@forEach
+            val lastNode = segment.nodes.lastOrNull() ?: return@forEach
+            canvas.drawPath(segment.path, routePaint)
+            if (firstNode.id == firstRouteNode?.id) {
+                userPosition?.takeIf { it.floor == floor.number }?.let { point ->
+                    canvas.drawLine(point.x, point.y, firstNode.x.toFloat(), firstNode.y.toFloat(), routePaint)
+                }
             }
-            if (segment.lastOrNull()?.id == route.lastOrNull()?.id) {
+            if (lastNode.id == lastRouteNode?.id) {
                 destination?.takeIf { it.floor == floor.number }?.let { room ->
                     val x = room.x
                     val y = room.y
-                    if (x != null && y != null) points += PointF(x.toFloat(), y.toFloat())
+                    if (x != null && y != null) canvas.drawLine(lastNode.x.toFloat(), lastNode.y.toFloat(), x.toFloat(), y.toFloat(), routePaint)
                 }
             }
-            if (points.size < 2) return@forEach
-            val path = Path().apply {
-                moveTo(points.first().x, points.first().y)
-                points.drop(1).forEach { lineTo(it.x, it.y) }
-            }
-            canvas.drawPath(path, routePaint)
-            routePaint.pathEffect = null
-            segment.drop(1).dropLast(1).forEach { node ->
+            for (index in 1 until segment.nodes.lastIndex) {
+                val node = segment.nodes[index]
                 canvas.drawCircle(node.x.toFloat(), node.y.toFloat(), widthInSvgUnits * 0.85f, haloPaint)
                 roomPaint.color = settings.routeColorArgb
                 canvas.drawCircle(node.x.toFloat(), node.y.toFloat(), widthInSvgUnits * 0.48f, roomPaint)
             }
-            routePaint.pathEffect = when (settings.routeLineStyle) {
-                RouteLineStyle.SOLID -> null
-                RouteLineStyle.DASHED -> DashPathEffect(floatArrayOf(widthInSvgUnits * 2.5f, widthInSvgUnits * 1.7f), 0f)
-                RouteLineStyle.ANIMATED -> if (settings.animationsEnabled) DashPathEffect(floatArrayOf(widthInSvgUnits * 0.8f, widthInSvgUnits * 2.1f), dashPhase) else null
-            }
         }
+        routePaint.pathEffect = null
     }
 
     /** Подсветка рисуется отдельным полупрозрачным слоем поверх исходного SVG. */
@@ -459,13 +677,7 @@ class SvgMapView @JvmOverloads constructor(
             val isSelected = geometry.room.id == selectedId
             val isHovered = geometry.room.id == hoveredRoomId
             if (!isDestination && !isSelected && !isHovered) return@forEach
-            geometry.polygons.forEach polygonLoop@ { polygon ->
-                if (polygon.size < 3) return@polygonLoop
-                val path = Path().apply {
-                    moveTo(polygon.first().x, polygon.first().y)
-                    polygon.drop(1).forEach { lineTo(it.x, it.y) }
-                    close()
-                }
+            geometry.paths.forEach { path ->
                 roomPaint.style = Paint.Style.FILL
                 roomPaint.color = when {
                     isDestination -> 0x6659C36A
@@ -491,10 +703,10 @@ class SvgMapView @JvmOverloads constructor(
             RoomLabelMode.ON_ZOOM -> zoom >= 1.28f
             RoomLabelMode.NEVER -> false
         }
+        if (!labelsEnabled) return
         rooms.asSequence().filter { it.floor == floor.number }.forEach { room ->
-            if (!labelsEnabled) return@forEach
             val isTarget = room.id == destination?.id || room.id == selectedRoom?.id
-            val geometry = roomGeometries.firstOrNull { it.room.id == room.id }
+            val geometry = roomGeometriesById[room.id]
             val centerX = room.centerX?.toFloat() ?: room.x?.toFloat() ?: geometry?.bounds?.centerX()
                 ?: return@forEach
             val centerY = room.centerY?.toFloat() ?: room.y?.toFloat() ?: geometry?.bounds?.centerY()
@@ -593,9 +805,9 @@ class SvgMapView @JvmOverloads constructor(
     }
 
     private fun drawFilterFor(quality: SvgRenderQuality): PaintFlagsDrawFilter = when (quality) {
-        SvgRenderQuality.LOW -> PaintFlagsDrawFilter(Paint.ANTI_ALIAS_FLAG, 0)
-        SvgRenderQuality.MEDIUM -> PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG)
-        SvgRenderQuality.HIGH -> PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG)
+        SvgRenderQuality.LOW -> LOW_QUALITY_DRAW_FILTER
+        SvgRenderQuality.MEDIUM -> MEDIUM_QUALITY_DRAW_FILTER
+        SvgRenderQuality.HIGH -> HIGH_QUALITY_DRAW_FILTER
     }
 
     private inner class ScaleListener : ScaleGestureDetector.SimpleOnScaleGestureListener() {
@@ -625,6 +837,7 @@ class SvgMapView @JvmOverloads constructor(
 
         override fun onScaleEnd(detector: ScaleGestureDetector) {
             focusPoint = null
+            requestMapBitmapRender()
         }
     }
 
@@ -675,11 +888,33 @@ class SvgMapView @JvmOverloads constructor(
     private data class RoomGeometry(
         val room: Room,
         val polygons: List<List<PointF>>,
+        val paths: List<Path>,
         val bounds: RectF,
         val area: Float,
     )
 
+    private data class RouteFloorSegment(
+        val floor: Int,
+        val nodes: List<NavNode>,
+        val path: Path,
+    )
+
+    private data class RenderedMapBitmap(val bitmap: Bitmap, val scale: Float)
+
     private companion object {
         const val MARKER_DRAG_RADIUS_DP = 34f
+        const val BITMAP_OVERSAMPLE = 1.2f
+        const val MAX_BITMAP_CACHE_PIXELS = 2_400_000
+        const val MIN_BITMAP_SCALE = 0.25f
+        const val MIN_BITMAP_FALLBACK_SCALE = 0.12f
+        const val BITMAP_RETRY_SCALE_FACTOR = 0.6f
+        const val MAX_BITMAP_RENDER_ATTEMPTS = 4
+        const val BITMAP_SCALE_EPSILON = 0.01f
+        val LOW_QUALITY_DRAW_FILTER = PaintFlagsDrawFilter(Paint.ANTI_ALIAS_FLAG, 0)
+        val MEDIUM_QUALITY_DRAW_FILTER = PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG)
+        val HIGH_QUALITY_DRAW_FILTER = PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG)
+        val MAP_RENDER_EXECUTOR: ExecutorService = Executors.newSingleThreadExecutor { task ->
+            Thread(task, "logos-svg-cache").apply { priority = Thread.MIN_PRIORITY }
+        }
     }
 }
