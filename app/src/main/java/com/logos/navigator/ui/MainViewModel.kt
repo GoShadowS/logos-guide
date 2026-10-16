@@ -35,7 +35,7 @@ import com.logos.navigator.data.repository.IndoorRepository
 import com.logos.navigator.navigation.GeoReferencer
 import com.logos.navigator.navigation.RouteProgressCalculator
 import com.logos.navigator.navigation.RouteStepGenerator
-import com.logos.navigator.navigation.pathfinding.AStarPathfinder
+import com.logos.navigator.navigation.SiteIndoorRouter
 import com.logos.navigator.utils.localizedName
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -245,7 +245,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val current = _state.value
         val floor = navigationData?.floors?.firstOrNull { it.number == current.selectedFloor } ?: return
         if (current.locationMode != LocationMode.MANUAL) return
-        if (!isWithinFloorViewBox(floor, x.toDouble(), y.toDouble())) {
+        if (!SiteIndoorRouter.isInsideCollege(floor.number, x.toDouble(), y.toDouble(), current.rooms)) {
             showMessage(appContext.getString(R.string.manual_position_outside_map))
             return
         }
@@ -441,11 +441,19 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
             return
         }
-        if (!isWithinFloorViewBox(floor, svgPoint.first, svgPoint.second)) {
+        if (!SiteIndoorRouter.isInsideCollege(floor.number, svgPoint.first, svgPoint.second, _state.value.rooms)) {
             _state.update {
                 it.copy(
                     userPosition = null,
                     isManualPositionConfirmed = false,
+                    route = null,
+                    routeOriginPosition = null,
+                    isNavigationStarted = false,
+                    routeSteps = emptyList(),
+                    currentRouteStepIndex = 0,
+                    routeProgress = 0f,
+                    routeDistanceMeters = null,
+                    routeMinutes = null,
                     gpsAccuracyMeters = accuracy,
                     gpsWarning = appContext.getString(R.string.gps_position_outside_map),
                     isGpsActive = true,
@@ -575,7 +583,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         buildRoute(room)
     }
 
-    /** Находит доступный санузел или лестницу по фактическому положению пользователя. */
+    /** Находит ближайшую подходящую комнату по коридорному маршруту сайта. */
     fun navigateToNearest(role: String) {
         val state = _state.value
         val position = state.userPosition
@@ -584,43 +592,34 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             showMessage(appContext.getString(R.string.quick_action_location_required))
             return
         }
+        if (!SiteIndoorRouter.isInsideCollege(position.floor, position.x.toDouble(), position.y.toDouble(), state.rooms)) {
+            showMessage(appContext.getString(R.string.manual_position_outside_map))
+            return
+        }
         if (isInsideRestrictedArea(graph, position.floor, position.x.toDouble(), position.y.toDouble())) {
             showMessage(appContext.getString(R.string.route_start_in_restricted_area))
             return
         }
-        val start = AStarPathfinder.nearestNode(graph, position.floor, position.x.toDouble(), position.y.toDouble())
-        if (start == null) {
-            showMessage(appContext.getString(R.string.route_no_graph_nodes))
+        nonRouteableRoomAt(position)?.let { room ->
+            showMessage(appContext.getString(R.string.room_route_unavailable, room.localizedName(appContext)))
             return
         }
+        val transition = routeTransition(state.settings)
         val destination = state.rooms.asSequence()
             .filter { it.role?.equals(role, ignoreCase = true) == true && it.routeAvailable && !it.nodeId.isNullOrBlank() }
             .mapNotNull { room ->
-                val path = AStarPathfinder.findPath(
-                    graph = graph,
-                    startId = start.id,
-                    goalId = room.nodeId ?: return@mapNotNull null,
-                    preference = state.settings.routePreference,
-                    useElevator = state.settings.useElevator,
+                val plan = SiteIndoorRouter.plan(
+                    start = position,
+                    target = room,
+                    rooms = state.rooms,
+                    transition = transition,
+                    startRoomId = manualStartRoomId.takeIf { state.locationMode == LocationMode.MANUAL },
+                    routeSession = routeSession,
                 ) ?: return@mapNotNull null
-                val networkCost = AStarPathfinder.pathCost(
-                    graph = graph,
-                    path = path,
-                    preference = state.settings.routePreference,
-                    useElevator = state.settings.useElevator,
-                )
-                val startScale = graph.floors.firstOrNull { it.number == position.floor }?.metersPerUnit
-                    ?.takeIf { it.isFinite() && it > 0.0 } ?: DEFAULT_METERS_PER_UNIT
-                val startConnector = hypot(start.x - position.x, start.y - position.y) * startScale
-                val destinationNode = path.last()
-                val destinationConnector = if (destinationNode.floor == room.floor && room.x != null && room.y != null) {
-                    val destinationScale = graph.floors.firstOrNull { it.number == room.floor }?.metersPerUnit
-                        ?.takeIf { it.isFinite() && it > 0.0 } ?: DEFAULT_METERS_PER_UNIT
-                    hypot(destinationNode.x - room.x, destinationNode.y - room.y) * destinationScale
-                } else {
-                    0.0
-                }
-                room to (networkCost + startConnector + destinationConnector)
+                val routeGraph = SiteIndoorRouter.graphWithRouteTransitions(graph, plan.nodes)
+                val destinationDoor = routeDestinationAtDoor(room, plan.nodes)
+                val distance = RouteProgressCalculator.distances(routeGraph, plan.nodes, position, destinationDoor).totalMeters
+                room to distance
             }
             .minByOrNull { it.second }
             ?.first
@@ -652,9 +651,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun buildRoute(room: Room) {
         val graph = navigationData ?: return
-        val position = _state.value.userPosition ?: return
-        val nonRouteableRoom = nonRouteableRoomAt(position)
-        if (nonRouteableRoom != null) {
+        val current = _state.value
+        val position = current.userPosition ?: return
+
+        fun failRoute(message: String) {
             stopRouteSpeech()
             announcedRouteSession = -1L
             _state.update {
@@ -667,124 +667,61 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     routeProgress = 0f,
                     routeDistanceMeters = null,
                     routeMinutes = null,
-                    message = appContext.getString(
-                        R.string.room_route_unavailable,
-                        nonRouteableRoom.localizedName(appContext),
-                    ),
+                    message = message,
                 )
             }
+        }
+
+        if (!SiteIndoorRouter.isInsideCollege(position.floor, position.x.toDouble(), position.y.toDouble(), current.rooms)) {
+            failRoute(appContext.getString(R.string.manual_position_outside_map))
+            return
+        }
+        nonRouteableRoomAt(position)?.let { nonRouteableRoom ->
+            failRoute(appContext.getString(R.string.room_route_unavailable, nonRouteableRoom.localizedName(appContext)))
             return
         }
         if (isInsideRestrictedArea(graph, position.floor, position.x.toDouble(), position.y.toDouble())) {
-            stopRouteSpeech()
-            announcedRouteSession = -1L
-            _state.update {
-                it.copy(
-                    route = null,
-                    routeOriginPosition = null,
-                    isNavigationStarted = false,
-                    routeSteps = emptyList(),
-                    currentRouteStepIndex = 0,
-                    routeProgress = 0f,
-                    routeDistanceMeters = null,
-                    routeMinutes = null,
-                    message = appContext.getString(R.string.route_start_in_restricted_area),
-                )
-            }
+            failRoute(appContext.getString(R.string.route_start_in_restricted_area))
             return
         }
-        val goalId = room.nodeId
-        if (!room.routeAvailable || goalId.isNullOrBlank()) {
+        if (!room.routeAvailable || room.nodeId.isNullOrBlank()) {
             showMessage(appContext.getString(R.string.room_route_unavailable, room.localizedName(appContext)))
             return
         }
-        val selectedStartRoom = manualStartRoomId
-            ?.let { id -> _state.value.rooms.firstOrNull { it.id == id && it.floor == position.floor } }
-        val startRoomDoorIds = selectedStartRoom?.let { startRoom ->
-            (startRoom.doorNodeIds + listOfNotNull(startRoom.doorNodeId, startRoom.nodeId)).distinct()
-        }.orEmpty()
-        val roomDoorNodes = graph.nodes.filter { node ->
-            node.floor == position.floor && node.id in startRoomDoorIds && node.type.equals("door", ignoreCase = true)
-        }
-        val startCandidates = roomDoorNodes.ifEmpty {
-            listOfNotNull(AStarPathfinder.nearestNode(graph, position.floor, position.x.toDouble(), position.y.toDouble()))
-        }
-        if (startCandidates.isEmpty()) {
-            stopRouteSpeech()
-            announcedRouteSession = -1L
-            _state.update {
-                it.copy(
-                    route = null,
-                    routeOriginPosition = null,
-                    isNavigationStarted = false,
-                    routeSteps = emptyList(),
-                    currentRouteStepIndex = 0,
-                    routeProgress = 0f,
-                    routeDistanceMeters = null,
-                    routeMinutes = null,
-                    message = appContext.getString(R.string.route_no_graph_nodes),
-                )
-            }
+
+        val plan = SiteIndoorRouter.plan(
+            start = position,
+            target = room,
+            rooms = current.rooms,
+            transition = routeTransition(current.settings),
+            startRoomId = manualStartRoomId.takeIf { current.locationMode == LocationMode.MANUAL },
+            routeSession = routeSession,
+        )
+        val route = plan?.nodes?.takeIf { it.isNotEmpty() }
+        if (route == null) {
+            failRoute(appContext.getString(R.string.route_not_found))
             return
         }
-        val metersPerUnit = graph.floors.firstOrNull { it.number == position.floor }?.metersPerUnit
-            ?: DEFAULT_METERS_PER_UNIT
-        val routeCandidates = startCandidates.mapNotNull { startNode ->
-            val candidatePath = AStarPathfinder.findPath(
-                graph,
-                startNode.id,
-                goalId,
-                _state.value.settings.routePreference,
-                useElevator = _state.value.settings.useElevator,
-            ) ?: return@mapNotNull null
-            val distanceToDoor = hypot(startNode.x - position.x, startNode.y - position.y) * metersPerUnit
-            val routeCost = AStarPathfinder.pathCost(
-                graph = graph,
-                path = candidatePath,
-                preference = _state.value.settings.routePreference,
-                useElevator = _state.value.settings.useElevator,
-            )
-            Triple(startNode, candidatePath, routeCost + distanceToDoor)
-        }
-        val selectedRoute = routeCandidates.minByOrNull { it.third }
-        val start = selectedRoute?.first
-        val route = selectedRoute?.second
-        if (start == null || route == null) {
-            stopRouteSpeech()
-            announcedRouteSession = -1L
-            _state.update {
-                it.copy(
-                    route = null,
-                    routeOriginPosition = null,
-                    isNavigationStarted = false,
-                    routeSteps = emptyList(),
-                    currentRouteStepIndex = 0,
-                    routeProgress = 0f,
-                    routeDistanceMeters = null,
-                    routeMinutes = null,
-                    message = appContext.getString(R.string.route_not_found),
-                )
-            }
-            return
-        }
-        val routeDistances = RouteProgressCalculator.distances(graph, route, position, room)
+
+        val routeGraph = SiteIndoorRouter.graphWithRouteTransitions(graph, route)
+        val destinationAtDoor = routeDestinationAtDoor(room, route)
+        val routeDistances = RouteProgressCalculator.distances(routeGraph, route, position, destinationAtDoor)
         val distance = routeDistances.totalMeters
-        val speedMetersPerMinute = _state.value.settings.walkingSpeedKmh * 1_000.0 / 60.0
+        val speedMetersPerMinute = current.settings.walkingSpeedKmh * 1_000.0 / 60.0
         val minutes = ceil(distance / speedMetersPerMinute).toInt().coerceAtLeast(1)
         val generatedSteps = RouteStepGenerator.generate(
-            graph = graph,
+            graph = routeGraph,
             path = route,
             destinationName = room.localizedName(appContext),
             totalDistanceMeters = distance,
             startConnectorMeters = routeDistances.startConnectorMeters,
         )
-        val startRoomName = selectedStartRoom
-            ?.takeIf { start.id in roomDoorNodes.map(NavNode::id) }
-            ?.localizedName(appContext)
+        val selectedStartRoom = manualStartRoomId
+            ?.let { id -> current.rooms.firstOrNull { it.id == id && it.floor == position.floor } }
         val routeSteps = generatedSteps.mapIndexed { index, instruction ->
             if (index == 0 && instruction.action == RouteAction.START) {
                 instruction.copy(
-                    destinationName = startRoomName,
+                    destinationName = selectedStartRoom?.localizedName(appContext),
                     distanceMeters = routeDistances.startConnectorMeters,
                 )
             } else instruction
@@ -803,7 +740,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 message = null,
             )
         }
-        writeDebugLog("Route preview built for destination ${room.id}; units=${route.size}; distanceMeters=${distance.toInt()}")
+        writeDebugLog("Site route built for destination ${room.id}; units=${route.size}; distanceMeters=${distance.toInt()}")
     }
 
     /** Начинает пошаговое ведение только после явного подтверждения пользователя. */
@@ -919,11 +856,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val path = current.route ?: return
         val destination = current.destination ?: return
         val graph = navigationData ?: return
+        val routeGraph = SiteIndoorRouter.graphWithRouteTransitions(graph, path)
         val projection = RouteProgressCalculator.project(
-            graph = graph,
+            graph = routeGraph,
             route = path,
             origin = current.routeOriginPosition,
-            destination = destination,
+            destination = routeDestinationAtDoor(destination, path),
             point = point,
         ) ?: return
 
@@ -1057,16 +995,21 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    /** Сайт не проводит линию от двери до центра кабинета: конечной точкой остаётся дверь. */
+    private fun routeDestinationAtDoor(room: Room, route: List<NavNode>): Room {
+        val door = route.lastOrNull()?.takeIf { it.floor == room.floor } ?: return room
+        return room.copy(x = door.x, y = door.y)
+    }
+
+    /** Лифт доступен только при явном включении, как и в старом графе; иначе выбирается кратчайшая лестница. */
+    private fun routeTransition(settings: AppSettings): SiteIndoorRouter.Transition =
+        if (settings.useElevator) SiteIndoorRouter.Transition.LIFT else SiteIndoorRouter.Transition.STAIRS
+
     private fun nonRouteableRoomAt(point: MapPoint): Room? = _state.value.rooms.firstOrNull { room ->
         if (room.floor != point.floor || room.routeAvailable) return@firstOrNull false
         val polygons = if (room.polygon.isEmpty()) room.polygons else room.polygons + listOf(room.polygon)
         polygons.any { polygon -> pointInPolygonOrBoundary(point.x.toDouble(), point.y.toDouble(), polygon) }
     }
-
-    private fun isWithinFloorViewBox(floor: FloorPlan, x: Double, y: Double): Boolean =
-        x.isFinite() && y.isFinite() &&
-            x in floor.viewBoxX..(floor.viewBoxX + floor.width) &&
-            y in floor.viewBoxY..(floor.viewBoxY + floor.height)
 
     /** Запрещает начинать маршрут из наблюдательной и прочих закрытых серых областей. */
     private fun isInsideRestrictedArea(graph: NavigationData, floor: Int, x: Double, y: Double): Boolean =
@@ -1102,8 +1045,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             !accuracy.isFinite() || accuracy > _state.value.settings.minimumAccuracyMeters
         ) return
         if (point.floor != destination.floor) return
-        val destinationX = destination.x ?: return
-        val destinationY = destination.y ?: return
+        val routeEndpoint = _state.value.route?.lastOrNull()?.takeIf { it.floor == point.floor }
+        val destinationX = routeEndpoint?.x ?: destination.x ?: return
+        val destinationY = routeEndpoint?.y ?: destination.y ?: return
         val floor = navigationData?.floors?.firstOrNull { it.number == point.floor } ?: return
         val distanceMeters = hypot(destinationX - point.x, destinationY - point.y) * floor.metersPerUnit
         if (distanceMeters <= ARRIVAL_RADIUS_METERS && arrivalRoomId != destination.id) {

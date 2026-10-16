@@ -33,7 +33,7 @@ data class RouteProjection(
         }
 }
 
-/** Считает прогресс по той же ломаной, которую карта рисует между позицией, графом и комнатой. */
+/** Считает расстояние и прогресс по переданной маршрутной ломаной и её конечным коннекторам. */
 object RouteProgressCalculator {
     fun distances(
         graph: NavigationData,

@@ -49,7 +49,7 @@
     <string name="gps_no_anchors">There are not enough GPS reference points for “%1$s”. Place the marker manually.</string>
     <string name="gps_accuracy_too_low">GPS position hidden: accuracy ±%1$d m is worse than the %2$d m threshold. Adjust it manually.</string>
     <string name="gps_accuracy_missing">GPS did not report its accuracy. Check the map and switch to manual mode if needed.</string>
-    <string name="gps_position_outside_map">GPS mapped your position outside this floor plan. Wait for a better fix or mark your position manually.</string>
+    <string name="gps_position_outside_map">GPS placed your position outside the college rooms and corridors. Wait for a better fix or mark your position manually.</string>
     <string name="gps_unavailable">Location services cannot see a fresh signal. You can switch to manual mode.</string>
     <string name="gps_error">GPS is unavailable: %1$s Switch to manual mode.</string>
     <string name="gps_permission_denied">Permission was not granted. You can place your position manually.</string>
@@ -103,7 +103,7 @@
     <string name="floor_map_error_message">The SVG map for “%1$s” is missing or unreadable. Check %2$s and its viewBox.</string>
     <string name="manual_start_hint">Mark “I’m here” on the map or turn on GPS first.</string>
     <string name="manual_position_required">Mark your position on the map first.</string>
-    <string name="manual_position_outside_map">Choose a point inside the visible floor plan.</string>
+    <string name="manual_position_outside_map">Choose a point inside a college room or corridor.</string>
     <string name="location_on_other_floor">Your marker is on floor %1$d. Open that floor to see it.</string>
     <string name="no_location_to_center">Mark your position on the plan first.</string>
     <string name="no_graph_nodes">There are no navigation nodes on this floor yet.</string>

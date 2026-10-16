@@ -97,6 +97,10 @@ class CanvasMapView @JvmOverloads constructor(
     }
     private val haloPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.WHITE; style = Paint.Style.FILL }
     private val roomPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL }
+    private val routeDestinationPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = 0xFFFF5A59.toInt()
+        style = Paint.Style.FILL
+    }
     private val selectionFillPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL }
     private val openDoorsHaloPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE
@@ -505,23 +509,14 @@ class CanvasMapView @JvmOverloads constructor(
             val firstNode = segment.nodes.firstOrNull() ?: return@forEach
             val lastNode = segment.nodes.lastOrNull() ?: return@forEach
             canvas.drawPath(segment.path, routePaint)
-            if (firstNode.id == firstRouteNode?.id) {
-                userPosition?.takeIf { it.floor == floor.number }?.let { point ->
-                    canvas.drawLine(point.x, point.y, firstNode.x.toFloat(), firstNode.y.toFloat(), routePaint)
-                }
-            }
-            if (lastNode.id == lastRouteNode?.id) {
-                destination?.takeIf { it.floor == floor.number }?.let { room ->
-                    val x = room.x
-                    val y = room.y
-                    if (x != null && y != null) canvas.drawLine(lastNode.x.toFloat(), lastNode.y.toFloat(), x.toFloat(), y.toFloat(), routePaint)
-                }
-            }
-            for (index in 1 until segment.nodes.lastIndex) {
-                val node = segment.nodes[index]
-                canvas.drawCircle(node.x.toFloat(), node.y.toFloat(), widthInSvgUnits * 0.85f, haloPaint)
+            if (segment.nodes.size > 1 && firstNode.id == firstRouteNode?.id) {
+                canvas.drawCircle(firstNode.x.toFloat(), firstNode.y.toFloat(), widthInSvgUnits * 1.35f, haloPaint)
                 roomPaint.color = settings.routeColorArgb
-                canvas.drawCircle(node.x.toFloat(), node.y.toFloat(), widthInSvgUnits * 0.48f, roomPaint)
+                canvas.drawCircle(firstNode.x.toFloat(), firstNode.y.toFloat(), widthInSvgUnits * 0.82f, roomPaint)
+            }
+            if (segment.nodes.size > 1 && lastNode.id == lastRouteNode?.id) {
+                canvas.drawCircle(lastNode.x.toFloat(), lastNode.y.toFloat(), widthInSvgUnits * 1.5f, haloPaint)
+                canvas.drawCircle(lastNode.x.toFloat(), lastNode.y.toFloat(), widthInSvgUnits, routeDestinationPaint)
             }
         }
         routePaint.pathEffect = null
