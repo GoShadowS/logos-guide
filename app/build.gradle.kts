@@ -89,7 +89,6 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.8.2")
 
     implementation("com.google.android.gms:play-services-location:21.3.0")
-    implementation("com.caverock:androidsvg-aar:1.4")
     implementation("com.google.code.gson:gson:2.11.0")
 
     testImplementation("junit:junit:4.13.2")

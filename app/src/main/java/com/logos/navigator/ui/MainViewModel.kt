@@ -74,7 +74,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     /** GPS сам не определяет этаж, поэтому используем только сохранённый/подтверждённый этаж. */
     private var gpsFloorNumber: Int? = null
     private var dataLoadJob: Job? = null
-    private var mapLoadJob: Job? = null
     private var gpsTimeoutJob: Job? = null
     private var gpsAttempt = 0
     private var arrivalRoomId: String? = null
@@ -145,14 +144,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         routeMinutes = null,
                     )
                 }
-                loadFloorSvg(firstFloor)
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (exception: Exception) {
                 _state.update {
                     it.copy(
                         isLoading = false,
-                        isMapLoading = false,
                         loadError = appContext.getString(
                             R.string.data_load_error,
                             "\n${exception.localizedMessage ?: appContext.getString(R.string.unknown_error)}",
@@ -167,52 +164,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         loadData()
     }
 
-    fun retryMap() {
-        val floor = navigationData?.floors?.firstOrNull { it.number == _state.value.selectedFloor } ?: return
-        loadFloorSvg(floor)
-    }
-
     fun selectFloor(floorNumber: Int, userSelected: Boolean = true) {
-        val floor = navigationData?.floors?.firstOrNull { it.number == floorNumber } ?: return
+        if (navigationData?.floors?.any { it.number == floorNumber } != true) return
         if (userSelected && _state.value.locationMode == LocationMode.MANUAL) {
             lastPositionFloor = floorNumber
         }
-        if (_state.value.selectedFloor == floorNumber && _state.value.floorSvg != null) return
-        _state.update { it.copy(selectedFloor = floorNumber, floorSvg = null, mapError = null) }
+        if (_state.value.selectedFloor == floorNumber) return
+        _state.update { it.copy(selectedFloor = floorNumber) }
         viewModelScope.launch { settingsStore.setLastOpenedFloor(floorNumber) }
-        loadFloorSvg(floor)
         // Намеренно не переносим GPS-маркер на другой этаж: GPS не определяет этаж здания.
-    }
-
-    private fun loadFloorSvg(floor: FloorPlan) {
-        mapLoadJob?.cancel()
-        _state.update { it.copy(isMapLoading = true, mapError = null, floorSvg = null) }
-        mapLoadJob = viewModelScope.launch {
-            try {
-                val svg = repository.loadFloorSvg(floor)
-                if (_state.value.selectedFloor == floor.number) {
-                    _state.update { it.copy(floorSvg = svg, isMapLoading = false, mapError = null) }
-                    writeDebugLog("Loaded SVG floor ${floor.number}: ${floor.mapAsset}")
-                }
-            } catch (cancelled: CancellationException) {
-                throw cancelled
-            } catch (exception: Exception) {
-                writeDebugLog("SVG load failed on floor ${floor.number}: ${exception.javaClass.simpleName}")
-                if (_state.value.selectedFloor == floor.number) {
-                    _state.update {
-                        it.copy(
-                            floorSvg = null,
-                            isMapLoading = false,
-                            mapError = appContext.getString(
-                                R.string.svg_floor_missing,
-                                appContext.getString(R.string.floor_number_format, floor.number),
-                                "\n${appContext.getString(R.string.svg_check_file_viewbox, floor.mapAsset)}",
-                            ),
-                        )
-                    }
-                }
-            }
-        }
     }
 
     fun showRoom(room: Room) {
@@ -1381,7 +1341,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         textToSpeech = null
         gpsTimeoutJob?.cancel()
         dataLoadJob?.cancel()
-        mapLoadJob?.cancel()
         super.onCleared()
     }
 

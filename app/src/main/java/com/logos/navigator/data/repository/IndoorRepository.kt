@@ -1,9 +1,7 @@
 package com.logos.navigator.data.repository
 
 import android.content.Context
-import com.caverock.androidsvg.SVG
 import com.logos.navigator.R
-import com.logos.navigator.svg.SvgLoader
 import com.logos.navigator.data.model.FloorPlan
 import com.logos.navigator.data.model.LoadedIndoorData
 import com.logos.navigator.data.model.NavigationData
@@ -14,9 +12,8 @@ import com.logos.navigator.data.model.SvgPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.IOException
-import kotlin.math.abs
 
-/** Читает только SVG-карты и JSON из APK; сетевых запросов и растровых карт нет. */
+/** Загружает навигационные JSON; планы отрисовываются из сгенерированных Kotlin Canvas/Path-команд. */
 class IndoorRepository(context: Context) {
     private val appContext = context.applicationContext
     private val gson = com.google.gson.Gson()
@@ -26,28 +23,6 @@ class IndoorRepository(context: Context) {
         val catalog = readJson("rooms.json", RoomCatalog::class.java)
         validate(navigation, catalog)
         LoadedIndoorData(navigation, catalog.rooms)
-    }
-
-    /** Парсинг SVG выполняется в IO-пуле; на карте остаётся векторное представление. */
-    suspend fun loadFloorSvg(floor: FloorPlan): SVG = withContext(Dispatchers.IO) {
-        if (!floor.mapAsset.endsWith(".svg", ignoreCase = true)) {
-            throw IOException(appContext.getString(R.string.data_invalid_floor_asset, appContext.getString(R.string.floor_number_format, floor.number)))
-        }
-        val svg = SvgLoader.load(appContext, floor.mapAsset)
-        val viewBox = svg.documentViewBox
-            ?: throw IOException(appContext.getString(R.string.data_missing_viewbox, floor.mapAsset))
-        val expectedRight = floor.viewBoxX + floor.width
-        val expectedBottom = floor.viewBoxY + floor.height
-        if (abs(viewBox.left - floor.viewBoxX.toFloat()) > VIEWBOX_TOLERANCE ||
-            abs(viewBox.top - floor.viewBoxY.toFloat()) > VIEWBOX_TOLERANCE ||
-            abs(viewBox.right - expectedRight.toFloat()) > VIEWBOX_TOLERANCE ||
-            abs(viewBox.bottom - expectedBottom.toFloat()) > VIEWBOX_TOLERANCE
-        ) {
-            throw IOException(
-                appContext.getString(R.string.data_viewbox_mismatch, floor.mapAsset)
-            )
-        }
-        svg
     }
 
     private fun <T> readJson(assetName: String, clazz: Class<T>): T = try {
@@ -176,7 +151,4 @@ class IndoorRepository(context: Context) {
         return inside
     }
 
-    private companion object {
-        const val VIEWBOX_TOLERANCE = 0.1f
-    }
 }

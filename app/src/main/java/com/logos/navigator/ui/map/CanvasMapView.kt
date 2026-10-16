@@ -2,7 +2,6 @@ package com.logos.navigator.ui.map
 
 import android.content.Context
 import android.content.res.Configuration
-import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.DashPathEffect
@@ -18,7 +17,6 @@ import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 import android.view.View
-import com.caverock.androidsvg.SVG
 import com.logos.navigator.R
 import com.logos.navigator.data.model.AppSettings
 import com.logos.navigator.data.model.FloorPlan
@@ -28,51 +26,25 @@ import com.logos.navigator.data.model.NavEdge
 import com.logos.navigator.data.model.NavNode
 import com.logos.navigator.data.model.Room
 import com.logos.navigator.data.model.RouteLineStyle
-import com.logos.navigator.data.model.SvgRenderQuality
+import com.logos.navigator.data.model.MapRenderQuality
 import com.logos.navigator.data.model.ThemeMode
 import com.logos.navigator.svg.SvgCoordinateConverter
-import com.logos.navigator.svg.SvgGeometryExtractor
-import com.logos.navigator.svg.SvgRenderer
 import com.logos.navigator.svg.isPointInPolygon
 import com.logos.navigator.svg.polygonBounds
-import com.logos.navigator.svg.renderProfile
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
-import java.util.concurrent.Future
-import kotlin.math.abs
 import kotlin.math.hypot
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.math.sqrt
 
-/**
- * Исходная карта и координаты остаются SVG/viewBox; для плавного pan/zoom создаётся
- * ограниченный по памяти кэш кадра в RAM, поверх которого рисуются маршрут и маркеры.
- */
-class SvgMapView @JvmOverloads constructor(
+/** Нативный Canvas-view: базовый план рисуется сгенерированными Kotlin Path-командами. */
+class CanvasMapView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
 ) : View(context, attrs) {
-    private var svg: SVG? = null
     private var floor: FloorPlan? = null
     private var rooms: List<Room> = emptyList()
     private var roomGeometries: List<RoomGeometry> = emptyList()
     private var routeSegments: List<RouteFloorSegment> = emptyList()
     private var selectedRoom: Room? = null
-
-    private var mapBitmap: Bitmap? = null
-    private var mapBitmapSvg: SVG? = null
-    private var mapBitmapFloor: FloorPlan? = null
-    private var mapBitmapScale = 0f
-    private var mapBitmapQuality: SvgRenderQuality? = null
-    private var bitmapRenderFailed = false
-    private var bitmapRenderVersion = 0L
-    private var bitmapRenderFuture: Future<*>? = null
-    private var pendingBitmapSvg: SVG? = null
-    private var pendingBitmapFloor: FloorPlan? = null
-    private var pendingBitmapScale = 0f
-    private var pendingBitmapQuality: SvgRenderQuality? = null
-    private val bitmapBounds = RectF()
     private var hoveredRoomId: String? = null
     private var nodes: List<NavNode> = emptyList()
     private var nodesById: Map<String, NavNode> = emptyMap()
@@ -109,7 +81,6 @@ class SvgMapView @JvmOverloads constructor(
     var onRoomTap: ((Room) -> Unit)? = null
     var onTapCoordinate: ((Double, Double) -> Unit)? = null
 
-    private val mapPaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val gridPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = 0x443858D8
         style = Paint.Style.STROKE
@@ -150,7 +121,6 @@ class SvgMapView @JvmOverloads constructor(
 
     /** Обновляет данные карты. Вызывается из AndroidView.update при каждом изменении StateFlow. */
     fun submit(
-        svg: SVG?,
         floor: FloorPlan?,
         rooms: List<Room>,
         nodes: List<NavNode>,
@@ -170,7 +140,6 @@ class SvgMapView @JvmOverloads constructor(
         onManualPositionInRoom: (Room, Float, Float) -> Unit = { _, x, y -> onManualPosition(x, y) },
     ) {
         val floorChanged = this.floor != floor
-        val svgChanged = this.svg !== svg
         val geometryChanged = floorChanged || this.rooms !== rooms
         val nextRoute = route.orEmpty()
         val routeChanged = this.route != nextRoute
@@ -182,12 +151,9 @@ class SvgMapView @JvmOverloads constructor(
         val edgesChanged = this.edges != edges
         val compassChanged = settings.compassRotationEnabled && this.compassHeadingDegrees != compassHeadingDegrees
         val compassModeChanged = this.settings.compassRotationEnabled != settings.compassRotationEnabled
-        val renderQualityChanged = this.settings.svgRenderQuality != settings.svgRenderQuality
         val settingsChanged = this.settings != settings
         val oldZoom = zoom
 
-        if (floorChanged || svgChanged) releaseMapBitmap()
-        this.svg = svg
         this.floor = floor
         this.rooms = rooms
         this.selectedRoom = selectedRoom
@@ -216,9 +182,8 @@ class SvgMapView @JvmOverloads constructor(
         }
         val zoomChanged = zoom != oldZoom
         if (floorChanged || zoomChanged || compassModeChanged || compassChanged) updateMatrix()
-        if (svgChanged || floorChanged || zoomChanged || renderQualityChanged) requestMapBitmapRender()
 
-        val visualsChanged = svgChanged || floorChanged || geometryChanged || routeChanged || positionChanged ||
+        val visualsChanged = floorChanged || geometryChanged || routeChanged || positionChanged ||
             accuracyChanged || locationModeChanged || selectionChanged || nodesChanged || edgesChanged ||
             settingsChanged || compassChanged || compassModeChanged
         if (visualsChanged) invalidate()
@@ -252,168 +217,18 @@ class SvgMapView @JvmOverloads constructor(
 
     fun zoomLevel(): Float = zoom
 
-    override fun onAttachedToWindow() {
-        super.onAttachedToWindow()
-        requestMapBitmapRender()
-    }
-
-    override fun onDetachedFromWindow() {
-        bitmapRenderVersion++
-        bitmapRenderFuture?.cancel(true)
-        bitmapRenderFuture = null
-        pendingBitmapSvg = null
-        pendingBitmapFloor = null
-        pendingBitmapScale = 0f
-        pendingBitmapQuality = null
-        releaseMapBitmap()
-        super.onDetachedFromWindow()
-    }
-
-    private fun requestMapBitmapRender() {
-        val sourceSvg = svg ?: return
-        val currentFloor = floor ?: return
-        if (!isAttachedToWindow || width <= 0 || height <= 0) return
-        updateMatrix()
-
-        val mapArea = currentFloor.width.toDouble() * currentFloor.height.toDouble()
-        if (mapArea <= 0.0) return
-        val quality = settings.svgRenderQuality
-        val profile = quality.renderProfile()
-        val maximumScale = sqrt(profile.maximumBitmapPixels.toDouble() / mapArea).toFloat()
-        val desiredScale = min(fitScale * max(zoom, 1f) * profile.oversampling, maximumScale)
-            .coerceAtLeast(min(MIN_BITMAP_SCALE, maximumScale))
-        val existingIsSharpEnough = mapBitmap != null && mapBitmapSvg === sourceSvg &&
-            mapBitmapFloor == currentFloor && mapBitmapQuality == quality &&
-            mapBitmapScale >= desiredScale - BITMAP_SCALE_EPSILON
-        if (existingIsSharpEnough) return
-        val requestAlreadyRunning = bitmapRenderFuture?.isDone == false &&
-            pendingBitmapSvg === sourceSvg && pendingBitmapFloor == currentFloor &&
-            pendingBitmapQuality == quality && pendingBitmapScale >= desiredScale - BITMAP_SCALE_EPSILON
-        if (requestAlreadyRunning) return
-
-        bitmapRenderVersion++
-        val requestVersion = bitmapRenderVersion
-        bitmapRenderFuture?.cancel(true)
-        pendingBitmapSvg = sourceSvg
-        pendingBitmapFloor = currentFloor
-        pendingBitmapScale = desiredScale
-        pendingBitmapQuality = quality
-        bitmapRenderFailed = false
-        bitmapRenderFuture = MAP_RENDER_EXECUTOR.submit {
-            val renderedMap = renderMapBitmap(sourceSvg, currentFloor, desiredScale, quality)
-            if (Thread.currentThread().isInterrupted) {
-                renderedMap?.bitmap?.recycle()
-                return@submit
-            }
-            if (renderedMap == null) {
-                post {
-                    if (requestVersion == bitmapRenderVersion) {
-                        bitmapRenderFuture = null
-                        pendingBitmapSvg = null
-                        pendingBitmapFloor = null
-                        pendingBitmapScale = 0f
-                        pendingBitmapQuality = null
-                        bitmapRenderFailed = true
-                        invalidate()
-                    }
-                }
-                return@submit
-            }
-            val rendered = renderedMap.bitmap
-            val posted = post {
-                if (requestVersion != bitmapRenderVersion || svg !== sourceSvg || floor != currentFloor) {
-                    rendered.recycle()
-                    return@post
-                }
-                val previous = mapBitmap
-                mapBitmap = rendered
-                mapBitmapSvg = sourceSvg
-                mapBitmapFloor = currentFloor
-                mapBitmapScale = renderedMap.scale
-                mapBitmapQuality = renderedMap.quality
-                bitmapRenderFuture = null
-                pendingBitmapSvg = null
-                pendingBitmapFloor = null
-                pendingBitmapScale = 0f
-                pendingBitmapQuality = null
-                bitmapRenderFailed = false
-                if (previous !== rendered) previous?.recycle()
-                invalidate()
-            }
-            if (!posted) rendered.recycle()
-        }
-    }
-
-    /** При нехватке памяти пробует уменьшить разрешение, не рендеря SVG на UI-потоке. */
-    private fun renderMapBitmap(
-        sourceSvg: SVG,
-        floor: FloorPlan,
-        desiredScale: Float,
-        quality: SvgRenderQuality,
-    ): RenderedMapBitmap? {
-        var scale = desiredScale
-        val minimumScale = min(desiredScale, MIN_BITMAP_FALLBACK_SCALE)
-        repeat(MAX_BITMAP_RENDER_ATTEMPTS) {
-            if (Thread.currentThread().isInterrupted) return null
-            try {
-                return RenderedMapBitmap(SvgRenderer.renderToBitmap(sourceSvg, floor, scale), scale, quality)
-            } catch (error: Throwable) {
-                if (error !is OutOfMemoryError) return null
-                val lowerScale = max(minimumScale, scale * BITMAP_RETRY_SCALE_FACTOR)
-                if (lowerScale >= scale) return null
-                scale = lowerScale
-            }
-        }
-        return null
-    }
-
-    private fun releaseMapBitmap() {
-        bitmapRenderVersion++
-        bitmapRenderFuture?.cancel(true)
-        bitmapRenderFuture = null
-        pendingBitmapSvg = null
-        pendingBitmapFloor = null
-        pendingBitmapScale = 0f
-        pendingBitmapQuality = null
-        bitmapRenderFailed = false
-        mapBitmap?.recycle()
-        mapBitmap = null
-        mapBitmapSvg = null
-        mapBitmapFloor = null
-        mapBitmapScale = 0f
-        mapBitmapQuality = null
-    }
-
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         val systemDark = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
         val darkTheme = settings.themeMode == ThemeMode.DARK || (settings.themeMode == ThemeMode.SYSTEM && systemDark)
         canvas.drawColor(if (darkTheme) 0xFF191D29.toInt() else 0xFFF0F2F8.toInt())
-        val currentSvg = svg
         val currentFloor = floor
-        if (currentSvg == null || currentFloor == null || width <= 0 || height <= 0) {
-            drawCenteredMessage(canvas, context.getString(R.string.map_loading_svg))
-            return
-        }
-
-        val cachedMap = mapBitmap?.takeIf { mapBitmapSvg === currentSvg && mapBitmapFloor == currentFloor }
-        if (cachedMap == null) {
-            val message = if (bitmapRenderFailed) R.string.map_render_error else R.string.map_loading_svg
-            drawCenteredMessage(canvas, context.getString(message))
-            return
-        }
+        if (currentFloor == null || width <= 0 || height <= 0) return
 
         val saveCount = canvas.save()
-        canvas.setDrawFilter(drawFilterFor(settings.svgRenderQuality))
+        canvas.setDrawFilter(drawFilterFor(settings.mapRenderQuality))
         canvas.concat(mapMatrix)
-        bitmapBounds.set(
-            currentFloor.viewBoxX.toFloat(),
-            currentFloor.viewBoxY.toFloat(),
-            (currentFloor.viewBoxX + currentFloor.width).toFloat(),
-            (currentFloor.viewBoxY + currentFloor.height).toFloat(),
-        )
-        mapPaint.isFilterBitmap = settings.svgRenderQuality != SvgRenderQuality.LOW
-        canvas.drawBitmap(cachedMap, null, bitmapBounds, mapPaint)
+        GeneratedFloorMaps.draw(canvas, currentFloor.number)
         val mapScale = fitScale * zoom
         if (settings.showCoordinateGrid) drawCoordinateGrid(canvas, currentFloor)
         if (settings.showNavigationEdges) drawDebugEdges(canvas, currentFloor)
@@ -442,15 +257,10 @@ class SvgMapView @JvmOverloads constructor(
         super.onSizeChanged(w, h, oldw, oldh)
         updateMatrix()
         pendingCenter?.takeIf { it.floor == floor?.number }?.let(::centerOn)
-        requestMapBitmapRender()
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
         if (!isEnabled) return false
-        if (bitmapRenderFailed) {
-            if (event.actionMasked == MotionEvent.ACTION_UP) requestMapBitmapRender()
-            return true
-        }
         scaleDetector.onTouchEvent(event)
         if (event.pointerCount == 1 && !scaleDetector.isInProgress) {
             gestureDetector.onTouchEvent(event)
@@ -508,7 +318,6 @@ class SvgMapView @JvmOverloads constructor(
             updateMatrix()
         }
         invalidate()
-        requestMapBitmapRender()
     }
 
     private fun updateRoomGeometries(floor: FloorPlan, floorRooms: List<Room>) {
@@ -522,10 +331,11 @@ class SvgMapView @JvmOverloads constructor(
                 val polygons = if (catalogPolygons.isNotEmpty()) {
                     catalogPolygons
                 } else {
-                    // Разбираем SVG только для редких записей без пригодных полигонов в JSON.
-                    (room.svgElementIds + listOfNotNull(room.svgElementId)).distinct()
-                        .mapNotNull { id -> runCatching { SvgGeometryExtractor.polygon(context.assets, floor.mapAsset, id) }.getOrNull() }
-                        .filter { it.size >= 3 }
+                    // Используем заранее сгенерированные Path-координаты для редких записей без полигонов в JSON.
+                    GeneratedFloorMaps.roomPolygons(
+                        floor.number,
+                        (room.svgElementIds + listOfNotNull(room.svgElementId)).distinct(),
+                    ).filter { it.size >= 3 }
                 }
                 if (polygons.isEmpty()) return@mapNotNull null
                 val bounds = polygons.mapNotNull(::polygonBounds).reduceOrNull { result, next ->
@@ -802,18 +612,10 @@ class SvgMapView @JvmOverloads constructor(
         canvas.drawText(message, 12f * density + padding, height - 22f * density, textPaint)
     }
 
-    private fun drawCenteredMessage(canvas: Canvas, message: String) {
-        textPaint.textSize = 14f * resources.displayMetrics.scaledDensity
-        textPaint.color = 0xFF596276.toInt()
-        textPaint.textAlign = Paint.Align.CENTER
-        canvas.drawText(message, width / 2f, height / 2f, textPaint)
-        textPaint.textAlign = Paint.Align.LEFT
-    }
-
-    private fun drawFilterFor(quality: SvgRenderQuality): PaintFlagsDrawFilter = when (quality) {
-        SvgRenderQuality.LOW -> LOW_QUALITY_DRAW_FILTER
-        SvgRenderQuality.MEDIUM -> MEDIUM_QUALITY_DRAW_FILTER
-        SvgRenderQuality.HIGH -> HIGH_QUALITY_DRAW_FILTER
+    private fun drawFilterFor(quality: MapRenderQuality): PaintFlagsDrawFilter = when (quality) {
+        MapRenderQuality.LOW -> LOW_QUALITY_DRAW_FILTER
+        MapRenderQuality.MEDIUM -> MEDIUM_QUALITY_DRAW_FILTER
+        MapRenderQuality.HIGH -> HIGH_QUALITY_DRAW_FILTER
     }
 
     private inner class ScaleListener : ScaleGestureDetector.SimpleOnScaleGestureListener() {
@@ -843,7 +645,6 @@ class SvgMapView @JvmOverloads constructor(
 
         override fun onScaleEnd(detector: ScaleGestureDetector) {
             focusPoint = null
-            requestMapBitmapRender()
         }
     }
 
@@ -905,20 +706,10 @@ class SvgMapView @JvmOverloads constructor(
         val path: Path,
     )
 
-    private data class RenderedMapBitmap(val bitmap: Bitmap, val scale: Float, val quality: SvgRenderQuality)
-
     private companion object {
         const val MARKER_DRAG_RADIUS_DP = 34f
-        const val MIN_BITMAP_SCALE = 0.25f
-        const val MIN_BITMAP_FALLBACK_SCALE = 0.12f
-        const val BITMAP_RETRY_SCALE_FACTOR = 0.6f
-        const val MAX_BITMAP_RENDER_ATTEMPTS = 4
-        const val BITMAP_SCALE_EPSILON = 0.01f
         val LOW_QUALITY_DRAW_FILTER = PaintFlagsDrawFilter(Paint.ANTI_ALIAS_FLAG, 0)
         val MEDIUM_QUALITY_DRAW_FILTER = PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG)
         val HIGH_QUALITY_DRAW_FILTER = PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG)
-        val MAP_RENDER_EXECUTOR: ExecutorService = Executors.newSingleThreadExecutor { task ->
-            Thread(task, "logos-svg-cache").apply { priority = Thread.MIN_PRIORITY }
-        }
     }
 }

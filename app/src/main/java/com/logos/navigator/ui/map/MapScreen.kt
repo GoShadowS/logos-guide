@@ -137,7 +137,7 @@ fun MapScreen(
     val navigationNodes = remember(state.navigation) { state.navigation?.nodes.orEmpty() }
     val navigationEdges = remember(state.navigation) { state.navigation?.edges.orEmpty() }
     val snackbarHostState = remember { SnackbarHostState() }
-    var mapView by remember { mutableStateOf<SvgMapView?>(null) }
+    var mapView by remember { mutableStateOf<CanvasMapView?>(null) }
     var menuExpanded by remember { mutableStateOf(false) }
     var floorMenuExpanded by remember { mutableStateOf(false) }
     var quickActionsExpanded by remember { mutableStateOf(false) }
@@ -179,9 +179,10 @@ fun MapScreen(
     LaunchedEffect(state.destination?.id) {
         isRouteSheetVisible = state.destination != null
     }
-    LaunchedEffect(state.selectedFloor, state.floorSvg, pendingCameraCenter, mapView) {
+    LaunchedEffect(state.selectedFloor, state.navigation, pendingCameraCenter, mapView) {
         val point = pendingCameraCenter
-        if (point != null && point.floor == state.selectedFloor && state.floorSvg != null) {
+        val floorExists = state.navigation?.floors?.any { it.number == state.selectedFloor } == true
+        if (point != null && point.floor == state.selectedFloor && floorExists && mapView != null) {
             delay(60)
             mapView?.centerOn(point)
             pendingCameraCenter = null
@@ -267,12 +268,11 @@ fun MapScreen(
                 else -> {
                     val floor = state.navigation?.floors?.firstOrNull { it.number == state.selectedFloor }
                     AndroidView(
-                        factory = { viewContext -> SvgMapView(viewContext).also { mapView = it } },
+                        factory = { viewContext -> CanvasMapView(viewContext).also { mapView = it } },
                         modifier = Modifier.fillMaxSize(),
                         update = { view ->
                             mapView = view
                             view.submit(
-                                svg = state.floorSvg,
                                 floor = floor,
                                 rooms = roomsOnSelectedFloor,
                                 nodes = navigationNodes,
@@ -301,28 +301,6 @@ fun MapScreen(
                             )
                         },
                     )
-
-                    if (state.isMapLoading) {
-                        Surface(
-                            modifier = Modifier.align(Alignment.Center),
-                            shape = RoundedCornerShape(20.dp),
-                            tonalElevation = 5.dp,
-                        ) {
-                            Row(Modifier.padding(horizontal = 18.dp, vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
-                                CircularProgressIndicator(modifier = Modifier.size(22.dp), strokeWidth = 2.dp)
-                                Spacer(Modifier.width(12.dp))
-                                Text(stringResource(R.string.loading_map))
-                            }
-                        }
-                    }
-                    if (state.mapError != null) {
-                        ErrorPanel(
-                            title = stringResource(R.string.floor_map_error_title),
-                            details = state.mapError,
-                            onRetry = viewModel::retryMap,
-                            modifier = Modifier.align(Alignment.Center).padding(24.dp),
-                        )
-                    }
 
                     Column(
                         modifier = Modifier.align(Alignment.TopStart).padding(12.dp),

@@ -18,7 +18,7 @@ import com.logos.navigator.data.model.RouteLineStyle
 import com.logos.navigator.data.model.RoutePreference
 import com.logos.navigator.data.model.StartupLocationMode
 import com.logos.navigator.data.model.SpeechLanguage
-import com.logos.navigator.data.model.SvgRenderQuality
+import com.logos.navigator.data.model.MapRenderQuality
 import com.logos.navigator.data.model.ThemeMode
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -58,7 +58,7 @@ class SettingsDataStore(context: Context) {
     suspend fun setAccentColor(value: Int) = update { it.copy(accentColorArgb = value) }
     suspend fun setFontScale(value: Float) = update { it.copy(fontScale = value) }
     suspend fun setAnimationsEnabled(value: Boolean) = update { it.copy(animationsEnabled = value) }
-    suspend fun setSvgRenderQuality(value: SvgRenderQuality) = update { it.copy(svgRenderQuality = value) }
+    suspend fun setMapRenderQuality(value: MapRenderQuality) = update { it.copy(mapRenderQuality = value) }
     suspend fun setInitialFloor(value: String) = update { it.copy(initialFloor = value) }
     suspend fun setLastOpenedFloor(value: Int) = update { it.copy(lastOpenedFloor = value) }
     suspend fun setMaximumZoom(value: Float) = update { it.copy(maximumZoom = value) }
@@ -124,7 +124,8 @@ class SettingsDataStore(context: Context) {
         internal val APP_LANGUAGE = stringPreferencesKey("app_language")
         private val LEGACY_ROOM_LABELS = stringPreferencesKey("room_label_mode")
         private val LEGACY_ROOM_LABELS_DEFAULT_APPLIED = booleanPreferencesKey("room_label_default_applied")
-        internal val SVG_QUALITY = stringPreferencesKey("svg_render_quality")
+        // Сохраняем прежний ключ, чтобы не сбросить выбор качества после обновления приложения.
+        internal val MAP_RENDER_QUALITY = stringPreferencesKey("svg_render_quality")
         internal val INITIAL_FLOOR = stringPreferencesKey("initial_floor")
         internal val LAST_OPENED_FLOOR = intPreferencesKey("last_opened_floor")
         internal val MAX_ZOOM = floatPreferencesKey("maximum_zoom")
@@ -168,7 +169,7 @@ private fun Preferences.toAppSettings() = AppSettings(
     fontScale = this[SettingsDataStore.FONT_SCALE] ?: 1f,
     animationsEnabled = this[SettingsDataStore.ANIMATIONS] ?: true,
     appLanguage = enumValue(this[SettingsDataStore.APP_LANGUAGE], AppLanguage.SYSTEM),
-    svgRenderQuality = enumValue(this[SettingsDataStore.SVG_QUALITY], SvgRenderQuality.HIGH),
+    mapRenderQuality = enumValue(this[SettingsDataStore.MAP_RENDER_QUALITY], MapRenderQuality.HIGH),
     initialFloor = this[SettingsDataStore.INITIAL_FLOOR] ?: "last",
     lastOpenedFloor = this[SettingsDataStore.LAST_OPENED_FLOOR] ?: 1,
     maximumZoom = this[SettingsDataStore.MAX_ZOOM] ?: 6f,
@@ -211,7 +212,7 @@ private fun AppSettings.writeTo(preferences: androidx.datastore.preferences.core
     preferences[SettingsDataStore.FONT_SCALE] = fontScale
     preferences[SettingsDataStore.ANIMATIONS] = animationsEnabled
     preferences[SettingsDataStore.APP_LANGUAGE] = appLanguage.name
-    preferences[SettingsDataStore.SVG_QUALITY] = svgRenderQuality.name
+    preferences[SettingsDataStore.MAP_RENDER_QUALITY] = mapRenderQuality.name
     preferences[SettingsDataStore.INITIAL_FLOOR] = initialFloor
     preferences[SettingsDataStore.LAST_OPENED_FLOOR] = lastOpenedFloor
     preferences[SettingsDataStore.MAX_ZOOM] = maximumZoom
