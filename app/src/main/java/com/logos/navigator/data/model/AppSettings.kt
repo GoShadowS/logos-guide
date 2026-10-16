@@ -56,6 +56,7 @@ data class AppSettings(
     val fileLoggingEnabled: Boolean = false,
 ) {
     companion object {
-        const val BRAND_BLUE: Int = 0xFF2538F5.toInt()
+        const val BRAND_BLUE: Int = 0xFF245CE5.toInt()
+        const val PREVIOUS_BRAND_BLUE: Int = 0xFF2538F5.toInt()
     }
 }

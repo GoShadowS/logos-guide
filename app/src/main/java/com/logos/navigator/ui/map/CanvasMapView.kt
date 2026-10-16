@@ -32,8 +32,11 @@ import com.logos.navigator.svg.SvgCoordinateConverter
 import com.logos.navigator.svg.isPointInPolygon
 import com.logos.navigator.svg.polygonBounds
 import kotlin.math.hypot
+import kotlin.math.PI
+import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.sin
 
 /** Нативный Canvas-view: базовый план рисуется сгенерированными Kotlin Path-командами. */
 class CanvasMapView @JvmOverloads constructor(
@@ -45,6 +48,7 @@ class CanvasMapView @JvmOverloads constructor(
     private var roomGeometries: List<RoomGeometry> = emptyList()
     private var routeSegments: List<RouteFloorSegment> = emptyList()
     private var selectedRoom: Room? = null
+    private var openDoorsRoomIds: Set<String> = emptySet()
     private var hoveredRoomId: String? = null
     private var nodes: List<NavNode> = emptyList()
     private var nodesById: Map<String, NavNode> = emptyMap()
@@ -94,6 +98,19 @@ class CanvasMapView @JvmOverloads constructor(
     private val haloPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.WHITE; style = Paint.Style.FILL }
     private val roomPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL }
     private val selectionFillPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL }
+    private val openDoorsHaloPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.WHITE
+        style = Paint.Style.FILL
+    }
+    private val openDoorsBadgePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = 0xFFFFD267.toInt()
+        style = Paint.Style.FILL
+    }
+    private val openDoorsStarPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = 0xFF0D1C3B.toInt()
+        style = Paint.Style.FILL
+    }
+    private val openDoorsStarPath = Path()
     private val selectionHaloPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = 0xF5FFFFFF.toInt()
         style = Paint.Style.STROKE
@@ -137,6 +154,7 @@ class CanvasMapView @JvmOverloads constructor(
         onRoomTap: (Room) -> Unit,
         onTapCoordinate: (Double, Double) -> Unit,
         manualPositionSelectionMode: Boolean = false,
+        openDoorsRoomIds: Set<String> = emptySet(),
         onManualPositionInRoom: (Room, Float, Float) -> Unit = { _, x, y -> onManualPosition(x, y) },
     ) {
         val floorChanged = this.floor != floor
@@ -147,6 +165,7 @@ class CanvasMapView @JvmOverloads constructor(
         val accuracyChanged = this.accuracyMeters != accuracyMeters
         val locationModeChanged = this.locationMode != locationMode
         val selectionChanged = this.selectedRoom != selectedRoom || this.destination != destination
+        val openDoorsChanged = this.openDoorsRoomIds != openDoorsRoomIds
         val nodesChanged = this.nodes != nodes
         val edgesChanged = this.edges != edges
         val compassChanged = settings.compassRotationEnabled && this.compassHeadingDegrees != compassHeadingDegrees
@@ -157,6 +176,7 @@ class CanvasMapView @JvmOverloads constructor(
         this.floor = floor
         this.rooms = rooms
         this.selectedRoom = selectedRoom
+        this.openDoorsRoomIds = openDoorsRoomIds
         if (geometryChanged && floor != null) updateRoomGeometries(floor, rooms)
         if (nodesChanged) nodesById = nodes.associateBy(NavNode::id)
         this.nodes = nodes
@@ -185,7 +205,7 @@ class CanvasMapView @JvmOverloads constructor(
 
         val visualsChanged = floorChanged || geometryChanged || routeChanged || positionChanged ||
             accuracyChanged || locationModeChanged || selectionChanged || nodesChanged || edgesChanged ||
-            settingsChanged || compassChanged || compassModeChanged
+            settingsChanged || compassChanged || compassModeChanged || openDoorsChanged
         if (visualsChanged) invalidate()
     }
 
@@ -221,7 +241,7 @@ class CanvasMapView @JvmOverloads constructor(
         super.onDraw(canvas)
         val systemDark = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
         val darkTheme = settings.themeMode == ThemeMode.DARK || (settings.themeMode == ThemeMode.SYSTEM && systemDark)
-        canvas.drawColor(if (darkTheme) 0xFF191D29.toInt() else 0xFFF0F2F8.toInt())
+        canvas.drawColor(if (darkTheme) 0xFF07162E.toInt() else 0xFFF4F7FC.toInt())
         val currentFloor = floor
         if (currentFloor == null || width <= 0 || height <= 0) return
 
@@ -235,6 +255,7 @@ class CanvasMapView @JvmOverloads constructor(
         if (settings.showNavigationNodes || settings.showDoorNodes) drawDebugNodes(canvas, currentFloor, mapScale)
         drawRoomHighlights(canvas, currentFloor, mapScale)
         drawRoute(canvas, currentFloor, mapScale)
+        drawOpenDoorsMarkers(canvas, mapScale)
         drawUserMarker(canvas, currentFloor, mapScale)
         canvas.restoreToCount(saveCount)
         drawTapCoordinateOverlay(canvas)
@@ -546,6 +567,30 @@ class CanvasMapView @JvmOverloads constructor(
                 canvas.drawPath(path, selectionOutlinePaint)
                 canvas.restoreToCount(highlightSaveCount)
             }
+        }
+    }
+
+    /** Подсвечивает площадки события заметной, но компактной отметкой поверх плана. */
+    private fun drawOpenDoorsMarkers(canvas: Canvas, mapScale: Float) {
+        if (openDoorsRoomIds.isEmpty()) return
+        val radius = 8.5f * resources.displayMetrics.density / max(mapScale, 0.0001f)
+        roomGeometries.forEach { geometry ->
+            if (geometry.room.id !in openDoorsRoomIds) return@forEach
+            val room = geometry.room
+            val x = (room.centerX ?: room.x)?.toFloat() ?: geometry.bounds.centerX()
+            val y = (room.centerY ?: room.y)?.toFloat() ?: geometry.bounds.centerY()
+            canvas.drawCircle(x, y, radius * 1.22f, openDoorsHaloPaint)
+            canvas.drawCircle(x, y, radius, openDoorsBadgePaint)
+            openDoorsStarPath.reset()
+            for (index in 0 until 10) {
+                val angle = -PI / 2.0 + index * PI / 5.0
+                val starRadius = radius * if (index % 2 == 0) 0.72f else 0.34f
+                val starX = x + (cos(angle) * starRadius).toFloat()
+                val starY = y + (sin(angle) * starRadius).toFloat()
+                if (index == 0) openDoorsStarPath.moveTo(starX, starY) else openDoorsStarPath.lineTo(starX, starY)
+            }
+            openDoorsStarPath.close()
+            canvas.drawPath(openDoorsStarPath, openDoorsStarPaint)
         }
     }
 

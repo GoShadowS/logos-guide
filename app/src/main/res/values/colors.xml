@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="brand_blue">#2538F5</color>
-    <color name="brand_blue_dark">#1625B7</color>
-    <color name="brand_cyan">#54D9FF</color>
-    <color name="window_background">#F5F7FC</color>
+    <color name="brand_blue">#245CE5</color>
+    <color name="brand_blue_dark">#0D3DB3</color>
+    <color name="brand_cyan">#7DB1FF</color>
+    <color name="window_background">#F4F7FC</color>
     <color name="white">#FFFFFF</color>
 </resources>

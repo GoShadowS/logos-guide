@@ -165,7 +165,7 @@ class SettingsDataStore(context: Context) {
 
 private fun Preferences.toAppSettings() = AppSettings(
     themeMode = enumValue(this[SettingsDataStore.THEME], ThemeMode.SYSTEM),
-    accentColorArgb = this[SettingsDataStore.ACCENT] ?: AppSettings.BRAND_BLUE,
+    accentColorArgb = this[SettingsDataStore.ACCENT]?.takeUnless { it == AppSettings.PREVIOUS_BRAND_BLUE } ?: AppSettings.BRAND_BLUE,
     fontScale = this[SettingsDataStore.FONT_SCALE] ?: 1f,
     animationsEnabled = this[SettingsDataStore.ANIMATIONS] ?: true,
     appLanguage = enumValue(this[SettingsDataStore.APP_LANGUAGE], AppLanguage.SYSTEM),
@@ -176,7 +176,7 @@ private fun Preferences.toAppSettings() = AppSettings(
     minimumZoom = this[SettingsDataStore.MIN_ZOOM] ?: 1f,
     showCoordinateGrid = this[SettingsDataStore.GRID] ?: false,
     compassRotationEnabled = this[SettingsDataStore.COMPASS] ?: false,
-    routeColorArgb = this[SettingsDataStore.ROUTE_COLOR] ?: AppSettings.BRAND_BLUE,
+    routeColorArgb = this[SettingsDataStore.ROUTE_COLOR]?.takeUnless { it == AppSettings.PREVIOUS_BRAND_BLUE } ?: AppSettings.BRAND_BLUE,
     routeLineWidthDp = this[SettingsDataStore.ROUTE_WIDTH] ?: 5f,
     routeLineStyle = enumValue(this[SettingsDataStore.ROUTE_STYLE], RouteLineStyle.SOLID),
     startupLocationMode = enumValue(this[SettingsDataStore.STARTUP_LOCATION], StartupLocationMode.GPS),

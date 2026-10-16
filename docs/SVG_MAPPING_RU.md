@@ -70,4 +70,4 @@ python3 tools/validate_indoor_data.py
 
 ## Сборка APK
 
-Откройте Android-проект в Android Studio с JDK 17 и Android SDK 34, дождитесь Gradle Sync и выполните `./gradlew testDebugUnitTest` и `./gradlew assembleDebug`. Подробные шаги установки Android Studio, настройки SDK, запуска на устройстве и получения APK: [`BUILD_APK_RU.md`](BUILD_APK_RU.md). В текущем рабочем контейнере JDK отсутствует, поэтому компиляция и APK здесь не подтверждены.
+Откройте Android-проект в Android Studio с JDK 25 и Android SDK Platform 37, дождитесь Gradle Sync и выполните `./gradlew testDebugUnitTest` и `./gradlew assembleDebug`. Перед выпуском проверьте планы и маршруты на Android 8 / API 26. Подробные шаги установки Android Studio, настройки SDK, запуска на устройстве и получения APK: [`BUILD_APK_RU.md`](BUILD_APK_RU.md).

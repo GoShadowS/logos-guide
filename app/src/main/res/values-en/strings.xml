@@ -41,12 +41,7 @@
     <string name="location_hint_other_floor">Your position is currently on floor %1$d. Tap the plan to update it.</string>
     <string name="location_on_floor">GPS marker on floor %1$d</string>
     <string name="location_accuracy">Accuracy ±%1$d m</string>
-    <string name="map_source_2gis">2GIS</string>
-    <string name="map_source_indoor">Floor plan</string>
-    <string name="dgis_key_required_title">2GIS Mobile SDK key required</string>
-    <string name="dgis_key_required_message">Download the dgissdk.key access file from the 2GIS Platform Manager and place it at app/src/main/assets/dgissdk.key. Do not send the key in chat or commit it to Git. The outdoor map loads data from the internet; floor plans and indoor routes remain offline.</string>
-    <string name="dgis_map_load_error">Could not start 2GIS. Check dgissdk.key and your internet connection.</string>
-    <string name="gps_follow">Follow position</string>
+                        <string name="gps_follow">Follow position</string>
     <string name="gps_following">Position centered</string>
     <string name="gps_determining">Finding your position… GPS may be inaccurate indoors.</string>
     <string name="gps_no_fresh_fix">Could not get a fresh GPS fix. Check location services or switch to manual mode.</string>
@@ -75,6 +70,7 @@
     <string name="quick_nearest_stairs">Nearest stairs</string>
     <string name="quick_actions">Quick actions</string>
     <string name="quick_actions_description">Restroom, stairs or set position</string>
+    <string name="quick_open_doors">Open Day activities</string>
     <string name="manual_place_location">Set place</string>
     <string name="manual_move_location">Move place</string>
     <string name="cancel_manual_placement">Cancel</string>
@@ -82,6 +78,16 @@
     <string name="set_location_here">Set my position in this room</string>
     <string name="manual_location_set">Your position is set in this room</string>
     <string name="quick_action_location_required">Mark your position on the map or turn on GPS first.</string>
+    <string name="open_doors_today">Today</string>
+    <string name="open_doors_heading_main">Open Day:</string>
+    <string name="open_doors_heading_accent">venues and master classes.</string>
+    <string name="open_doors_subtitle">Choose a venue to see its audience and hosts, then build a route right on the college floor plan.</string>
+    <string name="open_doors_venue_badge">Open Day venue</string>
+    <string name="open_doors_room_format">Room %1$s · floor %2$d</string>
+    <string name="open_doors_details_action">Venue details</string>
+    <string name="open_doors_back">All venues</string>
+    <string name="open_doors_route">Get route</string>
+    <string name="open_doors_empty">The offline activity cards are not available yet.</string>
     <string name="quick_action_destination_not_found">No route to a nearby destination is available.</string>
     <string name="route_start_in_restricted_area">Your start point is inside a restricted area. Move it to an accessible corridor.</string>
     <string name="room_route_unavailable">A route to “%1$s” is not configured yet; its geometry or entrance needs verification.</string>
@@ -132,6 +138,7 @@
     <string name="room_details">Room information</string>
     <string name="room_not_found">The destination is no longer in the local directory.</string>
     <string name="route_to_format">Route to %1$s</string>
+    <string name="route_sheet_eyebrow">Indoor route</string>
     <string name="route_destination_room">Room %1$s</string>
     <string name="route_room_floor_detail">%1$s · %2$s</string>
     <string name="route_card_summary">%1$d min · %2$s</string>
@@ -396,6 +403,15 @@
 
     <!-- About screen and splash. -->
     <string name="about_title">About</string>
+    <string name="about_version_value">Version %1$s</string>
+    <string name="about_project_section">Project</string>
+    <string name="about_license_title">License</string>
+    <string name="about_license_description">The application source code and project documentation are distributed under the Apache License 2.0.</string>
+    <string name="about_license_notice">The college name and logo, supplied floor plans, and building data are not covered by this license and remain subject to their respective rights holders.</string>
+    <string name="about_license_unavailable">The license text could not be loaded.</string>
+    <string name="about_license_open">Read the full Apache License 2.0</string>
+    <string name="about_website_title">Project website</string>
+    <string name="about_open_website">Open logos-guide.ru</string>
     <string name="about_version">Version</string>
     <string name="about_project_type">Project type</string>
     <string name="about_project_type_value">Individual project</string>

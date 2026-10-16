@@ -10,7 +10,7 @@
 - интернет для первоначальной загрузки IDE/SDK/Gradle/зависимостей. После установки APK карты и каталог работают офлайн;
 - Android-телефон Android 7.0/API 24 или новее — или эмулятор.
 
-В проекте выставлено: `minSdk = 24`, `targetSdk = 34`, `compileSdk = 34`, Java/Kotlin target 17, Android Gradle Plugin 8.6.1, Gradle 8.7. Приложение не объявляет разрешение INTERNET и не обращается к серверу.
+В проекте выставлено: `minSdk = 24`, `targetSdk = 36`, `compileSdk = 37`, JVM bytecode target 17, Android Gradle Plugin 9.3.1, Gradle 9.7.0, Kotlin 2.4.21 и KSP 2.3.12. Для сборки нужен JDK 25. Android 8 (API 26) остаётся поддерживаемой версией. Приложение не объявляет разрешение INTERNET; карты, поиск и маршруты работают офлайн. Карточки Дня открытых дверей включены только в release `1.0.0-opendoors`.
 
 ---
 
@@ -32,17 +32,17 @@
 
 ## 2. JDK: что установить и как проверить
 
-Android Studio поставляется со встроенным Java Runtime/Java Development Kit. Для этого проекта нужен **JDK 17**. Отдельная установка обычно не требуется.
+Android Studio поставляется со встроенным Java Runtime/Java Development Kit. Для этого проекта нужен **JDK 25**. Отдельная установка обычно не требуется.
 
 Проверить или указать встроенный JDK:
 
 1. Откройте Android Studio.
 2. Windows/Linux: выберите **File → Settings**. На macOS: **Android Studio → Settings**.
 3. В левой колонке откройте **Build, Execution, Deployment → Build Tools → Gradle**.
-4. Найдите поле **Gradle JDK** и выберите вариант с надписью **Embedded JDK** / **jbr-17** / **17**.
+4. Найдите поле **Gradle JDK** и выберите вариант с надписью **Embedded JDK** / **jbr-25** / **25**.
 5. Нажмите **Apply**, затем **OK**.
 
-Если встроенного JDK нет, установите Temurin 17 с сайта **https://adoptium.net/temurin/releases/?version=17** (выберите свою ОС, архитектуру и JDK 17), затем в поле **Gradle JDK** нажмите **Add JDK…** и укажите папку установленной JDK. Не выбирайте JRE — нужен именно JDK.
+Если встроенного JDK нет, установите Temurin 25 с сайта **https://adoptium.net/temurin/releases/?version=25** (выберите свою ОС, архитектуру и JDK 25), затем в поле **Gradle JDK** нажмите **Add JDK…** и укажите папку установленной JDK. Не выбирайте JRE — нужен именно JDK.
 
 ---
 
@@ -52,10 +52,10 @@ Android Studio поставляется со встроенным Java Runtime/J
 
 1. На стартовом окне нажмите **More Actions → SDK Manager**. Если проект уже открыт: **Tools → SDK Manager**. На некоторых версиях Android Studio ссылка находится в **File → Settings → Languages & Frameworks → Android SDK**.
 2. Вкладка **SDK Platforms**:
-   - отметьте **Android 14.0 (“UpsideDownCake”) — API Level 34**;
+   - отметьте **Android 17 — API Level 37**;
    - нажмите **Apply**.
 3. Вкладка **SDK Tools** отметьте:
-   - **Android SDK Build-Tools 34.0.0** (если строка показывает несколько версий — раскройте список и выберите `34.0.0`);
+   - **Android SDK Build-Tools 37.0.0** (если строка показывает несколько версий — раскройте список и выберите `37.0.0`);
    - **Android SDK Platform-Tools**;
    - **Android SDK Command-line Tools (latest)**;
    - **Android Emulator**;
@@ -128,11 +128,11 @@ XML layout в `res/layout` отсутствуют намеренно: польз
 1. Выберите **File → Sync Project with Gradle Files** (на macOS пункт File такой же).
 2. Дождитесь сообщения **BUILD SUCCESSFUL** или окончания Gradle Sync в нижней панели **Build**.
 3. Если справа/сверху появилось **Sync Now**, нажмите его.
-4. Убедитесь, что Gradle JDK выбран как 17 (см. шаг 2), а SDK Platform 34 установлен (шаг 3).
+4. Убедитесь, что Gradle JDK выбран как 25 (см. шаг 2), а SDK Platform 37 и Build-Tools 37.0.0 установлены (шаг 3).
 5. Если зависимость не скачалась, проверьте подключение к интернету и повторите **Sync Project with Gradle Files**. Для первого Sync нужны доступные Google Maven и Maven Central.
 6. Откройте вкладку **Build** внизу. Первая красная строка и блок **Caused by** обычно указывают первопричину, а не последнюю строку ошибки.
 
-Не удаляйте файлы проекта и не обновляйте сразу все версии Gradle/плагинов: сначала проверьте JDK, интернет, SDK и путь к проекту.
+Не удаляйте файлы проекта и не меняйте версии Gradle/плагинов вручную: согласованные версии указаны в `build.gradle.kts`, `app/build.gradle.kts` и `gradle/wrapper/gradle-wrapper.properties`. При ошибке сначала проверьте JDK, интернет, SDK и путь к проекту.
 
 ---
 
@@ -154,7 +154,7 @@ XML layout в `res/layout` отсутствуют намеренно: польз
 1. Откройте **Tools → Device Manager** (в старых сборках: **Tools → AVD Manager**).
 2. Нажмите **Create Device**.
 3. Выберите, например, **Pixel 6** или **Pixel 7** → **Next**.
-4. В списке System Image выберите **Android 14 / API 34 / Google Play / x86_64** и нажмите **Download**. Google Play-образ предпочтительнее для проверки Fused Location Provider; если он недоступен, используйте API 34 x86_64 и тестируйте ручной режим.
+4. В списке System Image выберите **Android 17 / API 37 / Google Play / x86_64** и нажмите **Download**. Google Play-образ предпочтительнее для проверки Fused Location Provider; если он недоступен, используйте доступный образ и тестируйте ручной режим. Для проверки минимальной поддержки отдельно запустите Android 8 / API 26.
 5. Нажмите **Next**. В **Verify Configuration** оставьте портретный режим; выделите 2–4 ГБ RAM, если компьютер имеет минимум 16 ГБ (при 8 ГБ задайте 2 ГБ и закройте тяжёлые приложения).
 6. Нажмите **Finish**, затем кнопку запуска ▶ напротив созданного виртуального устройства.
 7. Для GPS на эмуляторе нажмите `⋮` → **Location**, введите координаты или выберите точку на карте, нажмите **Set Location**. Помните, это тест внешнего GPS-положения, а не фактического определения этажа.
@@ -188,7 +188,7 @@ APK для распространения должен быть подписан
    - **Validity (years)** — например `30` (минимальный рекомендуемый срок для долгой поддержки — не менее 25 лет);
    - **First and Last Name**, **Organizational Unit**, **Organization**, **City or Locality**, **State or Province**, **Country Code** — заполните данными владельца/организации; код страны обычно две латинские буквы.
 6. Нажмите **OK**. Проверьте путь и alias и нажмите **Next**.
-7. В поле **Build Variant** выберите **release**. Для этих инструкций достаточно оставить выбранными назначение `V1` и `V2` подписи, если мастер показывает эти флажки.
+7. В поле **Build Variant** выберите **release**. В нём отображаются карточки пяти площадок Дня открытых дверей, встроенные в приложение. Имя релизной версии — `1.0.0-opendoors` (код версии 3). Для этих инструкций достаточно оставить выбранными назначение `V1` и `V2` подписи, если мастер показывает эти флажки.
 8. Нажмите **Create** / **Finish**. В панели Build дождитесь **BUILD SUCCESSFUL**; после успешной сборки Android Studio покажет ссылку **locate**.
 9. Для данного Gradle-проекта стандартный путь:
    `app/build/outputs/apk/release/app-release.apk`
@@ -219,7 +219,7 @@ Debug-сборка подписывается автоматически тес�
 2. Дождитесь **BUILD SUCCESSFUL**.
 3. Нажмите **locate** в уведомлении или откройте:
    `app/build/outputs/apk/debug/app-debug.apk`
-4. Этот APK предназначен для отладки/проверки, не для публикации как release. Разрешение на установку из неизвестных источников может понадобиться и для него.
+4. Этот APK предназначен для отладки/проверки, не для публикации как release; карточки Дня открытых дверей в debug отключены. Разрешение на установку из неизвестных источников может понадобиться и для него.
 
 Из терминала, если `adb` доступен в Android SDK Platform-Tools:
 
@@ -237,7 +237,7 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 ### `SDK not found`, `SDK location not found`
 
 1. Откройте **Tools → SDK Manager** и посмотрите поле **Android SDK Location**.
-2. Убедитесь, что там установлен API 34.
+2. Убедитесь, что там установлены API 37 и Build-Tools 37.0.0.
 3. Если проект скопирован на другой компьютер, создайте в корне локальный файл `local.properties` (он персонален для компьютера и не должен попадать в Git):
 
    ```properties
@@ -248,7 +248,7 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 
 ### `Gradle sync failed`, Gradle/JDK несовместимы
 
-1. В **Settings → Build, Execution, Deployment → Build Tools → Gradle** задайте **Gradle JDK = Embedded JDK 17**.
+1. В **Settings → Build, Execution, Deployment → Build Tools → Gradle** задайте **Gradle JDK = Embedded JDK 25**.
 2. Проверьте, что интернет доступен и Gradle не работает в Offline mode: в окне Gradle выключите **Toggle Offline Mode**.
 3. Нажмите **File → Sync Project with Gradle Files**.
 4. Если кэш явно повреждён, закройте Android Studio и удалите только каталог пользовательского Gradle-кэша (`~/.gradle/caches`; на Windows `%USERPROFILE%\.gradle\caches`), затем откройте проект и повторите Sync. Повторная загрузка зависимостей займёт время.

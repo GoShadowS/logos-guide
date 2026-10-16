@@ -577,7 +577,7 @@ private fun ColorDot(colorArgb: Int) {
 }
 
 private val ACCENT_COLOR_OPTIONS = listOf(
-    R.string.accent_logos to 0xFF2538F5.toInt(),
+    R.string.accent_logos to 0xFF245CE5.toInt(),
     R.string.accent_green to 0xFF16856B.toInt(),
     R.string.accent_orange to 0xFFF07B2B.toInt(),
     R.string.accent_purple to 0xFF7754C8.toInt(),
@@ -585,7 +585,7 @@ private val ACCENT_COLOR_OPTIONS = listOf(
 )
 
 private val ROUTE_COLOR_OPTIONS = listOf(
-    R.string.route_color_blue to 0xFF2538F5.toInt(),
+    R.string.route_color_blue to 0xFF245CE5.toInt(),
     R.string.route_color_orange to 0xFFF07B2B.toInt(),
     R.string.route_color_green to 0xFF16856B.toInt(),
     R.string.route_color_red to 0xFFC43E54.toInt(),
