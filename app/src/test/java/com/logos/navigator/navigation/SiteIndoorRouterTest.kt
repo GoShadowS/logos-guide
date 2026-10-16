@@ -132,20 +132,55 @@ class SiteIndoorRouterTest {
     }
 
     @Test
-    fun appRoomIdsKeepSiteAliasesAndUnavailableDestinationsUnavailable() {
+    fun assemblyHallRouteUsesOnlyItsFirstFloorEntranceAndOtherUnavailableRoomsStayClosed() {
         assertEquals("canteen", SiteIndoorRouter.siteRoomKeyForAppRoom("room_126"))
         assertEquals("meteorology-236", SiteIndoorRouter.siteRoomKeyForAppRoom("room_213"))
         assertEquals("academic-office", SiteIndoorRouter.siteRoomKeyForAppRoom("room_education_department"))
         assertEquals("electro-radio-230", SiteIndoorRouter.siteRoomKeyForAppRoom("room_230"))
+        assertEquals("auditorium-104", SiteIndoorRouter.siteRoomKeyForAppRoom("room_104"))
 
-        val unavailable = room("room_104", floor = 1, x = 680.0, y = 160.0, routeAvailable = false)
-        val plan = SiteIndoorRouter.plan(
+        val assemblyHall = room("room_104", floor = 1, x = 683.0, y = 167.0)
+        val firstFloorPlan = SiteIndoorRouter.plan(
             start = MapPoint(floor = 1, x = 200f, y = 168f),
-            target = unavailable,
+            target = assemblyHall,
             rooms = emptyList(),
             transition = SiteIndoorRouter.Transition.STAIRS,
         )
-        assertNull(plan)
+        assertNotNull(firstFloorPlan)
+        assertTrue(firstFloorPlan!!.nodes.all { it.floor == 1 })
+        assertEquals("door", firstFloorPlan.nodes.last().type)
+        assertEquals(610.0, firstFloorPlan.nodes.last().x, 0.0)
+        assertEquals(205.0, firstFloorPlan.nodes.last().y, 0.0)
+
+        val secondFloorPlan = SiteIndoorRouter.plan(
+            start = MapPoint(floor = 2, x = 200f, y = 168f),
+            target = assemblyHall,
+            rooms = emptyList(),
+            transition = SiteIndoorRouter.Transition.STAIRS,
+        )
+        assertNotNull(secondFloorPlan)
+        assertTrue(secondFloorPlan!!.nodes.any { it.floor == 2 })
+        assertEquals(1, secondFloorPlan.nodes.last().floor)
+        assertEquals("door", secondFloorPlan.nodes.last().type)
+        assertEquals(610.0, secondFloorPlan.nodes.last().x, 0.0)
+        assertEquals(205.0, secondFloorPlan.nodes.last().y, 0.0)
+
+        listOf(
+            room("room_144", floor = 1, x = 100.0, y = 200.0, routeAvailable = false),
+            room("room_161", floor = 1, x = 100.0, y = 200.0, routeAvailable = false),
+            room("room_232", floor = 2, x = 100.0, y = 200.0, routeAvailable = false),
+            room("room_233", floor = 2, x = 100.0, y = 200.0, routeAvailable = false),
+            room("room_observation_2", floor = 2, x = 100.0, y = 200.0, routeAvailable = false),
+        ).forEach { unavailable ->
+            assertNull(
+                SiteIndoorRouter.plan(
+                    start = MapPoint(floor = unavailable.floor, x = 200f, y = 168f),
+                    target = unavailable,
+                    rooms = emptyList(),
+                    transition = SiteIndoorRouter.Transition.STAIRS,
+                ),
+            )
+        }
     }
 
     private fun room(

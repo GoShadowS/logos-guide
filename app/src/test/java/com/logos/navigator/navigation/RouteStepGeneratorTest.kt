@@ -28,6 +28,7 @@ class RouteStepGeneratorTest {
         )
 
         assertEquals(listOf(RouteAction.START, RouteAction.STRAIGHT, RouteAction.ARRIVAL), steps.map { it.action })
+        assertEquals(listOf("start", "goal", "goal"), steps.map { it.targetNodeId })
         assertEquals(10.0, steps[1].distanceMeters, 0.0001)
         assertEquals(2f / 3f, steps[1].progress, 0.0001f)
         assertEquals(1f, steps.last().progress, 0.0001f)
