@@ -3,6 +3,7 @@ package com.logos.navigator
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import com.logos.navigator.ui.MainViewModel
 import com.logos.navigator.ui.MainViewModelFactory
@@ -14,6 +15,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         setContent {
             NavigatorApp(viewModel = viewModel)
         }

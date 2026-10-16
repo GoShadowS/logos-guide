@@ -99,16 +99,14 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import com.logos.navigator.LogosNavigatorApplication
+import com.logos.navigator.BuildConfig
 import com.logos.navigator.R
 import com.logos.navigator.data.model.DistanceUnit
-import com.logos.navigator.data.model.GeoCoordinate
 import com.logos.navigator.data.model.IndoorUiState
 import com.logos.navigator.data.model.LocationMode
 import com.logos.navigator.data.model.MapPoint
@@ -116,7 +114,6 @@ import com.logos.navigator.data.model.RouteAction
 import com.logos.navigator.data.model.RouteInstruction
 import com.logos.navigator.data.model.Room
 import com.logos.navigator.ui.MainViewModel
-import com.logos.navigator.ui.map.DgisOutdoorMap
 import com.logos.navigator.utils.categoryLabel
 import com.logos.navigator.utils.formatDistance
 import com.logos.navigator.utils.localizedDescription
@@ -137,25 +134,15 @@ fun MapScreen(
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
-    val application = context.applicationContext as? LogosNavigatorApplication
-    var dgisSdkContext by remember(application) { mutableStateOf(application?.dgisSdkContext) }
-    val hasLocationPermission = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
-        ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
     val roomsOnSelectedFloor = remember(state.rooms, state.selectedFloor) {
         state.rooms.filter { it.floor == state.selectedFloor }
     }
     val navigationNodes = remember(state.navigation) { state.navigation?.nodes.orEmpty() }
     val navigationEdges = remember(state.navigation) { state.navigation?.edges.orEmpty() }
-    val outdoorInitialCoordinate = remember(state.navigation) {
-        state.navigation?.gpsAnchors
-            ?.takeIf { it.isNotEmpty() }
-            ?.let { anchors ->
-                GeoCoordinate(
-                    latitude = anchors.map { it.latitude }.average(),
-                    longitude = anchors.map { it.longitude }.average(),
-                )
-            }
+    val openDoorsPlaces = remember(state.rooms) {
+        if (BuildConfig.OPEN_DOORS) OpenDoorsCatalog.roomsFor(state.rooms) else emptyList()
     }
+    val openDoorsRoomIds = remember(openDoorsPlaces) { openDoorsPlaces.map { it.second.id }.toSet() }
     val snackbarHostState = remember { SnackbarHostState() }
     var mapView by remember { mutableStateOf<CanvasMapView?>(null) }
     var menuExpanded by remember { mutableStateOf(false) }
@@ -163,9 +150,7 @@ fun MapScreen(
     var quickActionsExpanded by remember { mutableStateOf(false) }
     var isPlacingManualPosition by remember { mutableStateOf(false) }
     var isRouteSheetVisible by remember { mutableStateOf(false) }
-    var isOutdoorMapVisible by remember { mutableStateOf(false) }
-    var openOutdoorMapAfterPermission by remember { mutableStateOf(false) }
-    var outdoorRecenterRequest by remember { mutableStateOf(0) }
+    var isOpenDoorsSheetVisible by remember { mutableStateOf(false) }
     var followGpsLocation by remember { mutableStateOf(true) }
     var rationaleVisible by remember { mutableStateOf(false) }
     var pendingCameraCenter by remember { mutableStateOf<MapPoint?>(null) }
@@ -188,18 +173,9 @@ fun MapScreen(
         val coarse = permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true ||
             ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
         if (fine || coarse) {
-            if (openOutdoorMapAfterPermission) {
-                if (state.locationMode != LocationMode.GPS) viewModel.setLocationMode(LocationMode.GPS)
-                mapView = null
-                isOutdoorMapVisible = true
-                openOutdoorMapAfterPermission = false
-            } else {
-                viewModel.setLocationMode(LocationMode.GPS)
-            }
+            viewModel.setLocationMode(LocationMode.GPS)
         } else {
-            if (openOutdoorMapAfterPermission) isOutdoorMapVisible = true
-            else viewModel.setLocationMode(LocationMode.MANUAL)
-            openOutdoorMapAfterPermission = false
+            viewModel.setLocationMode(LocationMode.MANUAL)
             viewModel.showMessage(context.getString(R.string.gps_permission_denied))
         }
     }
@@ -221,9 +197,9 @@ fun MapScreen(
             pendingCameraCenter = null
         }
     }
-    LaunchedEffect(state.userPosition, state.locationMode, state.selectedFloor, followGpsLocation, isOutdoorMapVisible, mapView) {
+    LaunchedEffect(state.userPosition, state.locationMode, state.selectedFloor, followGpsLocation, mapView) {
         val point = state.userPosition ?: return@LaunchedEffect
-        if (!isOutdoorMapVisible && state.locationMode == LocationMode.GPS && followGpsLocation && point.floor == state.selectedFloor) {
+        if (state.locationMode == LocationMode.GPS && followGpsLocation && point.floor == state.selectedFloor) {
             mapView?.centerOn(point)
         }
     }
@@ -249,31 +225,6 @@ fun MapScreen(
         }
     }
 
-    fun toggleOutdoorMap() {
-        if (isOutdoorMapVisible) {
-            isOutdoorMapVisible = false
-            return
-        }
-        if (dgisSdkContext == null) {
-            dgisSdkContext = application?.initializeDgisSdk()
-            if (dgisSdkContext == null) {
-                mapView = null
-                isOutdoorMapVisible = true
-                return
-            }
-        }
-        val hasFine = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-        val hasCoarse = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
-        if (hasFine || hasCoarse) {
-            if (state.locationMode != LocationMode.GPS) viewModel.setLocationMode(LocationMode.GPS)
-            mapView = null
-            isOutdoorMapVisible = true
-        } else {
-            openOutdoorMapAfterPermission = true
-            requestGpsPermissionOrStart()
-        }
-    }
-
     Scaffold(
         modifier = modifier,
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -281,15 +232,24 @@ fun MapScreen(
             TopAppBar(
                 title = {
                     Column {
-                        Text(stringResource(R.string.map_screen_title), fontWeight = FontWeight.Bold, fontSize = 18.sp, maxLines = 1)
-                        Text(stringResource(R.string.map_screen_subtitle), fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(
+                            stringResource(R.string.map_screen_title),
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.SemiBold,
+                            maxLines = 1,
+                        )
+                        Text(
+                            stringResource(R.string.map_screen_subtitle),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                     }
                 },
                 navigationIcon = {
                     Image(
                         painter = painterResource(R.drawable.logo),
                         contentDescription = stringResource(R.string.splash_description),
-                        modifier = Modifier.padding(start = 12.dp, end = 8.dp).size(38.dp).clip(CircleShape),
+                        modifier = Modifier.padding(start = 12.dp, end = 8.dp).size(40.dp).clip(RoundedCornerShape(12.dp)),
                     )
                 },
                 actions = {
@@ -331,72 +291,60 @@ fun MapScreen(
                 )
                 else -> {
                     val floor = state.navigation?.floors?.firstOrNull { it.number == state.selectedFloor }
-                    if (isOutdoorMapVisible) {
-                        DgisOutdoorMap(
-                            sdkContext = dgisSdkContext,
-                            initialCoordinate = outdoorInitialCoordinate,
-                            currentCoordinate = state.gpsCoordinates,
-                            recenterRequest = outdoorRecenterRequest,
-                            hasLocationPermission = hasLocationPermission,
-                            modifier = Modifier.fillMaxSize(),
-                        )
-                    } else {
-                        AndroidView(
-                            factory = { viewContext -> CanvasMapView(viewContext).also { mapView = it } },
-                            modifier = Modifier.fillMaxSize(),
-                            update = { view ->
-                                mapView = view
-                                view.submit(
-                                    floor = floor,
-                                    rooms = roomsOnSelectedFloor,
-                                    nodes = navigationNodes,
-                                    edges = navigationEdges,
-                                    userPosition = state.userPosition,
-                                    accuracyMeters = state.gpsAccuracyMeters,
-                                    locationMode = state.locationMode,
-                                    route = state.route,
-                                    destination = state.destination,
-                                    selectedRoom = state.selectedRoom,
-                                    settings = state.settings,
-                                    compassHeadingDegrees = state.compassHeadingDegrees,
-                                    onManualPosition = { x, y ->
-                                        viewModel.setManualPosition(x, y)
-                                        isPlacingManualPosition = false
-                                        if (state.destination != null) isRouteSheetVisible = true
-                                    },
-                                    onRoomTap = viewModel::showRoom,
-                                    onTapCoordinate = viewModel::onMapTapCoordinate,
-                                    manualPositionSelectionMode = isPlacingManualPosition,
-                                    onManualPositionInRoom = { room, x, y ->
-                                        viewModel.setManualPositionInRoom(room, x, y)
-                                        isPlacingManualPosition = false
-                                        if (state.destination != null) isRouteSheetVisible = true
-                                    },
-                                )
-                            },
-                        )
-                    }
+                    AndroidView(
+                        factory = { viewContext -> CanvasMapView(viewContext).also { mapView = it } },
+                        modifier = Modifier.fillMaxSize(),
+                        update = { view ->
+                            mapView = view
+                            view.submit(
+                                floor = floor,
+                                rooms = roomsOnSelectedFloor,
+                                nodes = navigationNodes,
+                                edges = navigationEdges,
+                                userPosition = state.userPosition,
+                                accuracyMeters = state.gpsAccuracyMeters,
+                                locationMode = state.locationMode,
+                                route = state.route,
+                                destination = state.destination,
+                                selectedRoom = state.selectedRoom,
+                                settings = state.settings,
+                                compassHeadingDegrees = state.compassHeadingDegrees,
+                                onManualPosition = { x, y ->
+                                    viewModel.setManualPosition(x, y)
+                                    isPlacingManualPosition = false
+                                    if (state.destination != null) isRouteSheetVisible = true
+                                },
+                                onRoomTap = viewModel::showRoom,
+                                onTapCoordinate = viewModel::onMapTapCoordinate,
+                                manualPositionSelectionMode = isPlacingManualPosition,
+                                openDoorsRoomIds = openDoorsRoomIds,
+                                onManualPositionInRoom = { room, x, y ->
+                                    viewModel.setManualPositionInRoom(room, x, y)
+                                    isPlacingManualPosition = false
+                                    if (state.destination != null) isRouteSheetVisible = true
+                                },
+                            )
+                        },
+                    )
 
                     Column(
                         modifier = Modifier.align(Alignment.TopStart).padding(12.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        if (!isOutdoorMapVisible) {
-                            ModeSwitch(
-                                selectedMode = state.locationMode,
-                                onSelectGps = {
-                                    isPlacingManualPosition = false
-                                    if (state.destination != null) isRouteSheetVisible = true
-                                    if (state.locationMode == LocationMode.GPS) viewModel.setLocationMode(LocationMode.MANUAL)
-                                    else requestGpsPermissionOrStart()
-                                },
-                                onSelectManual = {
-                                    isPlacingManualPosition = false
-                                    if (state.destination != null) isRouteSheetVisible = true
-                                    viewModel.setLocationMode(LocationMode.MANUAL)
-                                },
-                            )
-                        }
+                        ModeSwitch(
+                            selectedMode = state.locationMode,
+                            onSelectGps = {
+                                isPlacingManualPosition = false
+                                if (state.destination != null) isRouteSheetVisible = true
+                                if (state.locationMode == LocationMode.GPS) viewModel.setLocationMode(LocationMode.MANUAL)
+                                else requestGpsPermissionOrStart()
+                            },
+                            onSelectManual = {
+                                isPlacingManualPosition = false
+                                if (state.destination != null) isRouteSheetVisible = true
+                                viewModel.setLocationMode(LocationMode.MANUAL)
+                            },
+                        )
                         if (state.locationMode == LocationMode.MANUAL && state.userPosition != null && !isPlacingManualPosition) {
                             AssistChip(
                                 onClick = {
@@ -415,92 +363,90 @@ fun MapScreen(
                                 modifier = Modifier.width(290.dp),
                             )
                         }
-                        if (!isOutdoorMapVisible) {
-                            Row(horizontalArrangement = Arrangement.spacedBy(7.dp), verticalAlignment = Alignment.CenterVertically) {
-                                Box {
-                                    val currentFloorTitle = state.navigation?.floors
-                                        ?.firstOrNull { it.number == state.selectedFloor }
-                                        ?.title ?: stringResource(R.string.floor_title_format, state.selectedFloor)
-                                    FilterChip(
-                                        selected = true,
-                                        onClick = { floorMenuExpanded = true },
-                                        label = { Text(currentFloorTitle) },
-                                        trailingIcon = { Icon(Icons.Default.KeyboardArrowDown, contentDescription = null) },
+                        Row(horizontalArrangement = Arrangement.spacedBy(7.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Box {
+                                val currentFloorTitle = state.navigation?.floors
+                                    ?.firstOrNull { it.number == state.selectedFloor }
+                                    ?.title ?: stringResource(R.string.floor_title_format, state.selectedFloor)
+                                FilterChip(
+                                    selected = true,
+                                    onClick = { floorMenuExpanded = true },
+                                    label = { Text(currentFloorTitle) },
+                                    trailingIcon = { Icon(Icons.Default.KeyboardArrowDown, contentDescription = null) },
+                                )
+                                DropdownMenu(expanded = floorMenuExpanded, onDismissRequest = { floorMenuExpanded = false }) {
+                                    state.navigation?.floors.orEmpty().sortedBy { it.number }.forEach { floorOption ->
+                                        DropdownMenuItem(
+                                            text = { Text(floorOption.title) },
+                                            onClick = {
+                                                floorMenuExpanded = false
+                                                viewModel.selectFloor(floorOption.number)
+                                            },
+                                        )
+                                    }
+                                }
+                            }
+                            Box {
+                                AssistChip(
+                                    onClick = { quickActionsExpanded = true },
+                                    leadingIcon = { Icon(Icons.Default.MoreVert, contentDescription = null) },
+                                    label = { Text(stringResource(R.string.quick_actions)) },
+                                )
+                                DropdownMenu(expanded = quickActionsExpanded, onDismissRequest = { quickActionsExpanded = false }) {
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(R.string.quick_nearest_restroom)) },
+                                        leadingIcon = { Icon(painterResource(R.drawable.ic_restroom_24), contentDescription = null) },
+                                        onClick = {
+                                            quickActionsExpanded = false
+                                            viewModel.navigateToNearest("restroom")
+                                        },
                                     )
-                                    DropdownMenu(expanded = floorMenuExpanded, onDismissRequest = { floorMenuExpanded = false }) {
-                                        state.navigation?.floors.orEmpty().sortedBy { it.number }.forEach { floorOption ->
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(R.string.quick_nearest_stairs)) },
+                                        leadingIcon = { Icon(painterResource(R.drawable.ic_stairs_24), contentDescription = null) },
+                                        onClick = {
+                                            quickActionsExpanded = false
+                                            viewModel.navigateToNearest("stairs")
+                                        },
+                                    )
+                                    if (BuildConfig.OPEN_DOORS) {
+                                        HorizontalDivider()
+                                        DropdownMenuItem(
+                                            text = { Text(stringResource(R.string.quick_open_doors)) },
+                                            leadingIcon = { Icon(Icons.Default.Star, contentDescription = null) },
+                                            onClick = {
+                                                quickActionsExpanded = false
+                                                isOpenDoorsSheetVisible = true
+                                            },
+                                        )
+                                    }
+                                    if (quickFavoriteRooms.isNotEmpty()) {
+                                        HorizontalDivider()
+                                        quickFavoriteRooms.take(5).forEach { room ->
                                             DropdownMenuItem(
-                                                text = { Text(floorOption.title) },
+                                                text = {
+                                                    Column {
+                                                        Text(
+                                                            room.number?.let { context.getString(R.string.cabinet_number_format, it) }
+                                                                ?: context.categoryLabel(room.category),
+                                                            style = MaterialTheme.typography.labelSmall,
+                                                            color = MaterialTheme.colorScheme.primary,
+                                                        )
+                                                        Text(room.localizedName(context), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                                    }
+                                                },
+                                                leadingIcon = { Icon(Icons.Default.StarBorder, contentDescription = null) },
                                                 onClick = {
-                                                    floorMenuExpanded = false
-                                                    viewModel.selectFloor(floorOption.number)
+                                                    quickActionsExpanded = false
+                                                    onOpenFavoriteRoom(room)
                                                 },
                                             )
                                         }
                                     }
                                 }
-                                Box {
-                                    AssistChip(
-                                        onClick = { quickActionsExpanded = true },
-                                        leadingIcon = { Icon(Icons.Default.MoreVert, contentDescription = null) },
-                                        label = { Text(stringResource(R.string.quick_actions)) },
-                                    )
-                                    DropdownMenu(expanded = quickActionsExpanded, onDismissRequest = { quickActionsExpanded = false }) {
-                                        DropdownMenuItem(
-                                            text = { Text(stringResource(R.string.quick_nearest_restroom)) },
-                                            leadingIcon = { Icon(painterResource(R.drawable.ic_restroom_24), contentDescription = null) },
-                                            onClick = {
-                                                quickActionsExpanded = false
-                                                viewModel.navigateToNearest("restroom")
-                                            },
-                                        )
-                                        DropdownMenuItem(
-                                            text = { Text(stringResource(R.string.quick_nearest_stairs)) },
-                                            leadingIcon = { Icon(painterResource(R.drawable.ic_stairs_24), contentDescription = null) },
-                                            onClick = {
-                                                quickActionsExpanded = false
-                                                viewModel.navigateToNearest("stairs")
-                                            },
-                                        )
-                                        if (quickFavoriteRooms.isNotEmpty()) {
-                                            HorizontalDivider()
-                                            quickFavoriteRooms.take(5).forEach { room ->
-                                                DropdownMenuItem(
-                                                    text = {
-                                                        Column {
-                                                            Text(
-                                                                room.number?.let { context.getString(R.string.cabinet_number_format, it) }
-                                                                    ?: context.categoryLabel(room.category),
-                                                                style = MaterialTheme.typography.labelSmall,
-                                                                color = MaterialTheme.colorScheme.primary,
-                                                            )
-                                                            Text(room.localizedName(context), maxLines = 1, overflow = TextOverflow.Ellipsis)
-                                                        }
-                                                    },
-                                                    leadingIcon = { Icon(Icons.Default.StarBorder, contentDescription = null) },
-                                                    onClick = {
-                                                        quickActionsExpanded = false
-                                                        onOpenFavoriteRoom(room)
-                                                    },
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
                             }
                         }
-                        AssistChip(
-                            onClick = ::toggleOutdoorMap,
-                            leadingIcon = { Icon(Icons.Default.LocationOn, contentDescription = null) },
-                            label = {
-                                Text(
-                                    stringResource(
-                                        if (isOutdoorMapVisible) R.string.map_source_indoor else R.string.map_source_2gis,
-                                    ),
-                                )
-                            },
-                        )
-                        if (!isOutdoorMapVisible && state.locationMode == LocationMode.GPS && state.userPosition != null) {
+                        if (state.locationMode == LocationMode.GPS && state.userPosition != null) {
                             AssistChip(
                                 onClick = {
                                     followGpsLocation = !followGpsLocation
@@ -575,65 +521,59 @@ fun MapScreen(
                     }
 
                     val transitionHint = viewModel.transitionHint(state.selectedFloor)
-                    if (!isOutdoorMapVisible || dgisSdkContext != null) {
-                        ExtendedFloatingActionButton(
-                            onClick = {
-                                when {
-                                    isOutdoorMapVisible -> {
-                                        if (state.gpsCoordinates != null) outdoorRecenterRequest += 1
-                                        else requestGpsPermissionOrStart()
-                                    }
-                                    state.locationMode == LocationMode.MANUAL && isPlacingManualPosition -> {
-                                        isPlacingManualPosition = false
-                                        if (state.destination != null) isRouteSheetVisible = true
-                                    }
-                                    state.locationMode == LocationMode.MANUAL && state.userPosition == null -> {
-                                        isPlacingManualPosition = true
-                                        viewModel.showMessage(context.getString(R.string.manual_place_hint))
-                                    }
-                                    else -> {
-                                        val point = state.userPosition
-                                        if (point == null) viewModel.goToMyLocation()
-                                        else if (point.floor != state.selectedFloor) {
-                                            pendingCameraCenter = point
-                                            viewModel.selectFloor(point.floor)
-                                        } else mapView?.centerOn(point)
-                                    }
+                    ExtendedFloatingActionButton(
+                        onClick = {
+                            when {
+                                state.locationMode == LocationMode.MANUAL && isPlacingManualPosition -> {
+                                    isPlacingManualPosition = false
+                                    if (state.destination != null) isRouteSheetVisible = true
                                 }
-                            },
-                            icon = {
-                                Icon(
-                                    if (isPlacingManualPosition) Icons.Default.Close else Icons.Default.MyLocation,
-                                    contentDescription = null,
-                                )
-                            },
-                            text = {
-                                Text(
-                                    stringResource(
-                                        when {
-                                            isPlacingManualPosition -> R.string.cancel_manual_placement
-                                            state.locationMode == LocationMode.MANUAL && state.userPosition == null -> R.string.manual_place_location
-                                            else -> R.string.my_location
-                                        },
-                                    ),
-                                )
-                            },
-                            modifier = Modifier.align(Alignment.BottomEnd).padding(
-                                end = 16.dp,
-                                bottom = if (transitionHint != null) 148.dp else 16.dp,
-                            ),
-                            containerColor = if (isPlacingManualPosition) {
-                                MaterialTheme.colorScheme.secondaryContainer
-                            } else {
-                                MaterialTheme.colorScheme.primary
-                            },
-                            contentColor = if (isPlacingManualPosition) {
-                                MaterialTheme.colorScheme.onSecondaryContainer
-                            } else {
-                                MaterialTheme.colorScheme.onPrimary
-                            },
-                        )
-                    }
+                                state.locationMode == LocationMode.MANUAL && state.userPosition == null -> {
+                                    isPlacingManualPosition = true
+                                    viewModel.showMessage(context.getString(R.string.manual_place_hint))
+                                }
+                                else -> {
+                                    val point = state.userPosition
+                                    if (point == null) viewModel.goToMyLocation()
+                                    else if (point.floor != state.selectedFloor) {
+                                        pendingCameraCenter = point
+                                        viewModel.selectFloor(point.floor)
+                                    } else mapView?.centerOn(point)
+                                }
+                            }
+                        },
+                        icon = {
+                            Icon(
+                                if (isPlacingManualPosition) Icons.Default.Close else Icons.Default.MyLocation,
+                                contentDescription = null,
+                            )
+                        },
+                        text = {
+                            Text(
+                                stringResource(
+                                    when {
+                                        isPlacingManualPosition -> R.string.cancel_manual_placement
+                                        state.locationMode == LocationMode.MANUAL && state.userPosition == null -> R.string.manual_place_location
+                                        else -> R.string.my_location
+                                    },
+                                ),
+                            )
+                        },
+                        modifier = Modifier.align(Alignment.BottomEnd).padding(
+                            end = 16.dp,
+                            bottom = if (transitionHint != null) 148.dp else 16.dp,
+                        ),
+                        containerColor = if (isPlacingManualPosition) {
+                            MaterialTheme.colorScheme.secondaryContainer
+                        } else {
+                            MaterialTheme.colorScheme.primary
+                        },
+                        contentColor = if (isPlacingManualPosition) {
+                            MaterialTheme.colorScheme.onSecondaryContainer
+                        } else {
+                            MaterialTheme.colorScheme.onPrimary
+                        },
+                    )
                     if (transitionHint != null) {
                         Card(
                             modifier = Modifier
@@ -683,12 +623,20 @@ fun MapScreen(
         )
     }
 
+    if (BuildConfig.OPEN_DOORS && isOpenDoorsSheetVisible) {
+        OpenDoorsSheet(
+            venues = openDoorsPlaces,
+            onDismiss = { isOpenDoorsSheetVisible = false },
+            onRoute = { room ->
+                isOpenDoorsSheetVisible = false
+                viewModel.navigateTo(room)
+            },
+        )
+    }
+
     if (rationaleVisible) {
         AlertDialog(
-            onDismissRequest = {
-                rationaleVisible = false
-                openOutdoorMapAfterPermission = false
-            },
+            onDismissRequest = { rationaleVisible = false },
             title = { Text(stringResource(R.string.gps_permission_title)) },
             text = {
                 Text(stringResource(R.string.gps_permission_rationale))
@@ -702,10 +650,9 @@ fun MapScreen(
                 }) { Text(stringResource(R.string.gps_permission_continue)) }
             },
             dismissButton = {
-                TextButton(onClick = {
-                    rationaleVisible = false
-                    openOutdoorMapAfterPermission = false
-                }) { Text(stringResource(R.string.action_cancel)) }
+                TextButton(onClick = { rationaleVisible = false }) {
+                    Text(stringResource(R.string.action_cancel))
+                }
             },
         )
     }
@@ -832,7 +779,7 @@ private fun RouteBottomSheet(
     val context = LocalContext.current
     val destination = state.destination ?: return
     val configuration = LocalConfiguration.current
-    val maxSheetHeight = (configuration.screenHeightDp * 0.48f).dp
+    val maxSheetHeight = (configuration.screenHeightDp * 0.72f).dp
     val sheetState = androidx.compose.material3.rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var actionsExpanded by remember(destination.id) { mutableStateOf(false) }
     var showAllSteps by remember(destination.id) { mutableStateOf(false) }
@@ -874,88 +821,119 @@ private fun RouteBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
         scrimColor = Color.Transparent,
+        containerColor = MaterialTheme.colorScheme.background,
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(max = maxSheetHeight)
                 .verticalScroll(rememberScrollState())
-                .padding(start = 22.dp, end = 22.dp, bottom = 14.dp),
+                .padding(start = 18.dp, end = 18.dp, bottom = 18.dp),
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                    Text(
-                        destinationHeading,
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                    Text(
-                        destinationDetail,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
-                Box {
-                    IconButton(onClick = { actionsExpanded = true }) {
-                        Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.quick_actions))
+            Surface(
+                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                shape = RoundedCornerShape(20.dp),
+                color = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(14.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Surface(
+                        shape = RoundedCornerShape(14.dp),
+                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f),
+                        contentColor = MaterialTheme.colorScheme.primary,
+                    ) {
+                        Icon(Icons.Default.Navigation, contentDescription = null, modifier = Modifier.padding(10.dp))
                     }
-                    DropdownMenu(expanded = actionsExpanded, onDismissRequest = { actionsExpanded = false }) {
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.change_start_location)) },
-                            leadingIcon = { Icon(Icons.Default.MyLocation, contentDescription = null) },
-                            onClick = {
-                                actionsExpanded = false
-                                onSelectStartLocation()
-                            },
+                    Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                        Text(
+                            stringResource(R.string.route_sheet_eyebrow),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.SemiBold,
                         )
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.save_route)) },
-                            leadingIcon = { Icon(Icons.Default.BookmarkAdd, contentDescription = null) },
-                            onClick = {
-                                actionsExpanded = false
-                                onSaveRoute(destination)
-                            },
+                        Text(
+                            destinationHeading,
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                         )
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.share_button)) },
-                            leadingIcon = { Icon(Icons.Default.Share, contentDescription = null) },
-                            onClick = {
-                                actionsExpanded = false
-                                onShare()
-                            },
+                        Text(
+                            destinationDetail,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                         )
                     }
-                }
-                IconButton(onClick = onCancelRoute) {
-                    Icon(Icons.Default.Close, contentDescription = stringResource(R.string.cancel_route))
+                    Box {
+                        IconButton(onClick = { actionsExpanded = true }) {
+                            Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.quick_actions))
+                        }
+                        DropdownMenu(expanded = actionsExpanded, onDismissRequest = { actionsExpanded = false }) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.change_start_location)) },
+                                leadingIcon = { Icon(Icons.Default.MyLocation, contentDescription = null) },
+                                onClick = {
+                                    actionsExpanded = false
+                                    onSelectStartLocation()
+                                },
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.save_route)) },
+                                leadingIcon = { Icon(Icons.Default.BookmarkAdd, contentDescription = null) },
+                                onClick = {
+                                    actionsExpanded = false
+                                    onSaveRoute(destination)
+                                },
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.share_button)) },
+                                leadingIcon = { Icon(Icons.Default.Share, contentDescription = null) },
+                                onClick = {
+                                    actionsExpanded = false
+                                    onShare()
+                                },
+                            )
+                        }
+                    }
+                    IconButton(onClick = onCancelRoute) {
+                        Icon(Icons.Default.Close, contentDescription = stringResource(R.string.cancel_route))
+                    }
                 }
             }
 
             if (state.routeDistanceMeters != null) {
-                Row(
-                    modifier = Modifier.padding(top = 5.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(9.dp),
+                Surface(
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 7.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    color = MaterialTheme.colorScheme.surface,
                 ) {
-                    Icon(Icons.Default.Navigation, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                    Text(
-                        stringResource(
-                            R.string.route_card_summary,
-                            state.routeMinutes ?: 1,
-                            context.formatDistance(state.routeDistanceMeters, distanceUnit),
-                        ),
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.SemiBold,
-                    )
-                    if (state.isNavigationStarted) {
-                        LinearProgressIndicator(
-                            progress = state.routeProgress.coerceIn(0f, 1f),
-                            modifier = Modifier.weight(1f),
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(9.dp),
+                    ) {
+                        Icon(Icons.Default.Navigation, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                        Text(
+                            stringResource(
+                                R.string.route_card_summary,
+                                state.routeMinutes ?: 1,
+                                context.formatDistance(state.routeDistanceMeters, distanceUnit),
+                            ),
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.SemiBold,
                         )
+                        if (state.isNavigationStarted) {
+                            LinearProgressIndicator(
+                                progress = state.routeProgress.coerceIn(0f, 1f),
+                                modifier = Modifier.weight(1f),
+                            )
+                        }
                     }
                 }
             }
@@ -1009,9 +987,9 @@ private fun RouteBottomSheet(
                             .clip(RoundedCornerShape(14.dp))
                             .background(
                                 if (isCurrent && state.isNavigationStarted) {
-                                    MaterialTheme.colorScheme.secondaryContainer
+                                    MaterialTheme.colorScheme.primaryContainer
                                 } else {
-                                    Color.Transparent
+                                    MaterialTheme.colorScheme.surface
                                 },
                             )
                             .padding(horizontal = 8.dp, vertical = 8.dp),

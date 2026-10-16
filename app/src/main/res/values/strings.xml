@@ -41,12 +41,7 @@
     <string name="location_hint_other_floor">Точка сейчас на %1$d-м этаже. Нажмите на план, чтобы обновить её.</string>
     <string name="location_on_floor">Маркер GPS на %1$d-м этаже</string>
     <string name="location_accuracy">Точность ±%1$d м</string>
-    <string name="map_source_2gis">2ГИС</string>
-    <string name="map_source_indoor">План этажа</string>
-    <string name="dgis_key_required_title">Нужен ключ 2ГИС Mobile SDK</string>
-    <string name="dgis_key_required_message">Скачайте файл доступа dgissdk.key в кабинете платформы 2ГИС и положите его в app/src/main/assets/dgissdk.key. Не отправляйте ключ в чат и не добавляйте его в Git. Наружная карта загружает данные из интернета; планы этажей и внутренние маршруты остаются офлайн.</string>
-    <string name="dgis_map_load_error">Не удалось запустить 2ГИС. Проверьте файл dgissdk.key и подключение к интернету.</string>
-    <string name="gps_follow">Следить за точкой</string>
+                        <string name="gps_follow">Следить за точкой</string>
     <string name="gps_following">Точка в центре</string>
     <string name="gps_determining">Определяем положение… Внутри здания GPS может работать неточно.</string>
     <string name="gps_no_fresh_fix">Не удалось получить свежую GPS-точку. Проверьте службы геолокации или переключитесь на ручной режим.</string>
@@ -75,6 +70,7 @@
     <string name="quick_nearest_stairs">Ближайшая лестница</string>
     <string name="quick_actions">Быстрые действия</string>
     <string name="quick_actions_description">Туалет, лестница или отметка места</string>
+    <string name="quick_open_doors">Площадки дня открытых дверей</string>
     <string name="manual_place_location">Указать место</string>
     <string name="manual_move_location">Переместить точку</string>
     <string name="cancel_manual_placement">Отменить</string>
@@ -82,6 +78,16 @@
     <string name="set_location_here">Отметить себя в этом кабинете</string>
     <string name="manual_location_set">Точка «Я здесь» установлена в выбранном помещении</string>
     <string name="quick_action_location_required">Сначала отметьте своё положение на карте или включите GPS.</string>
+    <string name="open_doors_today">Сегодня</string>
+    <string name="open_doors_heading_main">День открытых дверей:</string>
+    <string name="open_doors_heading_accent">площадки и мастер-классы.</string>
+    <string name="open_doors_subtitle">Выберите площадку — покажем аудиторию, ведущих и предложим построить маршрут прямо по плану колледжа.</string>
+    <string name="open_doors_venue_badge">Площадка Дня открытых дверей</string>
+    <string name="open_doors_room_format">Аудитория %1$s · %2$d этаж</string>
+    <string name="open_doors_details_action">Подробнее о площадке</string>
+    <string name="open_doors_back">Все площадки</string>
+    <string name="open_doors_route">Построить маршрут</string>
+    <string name="open_doors_empty">Локальные карточки площадок пока недоступны.</string>
     <string name="quick_action_destination_not_found">Не удалось найти доступный маршрут до ближайшего пункта.</string>
     <string name="route_start_in_restricted_area">Точка старта находится в закрытой зоне. Переместите её в доступный коридор.</string>
     <string name="room_route_unavailable">Маршрут к «%1$s» пока не настроен: нужно подтвердить его геометрию или вход.</string>
@@ -132,6 +138,7 @@
     <string name="room_details">Информация о помещении</string>
     <string name="room_not_found">Пункт назначения больше не найден в локальном каталоге.</string>
     <string name="route_to_format">Маршрут до %1$s</string>
+    <string name="route_sheet_eyebrow">Внутренний маршрут</string>
     <string name="route_destination_room">Кабинет %1$s</string>
     <string name="route_room_floor_detail">%1$s · %2$s</string>
     <string name="route_card_summary">%1$d мин · %2$s</string>
@@ -396,6 +403,15 @@
 
     <!-- Экран «О приложении» и заставка. -->
     <string name="about_title">О приложении</string>
+    <string name="about_version_value">Версия %1$s</string>
+    <string name="about_project_section">Проект</string>
+    <string name="about_license_title">Лицензия</string>
+    <string name="about_license_description">Исходный код приложения и документация распространяются по Apache License 2.0.</string>
+    <string name="about_license_notice">Название и логотип колледжа, предоставленные планы этажей и данные здания не входят в эту лицензию и остаются предметом прав их правообладателей.</string>
+    <string name="about_license_unavailable">Не удалось загрузить текст лицензии.</string>
+    <string name="about_license_open">Прочитать полный текст Apache License 2.0</string>
+    <string name="about_website_title">Сайт проекта</string>
+    <string name="about_open_website">Открыть сайт logos-guide.ru</string>
     <string name="about_version">Версия</string>
     <string name="about_project_type">Тип проекта</string>
     <string name="about_project_type_value">Индивидуальный проект</string>
