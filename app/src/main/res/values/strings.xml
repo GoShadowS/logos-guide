@@ -49,7 +49,7 @@
     <string name="gps_no_anchors">Для этажа «%1$s» нет достаточных GPS-опорных точек. Установите маркер вручную.</string>
     <string name="gps_accuracy_too_low">GPS-точка не показана: погрешность ±%1$d м выше порога %2$d м. Уточните место вручную.</string>
     <string name="gps_accuracy_missing">GPS не сообщил оценку точности. Проверьте положение на плане и при необходимости перейдите в ручной режим.</string>
-    <string name="gps_position_outside_map">GPS преобразовал координаты за пределы плана этого этажа. Дождитесь более точного сигнала или отметьте положение вручную.</string>
+    <string name="gps_position_outside_map">GPS определил точку за пределами помещений и коридоров колледжа. Дождитесь более точного сигнала или отметьте положение вручную.</string>
     <string name="gps_unavailable">Службы определения местоположения не видят свежий сигнал. Можно выбрать ручной режим.</string>
     <string name="gps_error">GPS недоступен: %1$s Переключитесь на ручной режим.</string>
     <string name="gps_permission_denied">Разрешение не выдано. Вы можете отметить положение вручную.</string>
@@ -103,7 +103,7 @@
     <string name="floor_map_error_message">SVG-карта этажа «%1$s» отсутствует или не читается. Проверьте файл %2$s и его viewBox.</string>
     <string name="manual_start_hint">Сначала отметьте «Я здесь» на карте или включите GPS.</string>
     <string name="manual_position_required">Сначала отметьте своё положение на карте.</string>
-    <string name="manual_position_outside_map">Выберите точку внутри видимой области плана этажа.</string>
+    <string name="manual_position_outside_map">Точку можно поставить только внутри помещений или коридоров колледжа.</string>
     <string name="location_on_other_floor">Ваш маркер находится на %1$d-м этаже. Откройте этот этаж, чтобы увидеть его.</string>
     <string name="no_location_to_center">Сначала отметьте своё положение на плане.</string>
     <string name="no_graph_nodes">На этом этаже пока нет узлов навигационного графа.</string>

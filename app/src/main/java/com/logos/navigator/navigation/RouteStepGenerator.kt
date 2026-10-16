@@ -9,7 +9,7 @@ import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.hypot
 
-/** Создаёт последовательность понятных действий из A*-пути и весов рёбер в метрах. */
+/** Создаёт последовательность понятных действий из маршрутной ломаной и весов переходов. */
 object RouteStepGenerator {
     fun generate(
         graph: NavigationData,
