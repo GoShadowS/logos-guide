@@ -21,5 +21,6 @@ jobs:
       - name: Validate indoor data and SVG geometry
         run: |
           python3 tools/validate_indoor_data.py
+          python3 tools/generate_kotlin_floor_maps.py --check
           python3 tools/extract_svg_geometry.py app/src/main/assets/floors/floor_1.svg --strict
           python3 tools/extract_svg_geometry.py app/src/main/assets/floors/floor_2.svg --strict

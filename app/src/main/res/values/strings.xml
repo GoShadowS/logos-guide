@@ -300,10 +300,10 @@
     <string name="settings_grid_description">Вспомогательная сетка для проверки SVG viewBox</string>
     <string name="settings_compass">Поворот по компасу</string>
     <string name="settings_compass_description">Оставьте выключенным, если датчик телефона нестабилен</string>
-    <string name="settings_svg_quality">Качество SVG</string>
-    <string name="svg_quality_low">Экономия</string>
-    <string name="svg_quality_medium">Обычное</string>
-    <string name="svg_quality_high">Высокое</string>
+    <string name="settings_map_quality">Качество отрисовки карты</string>
+    <string name="map_quality_low">Экономия</string>
+    <string name="map_quality_medium">Обычное</string>
+    <string name="map_quality_high">Высокое</string>
     <string name="settings_auto_route">Строить маршрут автоматически</string>
     <string name="settings_auto_route_description">После выбора кабинета и установки точки «Я здесь»</string>
     <string name="settings_arrival_vibration">Вибрация у цели</string>

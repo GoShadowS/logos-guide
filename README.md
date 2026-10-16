@@ -6,7 +6,7 @@ Android-приложение для внутренней навигации АН
 
 ## Возможности Android-приложения
 
-- Векторный рендер планов SVG через AndroidSVG и Android Canvas; жесты pinch-to-zoom и pan, одна заметная кнопка «Моё место» и компактный выбор этажа.
+- Нативная векторная отрисовка планов через Kotlin `Canvas`/`Path`; жесты pinch-to-zoom и pan, одна заметная кнопка «Моё место» и компактный выбор этажа. Исходные SVG используются как эталон для генерации, AndroidSVG во время работы не загружается.
 - Слои поверх плана: помещения с несколькими контурами, маркеры пользователя/назначения, A*-маршрут и межэтажные переходы. Подписи кабинетов по умолчанию скрыты; помещение подсвечивается при выборе.
 - Ручная установка и перетаскивание маркера в коридоре и внутри выбранной комнаты с блокировкой закрытых серых зон. GPS через Fused Location Provider с runtime-разрешениями и предупреждением о слабом сигнале внутри здания. GPS не определяет этаж; переключение этажа подтверждает пользователь.
 - Предпросмотр маршрута в нижней карточке: полный список шагов, расстояние и время, явная кнопка «Начать маршрут». В режиме движения выделяется текущий шаг; ручное ведение поддерживает «Назад» и «Следующий шаг».
@@ -18,17 +18,17 @@ Android-приложение для внутренней навигации АН
 
 ## Карты и ресурсы
 
-**Единственная основа карт в APK — предоставленные SVG.** Растровые планы остаются только исходными материалами для изучения планировки; PNG-планы не копируются в assets приложения и не отображаются. PNG логотипа и заставки допустимы.
+**В приложении планы рисуются Kotlin-кодом через `Canvas`/`Path`.** Исходные SVG сохранены как эталон геометрии и дизайна, а `tools/generate_kotlin_floor_maps.py` формирует из них `GeneratedFloorMaps.kt`; приложение больше не загружает SVG-парсер и не строит bitmap-кэш. Растровые планы остаются справочными материалами и не отображаются. PNG логотипа и заставки допустимы.
 
 | Источник | Использование | Ресурс приложения |
 |---|---|---|
-| `maps_and_design/map1lower.svg` | План 1-го этажа | `app/src/main/assets/floors/floor_1.svg` |
-| `maps_and_design/map2lower.svg` | План 2-го этажа | `app/src/main/assets/floors/floor_2.svg` |
+| `maps_and_design/map1lower.svg` / `app/src/main/assets/floors/floor_1.svg` | Эталон и вход генератора плана 1-го этажа | `GeneratedFloorMaps.kt` |
+| `maps_and_design/map2lower.svg` / `app/src/main/assets/floors/floor_2.svg` | Эталон и вход генератора плана 2-го этажа | `GeneratedFloorMaps.kt` |
 | `maps_and_design/map1lower_cabinet.png`, `map2lower_cabinet.png` | Только справочные растровые исходники | **В APK не включаются** |
 | `maps_and_design/logo.png` | Логотип приложения и адаптивной иконки | `app/src/main/res/drawable-nodpi/logo.png` |
 | `maps_and_design/splash.png` | Заставка | `app/src/main/res/drawable-nodpi/splash_screen.png` |
 
-В `app/src/main/assets/floors/` находятся только `floor_1.svg` и `floor_2.svg`. JSON-файлы лежат рядом с папкой `floors/`: `navigation_graph.json` и `rooms.json`. Их `x/y` — координаты SVG `viewBox`, а не PNG-пиксели и не dp.
+В `app/src/main/assets/floors/` сохранены `floor_1.svg` и `floor_2.svg` для сверки, генерации и проверки данных; Android-карта их не открывает. Сгенерированный Kotlin-файл хранит все слои плана и рисует их `Path`-ами, включая контуры подписей, маски, клипы и градиенты. JSON-файлы лежат рядом с папкой `floors/`: `navigation_graph.json` и `rooms.json`. Их `x/y` — координаты прежнего SVG `viewBox`, а не PNG-пиксели и не dp.
 
 - 1-й этаж: `viewBox="0 0 758 552"`, `metersPerUnit: 0.08332894`.
 - 2-й этаж: `viewBox="0 0 767 561"`, `metersPerUnit: 0.08334442`.
@@ -48,7 +48,7 @@ Android-приложение для внутренней навигации АН
 
 Debug APK: `app/build/outputs/apk/debug/app-debug.apk`. Подписание release, установка на телефон, миграции Room и ProGuard описаны в руководстве сборки.
 
-**Ограничение проверки этого рабочего сеанса:** в контейнере отсутствуют `java`/JDK и Android SDK, поэтому Gradle-сборка, JVM-тесты и APK здесь не подтверждены. JSON, SVG `viewBox`, каталог и связность графа проверяются локальными Python-скриптами. Перед выпуском выполните указанные Gradle-команды в Android Studio/JDK 17 и проверьте обе карты на устройстве.
+**Ограничение проверки этого рабочего сеанса:** в контейнере отсутствуют `java`/JDK и Android SDK, поэтому Gradle-сборка, JVM-тесты и APK здесь не подтверждены. JSON, синхронность сгенерированных Kotlin-карт с исходными SVG, `viewBox`, каталог и связность графа проверяются локальными Python-скриптами. Перед выпуском выполните указанные Gradle-команды в Android Studio/JDK 17 и визуально проверьте обе карты на устройстве.
 
 ## Структура проекта
 
@@ -65,13 +65,15 @@ app/src/main/
 │   ├── data/model/                    # модели и AppSettings
 │   ├── data/repository/               # indoor/favorites repositories
 │   ├── navigation/                    # GPS-привязка и A*
-│   ├── svg/                           # загрузка, рендер, координаты SVG
-│   └── ui/                            # Compose MVVM screens
+│   ├── svg/                           # координатные преобразования и геометрия viewBox
+│   └── ui/                            # Compose MVVM screens и Canvas/Path-отрисовка
+│       └── map/GeneratedFloorMaps.kt  # сгенерированные векторные слои планов
 ├── res/drawable-nodpi/                # логотип и заставка PNG
 ├── res/drawable/                      # VectorDrawable быстрых действий
 ├── res/values/                        # RU resources
 └── res/values-en/                     # EN resources
 
+tools/generate_kotlin_floor_maps.py   # генерация и проверка Canvas/Path-карт из эталонных SVG
 tools/extract_svg_geometry.py          # SVG-координаты и проверка данных
 tools/validate_indoor_data.py          # JSON, SVG ID, связность и рёбра через контуры комнат
 docs/                                  # руководства Android, Inkscape и данных

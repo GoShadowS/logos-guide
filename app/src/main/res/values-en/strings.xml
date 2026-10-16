@@ -300,10 +300,10 @@
     <string name="settings_grid_description">Helper grid for checking the SVG viewBox</string>
     <string name="settings_compass">Compass rotation</string>
     <string name="settings_compass_description">Leave off if the phone sensor is unstable</string>
-    <string name="settings_svg_quality">SVG quality</string>
-    <string name="svg_quality_low">Battery saving</string>
-    <string name="svg_quality_medium">Standard</string>
-    <string name="svg_quality_high">High</string>
+    <string name="settings_map_quality">Map rendering quality</string>
+    <string name="map_quality_low">Battery saving</string>
+    <string name="map_quality_medium">Standard</string>
+    <string name="map_quality_high">High</string>
     <string name="settings_auto_route">Build routes automatically</string>
     <string name="settings_auto_route_description">After choosing a room and setting “I’m here”</string>
     <string name="settings_arrival_vibration">Vibrate near destination</string>

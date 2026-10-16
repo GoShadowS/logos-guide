@@ -1,6 +1,5 @@
 package com.logos.navigator.data.model
 
-import com.caverock.androidsvg.SVG
 import com.google.gson.annotations.SerializedName
 
 /** Описание SVG-плана: x/y/width/height соответствуют viewBox документа. */
@@ -128,13 +127,10 @@ enum class LocationMode { GPS, MANUAL }
 /** Единый источник состояния экранов Compose. */
 data class IndoorUiState(
     val isLoading: Boolean = true,
-    val isMapLoading: Boolean = false,
     val loadError: String? = null,
-    val mapError: String? = null,
     val navigation: NavigationData? = null,
     val rooms: List<Room> = emptyList(),
     val selectedFloor: Int = 1,
-    val floorSvg: SVG? = null,
     val locationMode: LocationMode = LocationMode.MANUAL,
     val userPosition: MapPoint? = null,
     val isManualPositionConfirmed: Boolean = false,

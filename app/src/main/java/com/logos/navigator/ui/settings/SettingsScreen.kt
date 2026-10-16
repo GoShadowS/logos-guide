@@ -69,7 +69,7 @@ import com.logos.navigator.data.model.RouteLineStyle
 import com.logos.navigator.data.model.RoutePreference
 import com.logos.navigator.data.model.SpeechLanguage
 import com.logos.navigator.data.model.StartupLocationMode
-import com.logos.navigator.data.model.SvgRenderQuality
+import com.logos.navigator.data.model.MapRenderQuality
 import com.logos.navigator.data.model.ThemeMode
 import com.logos.navigator.utils.AppLocaleController
 
@@ -236,18 +236,18 @@ fun SettingsScreen(
                         SwitchSetting(stringResource(R.string.settings_compass), stringResource(R.string.settings_compass_description), settings.compassRotationEnabled) { checked ->
                             onUpdateSettings { current -> current.copy(compassRotationEnabled = checked) }
                         }
-                        Text(stringResource(R.string.settings_svg_quality), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                        Text(stringResource(R.string.settings_map_quality), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
                         ChoiceRow(
-                            values = SvgRenderQuality.entries,
-                            selected = settings.svgRenderQuality,
+                            values = MapRenderQuality.entries,
+                            selected = settings.mapRenderQuality,
                             label = {
                                 when (it) {
-                                    SvgRenderQuality.LOW -> stringResource(R.string.svg_quality_low)
-                                    SvgRenderQuality.MEDIUM -> stringResource(R.string.svg_quality_medium)
-                                    SvgRenderQuality.HIGH -> stringResource(R.string.svg_quality_high)
+                                    MapRenderQuality.LOW -> stringResource(R.string.map_quality_low)
+                                    MapRenderQuality.MEDIUM -> stringResource(R.string.map_quality_medium)
+                                    MapRenderQuality.HIGH -> stringResource(R.string.map_quality_high)
                                 }
                             },
-                            onSelected = { value -> onUpdateSettings { it.copy(svgRenderQuality = value) } },
+                            onSelected = { value -> onUpdateSettings { it.copy(mapRenderQuality = value) } },
                         )
                     }
                 }
