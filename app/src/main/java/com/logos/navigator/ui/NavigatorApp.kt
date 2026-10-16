@@ -337,6 +337,10 @@ private fun MainNavigation(
                                 onBack = { navigateToTab(navController, ROUTE_MAP) },
                                 onSelectRoom = viewModel::selectRoomFromSearch,
                                 onBuildRoute = viewModel::navigateTo,
+                                onVoiceQuickAction = { role ->
+                                    viewModel.navigateToNearest(role)
+                                    navigateToTab(navController, ROUTE_MAP)
+                                },
                                 initialQuery = pendingSearchQuery,
                                 initialCategory = pendingSearchCategory,
                                 searchRequestVersion = searchRequestVersion,
@@ -366,6 +370,10 @@ private fun MainNavigation(
                             },
                             onBuildRoute = { room ->
                                 viewModel.navigateTo(room)
+                                navigateToTab(navController, ROUTE_MAP)
+                            },
+                            onVoiceQuickAction = { role ->
+                                viewModel.navigateToNearest(role)
                                 navigateToTab(navController, ROUTE_MAP)
                             },
                             initialQuery = pendingSearchQuery,

@@ -41,6 +41,13 @@
     <string name="location_hint_other_floor">Точка сейчас на %1$d-м этаже. Нажмите на план, чтобы обновить её.</string>
     <string name="location_on_floor">Маркер GPS на %1$d-м этаже</string>
     <string name="location_accuracy">Точность ±%1$d м</string>
+    <string name="map_source_2gis">2ГИС</string>
+    <string name="map_source_indoor">План этажа</string>
+    <string name="dgis_key_required_title">Нужен ключ 2ГИС Mobile SDK</string>
+    <string name="dgis_key_required_message">Скачайте файл доступа dgissdk.key в кабинете платформы 2ГИС и положите его в app/src/main/assets/dgissdk.key. Не отправляйте ключ в чат и не добавляйте его в Git. Наружная карта загружает данные из интернета; планы этажей и внутренние маршруты остаются офлайн.</string>
+    <string name="dgis_map_load_error">Не удалось запустить 2ГИС. Проверьте файл dgissdk.key и подключение к интернету.</string>
+    <string name="gps_follow">Следить за точкой</string>
+    <string name="gps_following">Точка в центре</string>
     <string name="gps_determining">Определяем положение… Внутри здания GPS может работать неточно.</string>
     <string name="gps_no_fresh_fix">Не удалось получить свежую GPS-точку. Проверьте службы геолокации или переключитесь на ручной режим.</string>
     <string name="gps_stale_fix">Получена устаревшая GPS-точка; ожидаем новое измерение. Можно поставить маркер вручную.</string>
@@ -162,6 +169,10 @@
     <string name="search_label">Название или номер кабинета</string>
     <string name="search_hint">Номер, часть названия или транслитерация: 118, каб 118, kab 118</string>
     <string name="search_clear">Очистить поиск</string>
+    <string name="voice_search_start">Голосовой поиск</string>
+    <string name="voice_search_prompt">Назовите кабинет или скажите, куда построить маршрут</string>
+    <string name="voice_search_unavailable">На устройстве не найден сервис распознавания речи.</string>
+    <string name="voice_search_error">Не удалось запустить голосовой поиск.</string>
     <string name="search_similar_queries">Похожие запросы</string>
     <string name="search_build_route">Построить маршрут</string>
     <string name="all_categories">Все</string>
@@ -466,6 +477,8 @@
     <string name="previous_step">Предыдущий шаг</string>
     <string name="route_step_count">Шаг %1$d из %2$d</string>
     <string name="route_preview_hint">Проверьте путь и нажмите «Начать маршрут», когда будете готовы.</string>
+    <string name="route_show_steps">Все шаги</string>
+    <string name="route_hide_steps">Свернуть</string>
     <string name="all_steps">Все шаги</string>
     <string name="next_step">Следующий шаг</string>
     <string name="route_steps_title">Шаги маршрута</string>

@@ -569,15 +569,13 @@ class CanvasMapView @JvmOverloads constructor(
         haloPaint.color = Color.WHITE
         canvas.drawCircle(point.x, point.y, radius * 0.24f, haloPaint)
         haloPaint.color = Color.WHITE
-        if (locationMode == LocationMode.MANUAL) {
-            drawLocationLabel(
-                canvas = canvas,
-                text = context.getString(R.string.location_me_here),
-                x = point.x + radius * 1.2f,
-                y = point.y - radius * 1.4f,
-                mapScale = mapScale,
-            )
-        }
+        drawLocationLabel(
+            canvas = canvas,
+            text = context.getString(R.string.location_me_here),
+            x = point.x + radius * 1.2f,
+            y = point.y - radius * 1.4f,
+            mapScale = mapScale,
+        )
     }
 
     private fun drawLocationLabel(canvas: Canvas, text: String, x: Float, y: Float, mapScale: Float) {

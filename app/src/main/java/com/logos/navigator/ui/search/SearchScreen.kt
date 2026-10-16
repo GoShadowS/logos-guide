@@ -1,5 +1,13 @@
 package com.logos.navigator.ui.search
 
+import android.app.Activity
+import android.content.ActivityNotFoundException
+import android.content.Context
+import android.content.Intent
+import android.speech.RecognizerIntent
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -23,6 +31,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
@@ -79,6 +88,7 @@ fun SearchScreen(
     onBack: () -> Unit,
     onSelectRoom: (Room) -> Unit,
     onBuildRoute: ((Room) -> Unit)? = null,
+    onVoiceQuickAction: ((String) -> Unit)? = null,
     initialQuery: String = "",
     initialCategory: String = ALL_CATEGORIES,
     searchRequestVersion: Int = 0,
@@ -89,6 +99,63 @@ fun SearchScreen(
     var category by rememberSaveable { mutableStateOf(initialCategory) }
     var floorFilter by rememberSaveable { mutableStateOf<Int?>(null) }
     var appliedSearchRequestVersion by rememberSaveable { mutableIntStateOf(-1) }
+    val voiceSearchLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult(),
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val spoken = result.data
+                ?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
+                ?.firstOrNull()
+                .orEmpty()
+            if (spoken.isNotBlank()) {
+                category = ALL_CATEGORIES
+                floorFilter = null
+                val normalized = normalizeSearchText(spoken)
+                val quickAction = when {
+                    listOf("ближайший туалет", "ближайшая уборная", "nearest restroom", "nearest toilet")
+                        .any { normalized.contains(normalizeSearchText(it)) } -> "restroom"
+                    listOf("ближайшая лестница", "nearest stairs", "nearest staircase")
+                        .any { normalized.contains(normalizeSearchText(it)) } -> "stairs"
+                    else -> null
+                }
+                if (quickAction != null && onVoiceQuickAction != null) {
+                    onVoiceQuickAction(quickAction)
+                } else {
+                    val cleanQuery = cleanVoiceSearchCommand(spoken)
+                    query = cleanQuery.ifBlank { spoken }
+                    val isRouteCommand = listOf(
+                        "маршрут", "проложи", "построй", "navigate", "route to", "build route", "build a route", "take me to",
+                    )
+                        .any { normalized.contains(normalizeSearchText(it)) }
+                    if (isRouteCommand) {
+                        exactVoiceDestination(rooms, query, context)?.let { room -> onBuildRoute?.invoke(room) }
+                    }
+                }
+            }
+        }
+    }
+
+    fun startVoiceSearch() {
+        val locale = context.resources.configuration.locales
+            .takeIf { !it.isEmpty }
+            ?.get(0)
+            ?: java.util.Locale.getDefault()
+        val languageTag = if (locale.language == "en") "en-US" else "ru-RU"
+        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE, languageTag)
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, languageTag)
+            putExtra(RecognizerIntent.EXTRA_PROMPT, context.getString(R.string.voice_search_prompt))
+            putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true)
+        }
+        try {
+            voiceSearchLauncher.launch(intent)
+        } catch (_: ActivityNotFoundException) {
+            Toast.makeText(context, R.string.voice_search_unavailable, Toast.LENGTH_LONG).show()
+        } catch (_: Exception) {
+            Toast.makeText(context, R.string.voice_search_error, Toast.LENGTH_LONG).show()
+        }
+    }
 
     LaunchedEffect(searchRequestVersion, initialQuery, initialCategory) {
         if (appliedSearchRequestVersion == searchRequestVersion) return@LaunchedEffect
@@ -145,7 +212,6 @@ fun SearchScreen(
             .map { it.first }
             .toList()
     }
-    val routeableResultId = matchingRooms.firstOrNull { it.routeAvailable && !it.nodeId.isNullOrBlank() }?.id
     val relatedQueries = remember(query, matchingRooms, context) {
         if (query.isBlank()) {
             emptyList()
@@ -189,9 +255,17 @@ fun SearchScreen(
                         },
                         leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                         trailingIcon = {
-                            if (query.isNotEmpty()) {
-                                IconButton(onClick = { query = "" }) {
-                                    Icon(Icons.Default.Clear, contentDescription = stringResource(R.string.search_clear))
+                            Row {
+                                IconButton(onClick = { startVoiceSearch() }) {
+                                    Icon(
+                                        Icons.Default.Mic,
+                                        contentDescription = stringResource(R.string.voice_search_start),
+                                    )
+                                }
+                                if (query.isNotEmpty()) {
+                                    IconButton(onClick = { query = "" }) {
+                                        Icon(Icons.Default.Clear, contentDescription = stringResource(R.string.search_clear))
+                                    }
                                 }
                             }
                         },
@@ -267,7 +341,7 @@ fun SearchScreen(
                         RoomListCard(
                             room = room,
                             isFavorite = room.id in favoriteRoomIds,
-                            showRouteAction = room.id == routeableResultId,
+                            showRouteAction = true,
                             onClick = { onSelectRoom(room) },
                             onBuildRoute = { if (onBuildRoute != null) onBuildRoute(room) else onSelectRoom(room) },
                             onToggleFavorite = { onToggleFavorite(room) },
@@ -290,6 +364,29 @@ fun SearchScreen(
             }
         }
     }
+}
+
+private fun cleanVoiceSearchCommand(spoken: String): String {
+    var query = spoken.trim()
+    val prefixes = listOf(
+        Regex("^(?:(?:построй|проложи)\\s+)?маршрут(?:\\s+(?:до|к|в))?\\s+", RegexOption.IGNORE_CASE),
+        Regex("^(?:navigate\\s+to|route\\s+to|take\\s+me\\s+to|build(?:\\s+me)?\\s+(?:a\\s+)?route\\s+to)\\s+", RegexOption.IGNORE_CASE),
+        Regex("^(?:найди|покажи|открой|find|show|open)\\s+", RegexOption.IGNORE_CASE),
+        Regex("^(?:кабинет(?:а|у|е)?|комнат(?:а|у|ы)?|room|cabinet|office)\\s+(?:(?:номер|number|no\\.?)\\s+)?", RegexOption.IGNORE_CASE),
+    )
+    prefixes.forEach { prefix -> query = query.replaceFirst(prefix, "") }
+    return query.trim().trimEnd('.', ',', '!', '?', ';', ':')
+}
+
+private fun exactVoiceDestination(rooms: List<Room>, query: String, context: Context): Room? {
+    val normalizedQuery = normalizeSearchText(query)
+    if (normalizedQuery.isBlank()) return null
+    val exactMatches = rooms.filter { room ->
+        room.routeAvailable && !room.nodeId.isNullOrBlank() &&
+            (room.numberLabels() + listOf(room.localizedName(context), room.name, room.nameEn.orEmpty()) + room.aliasesRu + room.aliasesEn)
+                .any { normalizeSearchText(it) == normalizedQuery }
+    }
+    return exactMatches.singleOrNull()
 }
 
 @Composable
