@@ -31,6 +31,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.BookmarkAdd
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ArrowDownward
@@ -44,6 +45,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocationOn
@@ -61,6 +63,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.HorizontalDivider
@@ -197,11 +200,18 @@ fun MapScreen(
             pendingCameraCenter = null
         }
     }
-    LaunchedEffect(state.userPosition, state.locationMode, state.selectedFloor, followGpsLocation, mapView) {
+    LaunchedEffect(
+        state.userPosition,
+        state.locationMode,
+        state.selectedFloor,
+        state.isNavigationStarted,
+        followGpsLocation,
+        mapView,
+    ) {
         val point = state.userPosition ?: return@LaunchedEffect
-        if (state.locationMode == LocationMode.GPS && followGpsLocation && point.floor == state.selectedFloor) {
-            mapView?.centerOn(point)
-        }
+        val shouldFollowPosition = (state.locationMode == LocationMode.GPS && followGpsLocation) ||
+            (state.locationMode == LocationMode.MANUAL && state.isNavigationStarted)
+        if (shouldFollowPosition && point.floor == state.selectedFloor) mapView?.centerOn(point)
     }
 
     fun requestGpsPermissionOrStart() {
@@ -326,6 +336,24 @@ fun MapScreen(
                             )
                         },
                     )
+
+                    Column(
+                        modifier = Modifier.align(Alignment.TopEnd).padding(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        FilledTonalIconButton(
+                            onClick = { mapView?.zoomIn() },
+                            enabled = mapView != null,
+                        ) {
+                            Icon(Icons.Default.Add, contentDescription = stringResource(R.string.zoom_in))
+                        }
+                        FilledTonalIconButton(
+                            onClick = { mapView?.zoomOut() },
+                            enabled = mapView != null,
+                        ) {
+                            Icon(Icons.Default.Remove, contentDescription = stringResource(R.string.zoom_out))
+                        }
+                    }
 
                     Column(
                         modifier = Modifier.align(Alignment.TopStart).padding(12.dp),
@@ -617,6 +645,8 @@ fun MapScreen(
             onCancelRoute = viewModel::clearRoute,
             onPreviousStep = viewModel::previousRouteStep,
             onNextStep = viewModel::advanceRouteStep,
+            onZoomIn = { mapView?.zoomIn() },
+            onZoomOut = { mapView?.zoomOut() },
             onShare = { shareLocation(context, viewModel) },
             onSaveRoute = onSaveCurrentRoute,
             distanceUnit = state.settings.distanceUnit,
@@ -772,6 +802,8 @@ private fun RouteBottomSheet(
     onCancelRoute: () -> Unit,
     onPreviousStep: () -> Unit,
     onNextStep: () -> Unit,
+    onZoomIn: () -> Unit,
+    onZoomOut: () -> Unit,
     onShare: () -> Unit,
     onSaveRoute: (Room) -> Unit,
     distanceUnit: DistanceUnit,
@@ -903,6 +935,21 @@ private fun RouteBottomSheet(
                     }
                     IconButton(onClick = onCancelRoute) {
                         Icon(Icons.Default.Close, contentDescription = stringResource(R.string.cancel_route))
+                    }
+                }
+            }
+
+            if (state.route != null) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    FilledTonalIconButton(onClick = onZoomOut) {
+                        Icon(Icons.Default.Remove, contentDescription = stringResource(R.string.zoom_out))
+                    }
+                    FilledTonalIconButton(onClick = onZoomIn) {
+                        Icon(Icons.Default.Add, contentDescription = stringResource(R.string.zoom_in))
                     }
                 }
             }

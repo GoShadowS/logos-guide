@@ -177,15 +177,33 @@ def main() -> int:
             fail("Повторяются ID помещений")
         assembly_hall = room_by_id.get("room_104")
         if assembly_hall is not None:
-            if assembly_hall.get("route_available") or assembly_hall.get("nodeId") is not None:
-                fail("Зона актового зала 104 не должна быть маршрутизируемым пунктом")
-            if assembly_hall.get("doorNodeId") or assembly_hall.get("doorNodeIds"):
-                fail("У актового зала 104 не должно быть дверных узлов маршрута")
-            if any(
-                node.get("roomId") == "room_104" or node.get("connectsRoom") == "room_104"
-                for node in nodes
+            entrance_id = assembly_hall.get("nodeId")
+            entrance = node_by_id.get(entrance_id)
+            if not assembly_hall.get("route_available") or assembly_hall.get("floor") != 1:
+                fail("Актовый зал 104 должен быть доступен только на первом этаже")
+            if entrance_id != "1_door_104" or entrance is None:
+                fail("У актового зала 104 должен быть отдельный входной узел первого этажа")
+            if (
+                entrance.get("floor") != 1
+                or entrance.get("type") != "door"
+                or entrance.get("roomId") != "room_104"
+                or entrance.get("connectsRoom") != "room_104"
             ):
-                fail("Для актового зала 104 не должно быть узлов прохода/входа")
+                fail("Входной узел актового зала 104 должен вести только в зал с первого этажа")
+            if assembly_hall.get("doorNodeId") != entrance_id or assembly_hall.get("doorNodeIds") != [entrance_id]:
+                fail("У актового зала 104 должен быть ровно один входной узел на первом этаже")
+            linked_nodes = [
+                node["id"] for node in nodes
+                if node.get("roomId") == "room_104" or node.get("connectsRoom") == "room_104"
+            ]
+            if linked_nodes != [entrance_id]:
+                fail("Актовый зал 104 должен иметь только один узел входа на первом этаже")
+            entrance_edges = [edge for edge in graph["edges"] if entrance_id in (edge["from"], edge["to"])]
+            if not entrance_edges or any(
+                node_by_id[edge["from"]]["floor"] != 1 or node_by_id[edge["to"]]["floor"] != 1
+                for edge in entrance_edges
+            ):
+                fail("Все проходы в актовый зал 104 должны вести к входу первого этажа")
         allowed_categories = {"classroom", "laboratory", "administrative", "medical", "common", "entrance"}
         official_numbers: set[str] = set()
         for room in rooms:

@@ -72,7 +72,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private var lastGpsLocation: Location? = null
     /** Последний этаж, подтверждённый пользователем или предыдущим позиционированием. */
     private var lastPositionFloor: Int? = null
-    /** GPS сам не определяет этаж, поэтому используем только сохранённый/подтверждённый этаж. */
+    /** GPS не распознаёт этаж: используем сохранённый, подтверждённый или выбранный переходом маршрута этаж. */
     private var gpsFloorNumber: Int? = null
     private var dataLoadJob: Job? = null
     private var gpsTimeoutJob: Job? = null
@@ -173,12 +173,28 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         if (_state.value.selectedFloor == floorNumber) return
         _state.update { it.copy(selectedFloor = floorNumber) }
         viewModelScope.launch { settingsStore.setLastOpenedFloor(floorNumber) }
-        // Намеренно не переносим GPS-маркер на другой этаж: GPS не определяет этаж здания.
+        // Ручной выбор этажа не переносит GPS-маркер: переход по активному маршруту обрабатывается отдельно.
     }
 
     fun showRoom(room: Room) {
+        pairedTransferRoom(room)?.let { pairedRoom ->
+            selectFloor(pairedRoom.floor, userSelected = false)
+            _state.update { it.copy(selectedRoom = null) }
+            return
+        }
         if (room.floor != _state.value.selectedFloor) selectFloor(room.floor, userSelected = false)
         _state.update { it.copy(selectedRoom = room) }
+    }
+
+    private fun pairedTransferRoom(room: Room): Room? {
+        if (!room.id.startsWith("room_stairs_") && !room.id.startsWith("room_lift_")) return null
+        val roomFloor = room.id.substringAfterLast('_').toIntOrNull() ?: return null
+        if (roomFloor != room.floor) return null
+        val roomPrefix = room.id.substringBeforeLast('_')
+        val otherFloor = navigationData?.floors
+            ?.firstOrNull { it.number != room.floor }
+            ?.number ?: return null
+        return _state.value.rooms.firstOrNull { it.id == "${roomPrefix}_$otherFloor" && it.floor == otherFloor }
     }
 
     fun dismissRoomDetails() {
@@ -473,13 +489,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 isGpsActive = true,
             )
         }
-        if (_state.value.settings.automaticRouteOnSelection) {
-            _state.value.destination?.let { destination ->
-                val latest = _state.value
-                when {
-                    latest.route == null -> buildRoute(destination)
-                    latest.isNavigationStarted -> updateRouteProgress(point)
-                }
+        _state.value.destination?.let { destination ->
+            val latest = _state.value
+            when {
+                latest.isNavigationStarted -> updateRouteProgress(point)
+                latest.route == null && latest.settings.automaticRouteOnSelection -> buildRoute(destination)
             }
         }
         maybeNotifyArrival(point, accuracy)
@@ -517,7 +531,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    /** Вызывается после фактического перехода на другой этаж: этаж нельзя надёжно вывести из GPS. */
+    /** Подтверждает этаж GPS вручную, если автоматическое сопоставление не распознало переход. */
     fun confirmGpsFloor(floorNumber: Int) {
         val location = lastGpsLocation
         if (_state.value.locationMode != LocationMode.GPS || location == null || !isFreshLocation(location)) {
@@ -824,12 +838,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val nextIndex = (current.currentRouteStepIndex + 1).coerceAtMost(current.routeSteps.lastIndex)
         if (nextIndex == current.currentRouteStepIndex) return
         val step = current.routeSteps[nextIndex]
-        _state.update {
-            it.copy(
-                currentRouteStepIndex = nextIndex,
-                routeProgress = maxOf(it.routeProgress, step.progress).coerceIn(0f, 1f),
-            )
-        }
+        updateManualRouteStep(current, nextIndex, maxOf(current.routeProgress, step.progress))
         announceCurrentRouteStep()
     }
 
@@ -840,13 +849,27 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val previousIndex = (current.currentRouteStepIndex - 1).coerceAtLeast(0)
         if (previousIndex == current.currentRouteStepIndex) return
         val step = current.routeSteps[previousIndex]
+        updateManualRouteStep(current, previousIndex, step.progress)
+        announceCurrentRouteStep()
+    }
+
+    private fun updateManualRouteStep(current: IndoorUiState, stepIndex: Int, progress: Float) {
+        val step = current.routeSteps.getOrNull(stepIndex) ?: return
+        val targetNode = step.targetNodeId?.let { targetId -> current.route?.firstOrNull { it.id == targetId } }
+        val position = targetNode?.let { node -> MapPoint(node.floor, node.x.toFloat(), node.y.toFloat()) }
+        if (position != null) lastPositionFloor = position.floor
         _state.update {
             it.copy(
-                currentRouteStepIndex = previousIndex,
-                routeProgress = step.progress.coerceIn(0f, 1f),
+                currentRouteStepIndex = stepIndex,
+                routeProgress = progress.coerceIn(0f, 1f),
+                userPosition = position ?: it.userPosition,
+                isManualPositionConfirmed = if (position != null) true else it.isManualPositionConfirmed,
+                selectedFloor = position?.floor ?: it.selectedFloor,
             )
         }
-        announceCurrentRouteStep()
+        if (position != null && position.floor != current.selectedFloor) {
+            viewModelScope.launch { settingsStore.setLastOpenedFloor(position.floor) }
+        }
     }
 
     /** Сопоставляет GPS-точку с ближайшим отрезком связанной линии маршрута. */
@@ -877,12 +900,74 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             return
         }
 
+        if (maybeSwitchGpsFloorAtRouteTransition(point, current, path, destination, routeGraph)) return
+
         val progress = projection.progress
         val nextIndex = current.routeSteps.indexOfLast { it.progress <= progress + ROUTE_STEP_PROGRESS_EPSILON }
             .coerceAtLeast(0)
         val changedStep = nextIndex != current.currentRouteStepIndex
         _state.update { it.copy(routeProgress = progress, currentRouteStepIndex = nextIndex) }
         if (changedStep && nextIndex > 0) announceCurrentRouteStep()
+    }
+
+    /** Меняет этаж только у перехода, если свежая GPS-точка проецируется на продолжение маршрута. */
+    private fun maybeSwitchGpsFloorAtRouteTransition(
+        point: MapPoint,
+        current: IndoorUiState,
+        path: List<NavNode>,
+        destination: Room,
+        routeGraph: NavigationData,
+    ): Boolean {
+        if (current.locationMode != LocationMode.GPS) return false
+        val location = lastGpsLocation?.takeIf(::isFreshLocation) ?: return false
+        val accuracy = locationAccuracy(location) ?: return false
+        if (accuracy > current.settings.minimumAccuracyMeters) return false
+
+        val (from, to) = path.zipWithNext().firstOrNull { (start, end) ->
+            start.floor == point.floor && start.floor != end.floor &&
+                (start.type.equals("stairs", ignoreCase = true) ||
+                    start.type.equals("elevator", ignoreCase = true) ||
+                    end.type.equals("stairs", ignoreCase = true) ||
+                    end.type.equals("elevator", ignoreCase = true))
+        } ?: return false
+        val sourceFloor = navigationData?.floors?.firstOrNull { it.number == from.floor } ?: return false
+        val metersPerUnit = sourceFloor.metersPerUnit.takeIf { it.isFinite() && it > 0.0 } ?: DEFAULT_METERS_PER_UNIT
+        val distanceToLandingMeters = hypot(point.x.toDouble() - from.x, point.y.toDouble() - from.y) * metersPerUnit
+        if (distanceToLandingMeters > AUTO_FLOOR_TRANSITION_RADIUS_METERS) return false
+
+        val targetAnchors = routeGraph.gpsAnchors.filter { it.floor == to.floor }
+        val targetSvgPoint = GeoReferencer.toMapPoint(location.latitude, location.longitude, targetAnchors) ?: return false
+        if (!SiteIndoorRouter.isInsideCollege(to.floor, targetSvgPoint.first, targetSvgPoint.second, current.rooms)) return false
+        val targetPoint = MapPoint(to.floor, targetSvgPoint.first.toFloat(), targetSvgPoint.second.toFloat())
+        val targetProjection = RouteProgressCalculator.project(
+            graph = routeGraph,
+            route = path,
+            origin = current.routeOriginPosition,
+            destination = routeDestinationAtDoor(destination, path),
+            point = targetPoint,
+        ) ?: return false
+        if (targetProjection.deviationMeters > AUTO_FLOOR_TRANSITION_MAX_ROUTE_DEVIATION_METERS) return false
+
+        val nextIndex = current.routeSteps.indexOfLast {
+            it.progress <= targetProjection.progress + ROUTE_STEP_PROGRESS_EPSILON
+        }.coerceAtLeast(0)
+        gpsFloorNumber = to.floor
+        lastPositionFloor = to.floor
+        _state.update {
+            it.copy(
+                userPosition = targetPoint,
+                isManualPositionConfirmed = false,
+                selectedFloor = to.floor,
+                routeProgress = targetProjection.progress,
+                currentRouteStepIndex = nextIndex,
+            )
+        }
+        if (current.selectedFloor != to.floor) {
+            viewModelScope.launch { settingsStore.setLastOpenedFloor(to.floor) }
+        }
+        if (nextIndex != current.currentRouteStepIndex && nextIndex > 0) announceCurrentRouteStep()
+        maybeNotifyArrival(targetPoint, accuracy)
+        return true
     }
 
     private fun stopRouteSpeech() {
@@ -1307,6 +1392,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         const val MAX_FUTURE_FIX_SKEW_NANOS = 5_000_000_000L
         const val SHARE_NEARBY_LIMIT_METERS = 20.0
         const val ARRIVAL_RADIUS_METERS = 3.5
+        const val AUTO_FLOOR_TRANSITION_RADIUS_METERS = 5.0
+        const val AUTO_FLOOR_TRANSITION_MAX_ROUTE_DEVIATION_METERS = 15.0
         const val OFF_ROUTE_DISTANCE_METERS = 15.0
         const val ROUTE_RECALCULATION_COOLDOWN_MS = 10_000L
         const val ROUTE_STEP_PROGRESS_EPSILON = 0.0005f
