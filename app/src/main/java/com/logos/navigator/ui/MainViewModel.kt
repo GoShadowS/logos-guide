@@ -19,6 +19,7 @@ import com.logos.navigator.data.database.entity.RouteHistoryEntity
 import com.logos.navigator.R
 import com.logos.navigator.data.model.AppSettings
 import com.logos.navigator.data.model.FloorPlan
+import com.logos.navigator.data.model.GeoCoordinate
 import com.logos.navigator.data.model.IndoorUiState
 import com.logos.navigator.data.model.RouteAction
 import com.logos.navigator.data.model.RouteInstruction
@@ -288,6 +289,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             _state.update {
                 it.copy(
                     locationMode = LocationMode.MANUAL,
+                    gpsCoordinates = null,
                     isGpsActive = false,
                     gpsAccuracyMeters = null,
                     gpsWarning = null,
@@ -311,6 +313,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 locationMode = LocationMode.GPS,
                 isGpsActive = true,
                 userPosition = null,
+                gpsCoordinates = null,
                 isManualPositionConfirmed = false,
                 route = null,
                 routeOriginPosition = null,
@@ -368,6 +371,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
         val acceptedLocation = Location(location)
         lastGpsLocation = acceptedLocation
+        _state.update {
+            it.copy(gpsCoordinates = GeoCoordinate(acceptedLocation.latitude, acceptedLocation.longitude))
+        }
         gpsTimeoutJob?.cancel()
         gpsTimeoutJob = null
         val current = _state.value
@@ -478,6 +484,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             _state.update {
                 it.copy(
                     userPosition = null,
+                    gpsCoordinates = null,
                     isManualPositionConfirmed = false,
                     isGpsActive = false,
                     gpsWarning = appContext.getString(R.string.gps_unavailable),
@@ -494,6 +501,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             locationTracker.stop()
             _state.update {
                 it.copy(
+                    gpsCoordinates = null,
                     isGpsActive = false,
                     gpsWarning = appContext.getString(R.string.gps_error, message),
                 )

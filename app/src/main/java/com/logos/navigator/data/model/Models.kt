@@ -108,6 +108,8 @@ data class LoadedIndoorData(val navigation: NavigationData, val rooms: List<Room
 
 data class MapPoint(val floor: Int, val x: Float, val y: Float)
 
+data class GeoCoordinate(val latitude: Double, val longitude: Double)
+
 enum class RouteAction {
     START, STRAIGHT, TURN_LEFT, TURN_RIGHT, SLIGHT_LEFT, SLIGHT_RIGHT, U_TURN,
     DOOR, STAIRS_UP, STAIRS_DOWN, ELEVATOR, ARRIVAL,
@@ -133,6 +135,7 @@ data class IndoorUiState(
     val selectedFloor: Int = 1,
     val locationMode: LocationMode = LocationMode.MANUAL,
     val userPosition: MapPoint? = null,
+    val gpsCoordinates: GeoCoordinate? = null,
     val isManualPositionConfirmed: Boolean = false,
     val gpsAccuracyMeters: Float? = null,
     val gpsWarning: String? = null,

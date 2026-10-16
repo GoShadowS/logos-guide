@@ -41,6 +41,13 @@
     <string name="location_hint_other_floor">Your position is currently on floor %1$d. Tap the plan to update it.</string>
     <string name="location_on_floor">GPS marker on floor %1$d</string>
     <string name="location_accuracy">Accuracy ±%1$d m</string>
+    <string name="map_source_2gis">2GIS</string>
+    <string name="map_source_indoor">Floor plan</string>
+    <string name="dgis_key_required_title">2GIS Mobile SDK key required</string>
+    <string name="dgis_key_required_message">Download the dgissdk.key access file from the 2GIS Platform Manager and place it at app/src/main/assets/dgissdk.key. Do not send the key in chat or commit it to Git. The outdoor map loads data from the internet; floor plans and indoor routes remain offline.</string>
+    <string name="dgis_map_load_error">Could not start 2GIS. Check dgissdk.key and your internet connection.</string>
+    <string name="gps_follow">Follow position</string>
+    <string name="gps_following">Position centered</string>
     <string name="gps_determining">Finding your position… GPS may be inaccurate indoors.</string>
     <string name="gps_no_fresh_fix">Could not get a fresh GPS fix. Check location services or switch to manual mode.</string>
     <string name="gps_stale_fix">A stale GPS fix was received; waiting for a new one. You can place the marker manually.</string>
@@ -162,6 +169,10 @@
     <string name="search_label">Room name or number</string>
     <string name="search_hint">Number, part of a name or transliteration: 118, room 118</string>
     <string name="search_clear">Clear search</string>
+    <string name="voice_search_start">Voice search</string>
+    <string name="voice_search_prompt">Say a room number or where you want a route</string>
+    <string name="voice_search_unavailable">No speech recognition service is available on this device.</string>
+    <string name="voice_search_error">Could not start voice search.</string>
     <string name="search_similar_queries">Related searches</string>
     <string name="search_build_route">Build route</string>
     <string name="all_categories">All</string>
@@ -466,6 +477,8 @@
     <string name="previous_step">Previous step</string>
     <string name="route_step_count">Step %1$d of %2$d</string>
     <string name="route_preview_hint">Review the route, then tap “Start route” when you are ready.</string>
+    <string name="route_show_steps">All steps</string>
+    <string name="route_hide_steps">Collapse</string>
     <string name="all_steps">All steps</string>
     <string name="next_step">Next step</string>
     <string name="route_steps_title">Route steps</string>

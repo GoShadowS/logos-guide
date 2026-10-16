@@ -3,6 +3,7 @@
 .idea/
 **/build/
 local.properties
+app/src/main/assets/dgissdk.key
 *.iml
 .externalNativeBuild/
 .cxx/
