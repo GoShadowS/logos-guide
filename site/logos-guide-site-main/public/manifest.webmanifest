@@ -1,0 +1,26 @@
+{
+  "id": "/",
+  "name": "ЛОГОС — Путеводитель колледжа",
+  "short_name": "ЛОГОС",
+  "description": "Карта этажей и навигация по колледжу",
+  "start_url": "/map",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f4f7fc",
+  "theme_color": "#245ce5",
+  "icons": [
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
