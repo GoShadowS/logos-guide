@@ -1,3 +1,5 @@
+import java.io.File
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.plugin.compose")
@@ -56,15 +58,28 @@ android {
 
 val releaseApkFileName = "logos-guide-1.0.0-opendoors.apk"
 val releaseApkOutputDirectory = layout.buildDirectory.dir("outputs/apk/release")
+val androidStudioReleaseApkDirectory = layout.projectDirectory.dir("release").asFile
 val copyReleaseApk = tasks.register("copyReleaseApk") {
     doLast {
         val outputDirectory = releaseApkOutputDirectory.get().asFile
-        val sourceApk = listOf("app-release.apk", "app-release-unsigned.apk")
-            .map { outputDirectory.resolve(it) }
-            .filter { it.isFile }
-            .maxByOrNull { it.lastModified() }
-            ?: throw GradleException("Сборка release не создала APK в $outputDirectory")
         val outputApk = outputDirectory.resolve(releaseApkFileName)
+        val searchedDirectories = listOf(outputDirectory, androidStudioReleaseApkDirectory)
+        val sourceApk = searchedDirectories.asSequence()
+            .filter { it.isDirectory }
+            .flatMap { it.walkTopDown() }
+            .filter {
+                it.isFile &&
+                    it.extension.equals("apk", ignoreCase = true) &&
+                    it.name != releaseApkFileName
+            }
+            .maxWithOrNull(
+                compareBy<File> { it.lastModified() }
+                    .thenBy { !it.name.contains("unsigned", ignoreCase = true) },
+            )
+            ?: throw GradleException(
+                "Сборка release не создала APK. Проверены каталоги: ${searchedDirectories.joinToString()}",
+            )
+        outputDirectory.mkdirs()
         sourceApk.copyTo(outputApk, overwrite = true)
         logger.lifecycle("Release APK: ${outputApk.absolutePath}")
     }
