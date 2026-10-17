@@ -54,6 +54,25 @@ android {
     }
 }
 
+val releaseApkFileName = "logos-guide-1.0.0-opendoors.apk"
+val releaseApkOutputDirectory = layout.buildDirectory.dir("outputs/apk/release")
+val copyReleaseApk = tasks.register("copyReleaseApk") {
+    doLast {
+        val outputDirectory = releaseApkOutputDirectory.get().asFile
+        val sourceApk = listOf("app-release.apk", "app-release-unsigned.apk")
+            .map { outputDirectory.resolve(it) }
+            .filter { it.isFile }
+            .maxByOrNull { it.lastModified() }
+            ?: throw GradleException("Сборка release не создала APK в $outputDirectory")
+        val outputApk = outputDirectory.resolve(releaseApkFileName)
+        sourceApk.copyTo(outputApk, overwrite = true)
+        logger.lifecycle("Release APK: ${outputApk.absolutePath}")
+    }
+}
+tasks.matching { it.name == "assembleRelease" }.configureEach {
+    finalizedBy(copyReleaseApk)
+}
+
 kotlin {
     compilerOptions {
         jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)

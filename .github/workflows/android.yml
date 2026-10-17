@@ -26,8 +26,14 @@ jobs:
         uses: android-actions/setup-android@v4.0.4
       - name: Install Android SDK 37
         run: sdkmanager "platforms;android-37.0" "build-tools;37.0.0"
-      - name: Run unit tests and assemble debug APK
-        run: ./gradlew --no-daemon testDebugUnitTest assembleDebug 2>&1 | tee "$RUNNER_TEMP/gradle.log"
+      - name: Run unit tests and verify the Open Doors release APK
+        shell: bash
+        run: |
+          set -o pipefail
+          ./gradlew --no-daemon testDebugUnitTest assembleDebug assembleRelease 2>&1 | tee "$RUNNER_TEMP/gradle.log"
+          apk="app/build/outputs/apk/release/logos-guide-1.0.0-opendoors.apk"
+          test -f "$apk"
+          "$ANDROID_HOME/build-tools/37.0.0/aapt" dump badging "$apk" | grep -F "versionName='1.0.0-opendoors'"
       - name: Summarize Gradle failure
         if: failure()
         shell: bash

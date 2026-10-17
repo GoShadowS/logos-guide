@@ -49,9 +49,10 @@ Android-приложение для внутренней навигации АН
 ```bash
 ./gradlew testDebugUnitTest
 ./gradlew assembleDebug
+./gradlew assembleRelease
 ```
 
-Debug APK: `app/build/outputs/apk/debug/app-debug.apk`. Подписание release, установка на телефон, миграции Room и ProGuard описаны в руководстве сборки.
+Release APK (версия `1.0.0-opendoors`): `app/build/outputs/apk/release/logos-guide-1.0.0-opendoors.apk`. Команда `assembleRelease` автоматически создаёт файл с этим именем; без настроенной подписи APK будет unsigned. Debug APK для тестирования остаётся отдельным: `app/build/outputs/apk/debug/app-debug.apk`. Подписание release, установка на телефон, миграции Room и ProGuard описаны в руководстве сборки.
 
 Перед публикацией соберите release-вариант, проверьте сборку на Android 8 (API 26) и визуально проверьте планы и маршруты на устройстве.
 
