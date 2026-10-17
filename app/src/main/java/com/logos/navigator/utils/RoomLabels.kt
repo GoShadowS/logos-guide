@@ -63,7 +63,15 @@ fun Room.matchingNumberLabel(query: String): String? {
 fun searchForms(value: String): Set<String> {
     val normalized = normalizeSearchText(value)
     if (normalized.isEmpty()) return emptySet()
-    val rawText = Normalizer.normalize(value.lowercase(Locale.ROOT), Normalizer.Form.NFD).replace(MARKS, "")
+    val textWithCyrillicMarksPreserved = value.lowercase(Locale.ROOT)
+        .replace('ё', YO_SENTINEL)
+        .replace('й', SHORT_I_SENTINEL)
+        .replace("е\u0308", YO_SENTINEL.toString())
+        .replace("и\u0306", SHORT_I_SENTINEL.toString())
+    val rawText = Normalizer.normalize(textWithCyrillicMarksPreserved, Normalizer.Form.NFD)
+        .replace(MARKS, "")
+        .replace(YO_SENTINEL, 'ё')
+        .replace(SHORT_I_SENTINEL, 'й')
     val rawTerms = rawText.split(SEARCH_TOKEN_SPLITTER).filter(String::isNotEmpty)
     val terms = (listOf(normalized) + rawTerms.map(::normalizeSearchText))
         .filter(String::isNotEmpty)
@@ -160,6 +168,8 @@ fun Context.formatDistance(meters: Double?, unit: DistanceUnit = DistanceUnit.ME
     }
 }
 
+private const val YO_SENTINEL = '\uE000'
+private const val SHORT_I_SENTINEL = '\uE001'
 private val MARKS = Regex("\\p{M}+")
 private val ROOM_NUMBER_SPLITTER = Regex("[,;\\s]+")
 private val SEARCH_TOKEN_SPLITTER = Regex("[^\\p{L}\\p{N}]+")

@@ -31,14 +31,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          apk="app/build/outputs/apk/release/app-release-unsigned.apk"
+          apk="app/build/outputs/apk/release/logos-guide-1.0.0-opendoors.apk"
           test -f "$apk"
           echo "hashes=$(sha256sum "$apk" | base64 -w0)" >> "$GITHUB_OUTPUT"
       - name: Store unsigned APK as workflow artifact
         uses: actions/upload-artifact@v7.0.2
         with:
           name: logos-guide-release-unsigned
-          path: app/build/outputs/apk/release/app-release-unsigned.apk
+          path: app/build/outputs/apk/release/logos-guide-1.0.0-opendoors.apk
           if-no-files-found: error
           retention-days: 30
 
