@@ -315,6 +315,7 @@ fun MapScreen(
                                 accuracyMeters = state.gpsAccuracyMeters,
                                 locationMode = state.locationMode,
                                 route = state.route,
+                                routeOriginPosition = state.routeOriginPosition,
                                 destination = state.destination,
                                 selectedRoom = state.selectedRoom,
                                 settings = state.settings,
@@ -690,6 +691,7 @@ fun MapScreen(
     state.selectedRoom?.let { room ->
         RoomDetailsSheet(
             room = room,
+            openDoorsVenue = openDoorsPlaces.firstOrNull { it.second.id == room.id }?.first,
             isFavorite = room.id in favoriteRoomIds,
             canSetPosition = state.locationMode == LocationMode.MANUAL && room.routeAvailable &&
                 !room.nodeId.isNullOrBlank() && (room.centerX ?: room.x) != null && (room.centerY ?: room.y) != null,
@@ -811,8 +813,8 @@ private fun RouteBottomSheet(
     val context = LocalContext.current
     val destination = state.destination ?: return
     val configuration = LocalConfiguration.current
-    val maxSheetHeight = (configuration.screenHeightDp * 0.72f).dp
-    val sheetState = androidx.compose.material3.rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val maxSheetHeight = (configuration.screenHeightDp * 0.68f).dp
+    val sheetState = androidx.compose.material3.rememberModalBottomSheetState(skipPartiallyExpanded = false)
     var actionsExpanded by remember(destination.id) { mutableStateOf(false) }
     var showAllSteps by remember(destination.id) { mutableStateOf(false) }
 
@@ -1169,10 +1171,60 @@ private fun routeActionIcon(action: RouteAction): androidx.compose.ui.graphics.v
     RouteAction.ARRIVAL -> Icons.Default.Flag
 }
 
+@Composable
+private fun OpenDoorsRoomInfo(venue: OpenDoorsVenue) {
+    val context = LocalContext.current
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+    ) {
+        Column(
+            modifier = Modifier.padding(15.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Text(
+                stringResource(R.string.open_doors_venue_badge),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.SemiBold,
+            )
+            Text(
+                venue.title.resolve(context),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+            )
+            Text(
+                venue.highlights.joinToString(" · ") { it.resolve(context) },
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.SemiBold,
+            )
+            Text(
+                venue.description.resolve(context),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                venue.audience.resolve(context),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.SemiBold,
+            )
+            Text(
+                venue.leader.resolve(context),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun RoomDetailsSheet(
     room: Room,
+    openDoorsVenue: OpenDoorsVenue?,
     isFavorite: Boolean,
     canSetPosition: Boolean,
     onToggleFavorite: () -> Unit,
@@ -1215,8 +1267,12 @@ private fun RoomDetailsSheet(
                 }
             }
             Text(roomMetadata, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
-            room.localizedDescription(context)?.let {
-                Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            if (openDoorsVenue != null) {
+                OpenDoorsRoomInfo(venue = openDoorsVenue)
+            } else {
+                room.localizedDescription(context)?.let {
+                    Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
             }
             if (canSetPosition) {
                 OutlinedButton(onClick = onSetPosition, modifier = Modifier.fillMaxWidth()) {

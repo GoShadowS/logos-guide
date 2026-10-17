@@ -28,11 +28,13 @@ import com.logos.navigator.data.model.Room
 import com.logos.navigator.data.model.RouteLineStyle
 import com.logos.navigator.data.model.MapRenderQuality
 import com.logos.navigator.data.model.ThemeMode
+import com.logos.navigator.navigation.RouteDirectionCalculator
 import com.logos.navigator.svg.SvgCoordinateConverter
 import com.logos.navigator.svg.isPointInPolygon
 import com.logos.navigator.svg.polygonBounds
 import kotlin.math.hypot
 import kotlin.math.PI
+import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.min
@@ -58,6 +60,8 @@ class CanvasMapView @JvmOverloads constructor(
     private var locationMode: LocationMode = LocationMode.MANUAL
     private var manualPositionSelectionMode: Boolean = false
     private var route: List<NavNode> = emptyList()
+    private var routeOriginPosition: MapPoint? = null
+    private var routeDirectionTarget: PointF? = null
     private var destination: Room? = null
     private var settings: AppSettings = AppSettings()
     private var compassHeadingDegrees: Float = 0f
@@ -95,6 +99,11 @@ class CanvasMapView @JvmOverloads constructor(
         strokeCap = Paint.Cap.ROUND
         strokeJoin = Paint.Join.ROUND
     }
+    private val routeDirectionPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.WHITE
+        style = Paint.Style.FILL
+    }
+    private val routeDirectionPath = Path()
     private val haloPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.WHITE; style = Paint.Style.FILL }
     private val roomPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL }
     private val routeDestinationPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -150,6 +159,7 @@ class CanvasMapView @JvmOverloads constructor(
         accuracyMeters: Float?,
         locationMode: LocationMode,
         route: List<NavNode>?,
+        routeOriginPosition: MapPoint?,
         destination: Room?,
         selectedRoom: Room?,
         settings: AppSettings,
@@ -165,6 +175,7 @@ class CanvasMapView @JvmOverloads constructor(
         val geometryChanged = floorChanged || this.rooms !== rooms
         val nextRoute = route.orEmpty()
         val routeChanged = this.route != nextRoute
+        val routeOriginChanged = this.routeOriginPosition != routeOriginPosition
         val positionChanged = this.userPosition != userPosition
         val accuracyChanged = this.accuracyMeters != accuracyMeters
         val locationModeChanged = this.locationMode != locationMode
@@ -191,6 +202,12 @@ class CanvasMapView @JvmOverloads constructor(
         this.manualPositionSelectionMode = manualPositionSelectionMode
         if (routeChanged) routeSegments = buildRouteSegments(nextRoute)
         this.route = nextRoute
+        this.routeOriginPosition = routeOriginPosition
+        if (routeChanged || routeOriginChanged || positionChanged) {
+            routeDirectionTarget = userPosition
+                ?.let { RouteDirectionCalculator.nextTarget(nextRoute, routeOriginPosition, it) }
+                ?.let { PointF(it.x, it.y) }
+        }
         this.destination = destination
         this.settings = settings
         this.compassHeadingDegrees = compassHeadingDegrees
@@ -207,7 +224,7 @@ class CanvasMapView @JvmOverloads constructor(
         val zoomChanged = zoom != oldZoom
         if (floorChanged || zoomChanged || compassModeChanged || compassChanged) updateMatrix()
 
-        val visualsChanged = floorChanged || geometryChanged || routeChanged || positionChanged ||
+        val visualsChanged = floorChanged || geometryChanged || routeChanged || routeOriginChanged || positionChanged ||
             accuracyChanged || locationModeChanged || selectionChanged || nodesChanged || edgesChanged ||
             settingsChanged || compassChanged || compassModeChanged || openDoorsChanged
         if (visualsChanged) invalidate()
@@ -607,8 +624,10 @@ class CanvasMapView @JvmOverloads constructor(
         roomPaint.color = if (locationMode == LocationMode.GPS) 0xFF1478F8.toInt() else 0xFF12A76A.toInt()
         canvas.drawCircle(point.x, point.y, radius, roomPaint)
         haloPaint.color = Color.WHITE
-        canvas.drawCircle(point.x, point.y, radius * 0.24f, haloPaint)
-        haloPaint.color = Color.WHITE
+        val directionTarget = routeDirectionTarget
+        if (directionTarget == null || !drawRouteDirectionArrow(canvas, point, directionTarget, radius)) {
+            canvas.drawCircle(point.x, point.y, radius * 0.24f, haloPaint)
+        }
         drawLocationLabel(
             canvas = canvas,
             text = context.getString(R.string.location_me_here),
@@ -616,6 +635,25 @@ class CanvasMapView @JvmOverloads constructor(
             y = point.y - radius * 1.4f,
             mapScale = mapScale,
         )
+    }
+
+    private fun drawRouteDirectionArrow(canvas: Canvas, point: MapPoint, target: PointF, radius: Float): Boolean {
+        val directionX = target.x - point.x
+        val directionY = target.y - point.y
+        if (directionX * directionX + directionY * directionY <= ROUTE_DIRECTION_EPSILON_SQUARED) return false
+
+        val rotation = Math.toDegrees(atan2(directionY.toDouble(), directionX.toDouble())).toFloat() + 90f
+        val saveCount = canvas.save()
+        canvas.rotate(rotation, point.x, point.y)
+        routeDirectionPath.reset()
+        routeDirectionPath.moveTo(point.x, point.y - radius * 0.72f)
+        routeDirectionPath.lineTo(point.x + radius * 0.38f, point.y + radius * 0.34f)
+        routeDirectionPath.lineTo(point.x, point.y + radius * 0.12f)
+        routeDirectionPath.lineTo(point.x - radius * 0.38f, point.y + radius * 0.34f)
+        routeDirectionPath.close()
+        canvas.drawPath(routeDirectionPath, routeDirectionPaint)
+        canvas.restoreToCount(saveCount)
+        return true
     }
 
     private fun drawLocationLabel(canvas: Canvas, text: String, x: Float, y: Float, mapScale: Float) {
@@ -746,6 +784,7 @@ class CanvasMapView @JvmOverloads constructor(
 
     private companion object {
         const val MARKER_DRAG_RADIUS_DP = 34f
+        const val ROUTE_DIRECTION_EPSILON_SQUARED = 0.0001f
         val LOW_QUALITY_DRAW_FILTER = PaintFlagsDrawFilter(Paint.ANTI_ALIAS_FLAG, 0)
         val MEDIUM_QUALITY_DRAW_FILTER = PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG)
         val HIGH_QUALITY_DRAW_FILTER = PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG)
