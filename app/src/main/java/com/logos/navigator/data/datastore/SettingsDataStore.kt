@@ -54,41 +54,7 @@ class SettingsDataStore(context: Context) {
         }
     }
 
-    suspend fun setThemeMode(value: ThemeMode) = update { it.copy(themeMode = value) }
-    suspend fun setAccentColor(value: Int) = update { it.copy(accentColorArgb = value) }
-    suspend fun setFontScale(value: Float) = update { it.copy(fontScale = value) }
-    suspend fun setAnimationsEnabled(value: Boolean) = update { it.copy(animationsEnabled = value) }
-    suspend fun setMapRenderQuality(value: MapRenderQuality) = update { it.copy(mapRenderQuality = value) }
-    suspend fun setInitialFloor(value: String) = update { it.copy(initialFloor = value) }
     suspend fun setLastOpenedFloor(value: Int) = update { it.copy(lastOpenedFloor = value) }
-    suspend fun setMaximumZoom(value: Float) = update { it.copy(maximumZoom = value) }
-    suspend fun setMinimumZoom(value: Float) = update { it.copy(minimumZoom = value) }
-    suspend fun setCoordinateGridEnabled(value: Boolean) = update { it.copy(showCoordinateGrid = value) }
-    suspend fun setCompassRotationEnabled(value: Boolean) = update { it.copy(compassRotationEnabled = value) }
-    suspend fun setRouteColor(value: Int) = update { it.copy(routeColorArgb = value) }
-    suspend fun setRouteLineWidth(value: Float) = update { it.copy(routeLineWidthDp = value) }
-    suspend fun setRouteLineStyle(value: RouteLineStyle) = update { it.copy(routeLineStyle = value) }
-    suspend fun setStartupLocationMode(value: StartupLocationMode) = update { it.copy(startupLocationMode = value) }
-    suspend fun setLastLocationMode(value: LocationMode) = update { it.copy(lastLocationMode = value) }
-    suspend fun setAutomaticRouteOnSelection(value: Boolean) = update { it.copy(automaticRouteOnSelection = value) }
-    suspend fun setArrivalVibrationEnabled(value: Boolean) = update { it.copy(arrivalVibrationEnabled = value) }
-    suspend fun setVoiceGuidanceEnabled(value: Boolean) = update { it.copy(voiceGuidanceEnabled = value) }
-    suspend fun setDistanceUnit(value: DistanceUnit) = update { it.copy(distanceUnit = value) }
-    suspend fun setWalkingSpeed(value: Float) = update { it.copy(walkingSpeedKmh = value) }
-    suspend fun setRoutePreference(value: RoutePreference) = update { it.copy(routePreference = value) }
-    suspend fun setGpsEnabledOnLaunch(value: Boolean) = update { it.copy(gpsEnabledOnLaunch = value) }
-    suspend fun setLocationAccuracyMode(value: LocationAccuracyMode) = update { it.copy(locationAccuracyMode = value) }
-    suspend fun setLocationUpdateIntervalSeconds(value: Int) = update { it.copy(locationUpdateIntervalSeconds = value) }
-    suspend fun setMinimumAccuracy(value: Float) = update { it.copy(minimumAccuracyMeters = value) }
-    suspend fun setAccuracyCircleEnabled(value: Boolean) = update { it.copy(showAccuracyCircle = value) }
-    suspend fun setManualFallbackEnabled(value: Boolean) = update { it.copy(switchToManualOnPoorGps = value) }
-    suspend fun setSaveRouteHistory(value: Boolean) = update { it.copy(saveRouteHistory = value) }
-    suspend fun setMaximumHistoryRecords(value: Int) = update { it.copy(maximumHistoryRecords = value) }
-    suspend fun setDeveloperOptionsUnlocked(value: Boolean) = update { it.copy(developerOptionsUnlocked = value) }
-    suspend fun setShowTapCoordinates(value: Boolean) = update { it.copy(showTapCoordinates = value) }
-    suspend fun setShowNavigationNodes(value: Boolean) = update { it.copy(showNavigationNodes = value) }
-    suspend fun setShowNavigationEdges(value: Boolean) = update { it.copy(showNavigationEdges = value) }
-    suspend fun setFileLoggingEnabled(value: Boolean) = update { it.copy(fileLoggingEnabled = value) }
 
     suspend fun resetToDefaults() {
         store.edit { preferences ->
@@ -165,7 +131,7 @@ class SettingsDataStore(context: Context) {
 
 private fun Preferences.toAppSettings() = AppSettings(
     themeMode = enumValue(this[SettingsDataStore.THEME], ThemeMode.SYSTEM),
-    accentColorArgb = this[SettingsDataStore.ACCENT]?.takeUnless { it == AppSettings.PREVIOUS_BRAND_BLUE } ?: AppSettings.BRAND_BLUE,
+    accentColorArgb = this[SettingsDataStore.ACCENT]?.takeUnless { it in AppSettings.LEGACY_BRAND_BLUES } ?: AppSettings.BRAND_BLUE,
     fontScale = this[SettingsDataStore.FONT_SCALE] ?: 1f,
     animationsEnabled = this[SettingsDataStore.ANIMATIONS] ?: true,
     appLanguage = enumValue(this[SettingsDataStore.APP_LANGUAGE], AppLanguage.SYSTEM),
@@ -176,11 +142,11 @@ private fun Preferences.toAppSettings() = AppSettings(
     minimumZoom = this[SettingsDataStore.MIN_ZOOM] ?: 1f,
     showCoordinateGrid = this[SettingsDataStore.GRID] ?: false,
     compassRotationEnabled = this[SettingsDataStore.COMPASS] ?: false,
-    routeColorArgb = this[SettingsDataStore.ROUTE_COLOR]?.takeUnless { it == AppSettings.PREVIOUS_BRAND_BLUE } ?: AppSettings.BRAND_BLUE,
+    routeColorArgb = this[SettingsDataStore.ROUTE_COLOR]?.takeUnless { it in AppSettings.LEGACY_BRAND_BLUES } ?: AppSettings.BRAND_BLUE,
     routeLineWidthDp = this[SettingsDataStore.ROUTE_WIDTH] ?: 5f,
     routeLineStyle = enumValue(this[SettingsDataStore.ROUTE_STYLE], RouteLineStyle.SOLID),
     startupLocationMode = enumValue(this[SettingsDataStore.STARTUP_LOCATION], StartupLocationMode.GPS),
-    lastLocationMode = enumValue(this[SettingsDataStore.LAST_LOCATION_MODE], LocationMode.MANUAL),
+    lastLocationMode = enumValue(this[SettingsDataStore.LAST_LOCATION_MODE], LocationMode.GPS),
     automaticRouteOnSelection = this[SettingsDataStore.AUTO_ROUTE] ?: true,
     arrivalVibrationEnabled = this[SettingsDataStore.VIBRATION] ?: true,
     voiceGuidanceEnabled = this[SettingsDataStore.VOICE] ?: false,

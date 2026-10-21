@@ -10,6 +10,8 @@ import com.logos.navigator.data.model.RoomCatalog
 import com.logos.navigator.data.model.RestrictedArea
 import com.logos.navigator.data.model.SvgPoint
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.io.IOException
 
@@ -18,11 +20,14 @@ class IndoorRepository(context: Context) {
     private val appContext = context.applicationContext
     private val gson = com.google.gson.Gson()
 
-    suspend fun loadIndoorData(): LoadedIndoorData = withContext(Dispatchers.IO) {
-        val navigation = readJson("navigation_graph.json", NavigationData::class.java)
-        val catalog = readJson("rooms.json", RoomCatalog::class.java)
-        validate(navigation, catalog)
-        LoadedIndoorData(navigation, catalog.rooms)
+    /** Данные из assets неизменны: оба ViewModel получают один разобранный и проверенный снимок. */
+    suspend fun loadIndoorData(): LoadedIndoorData = cached ?: loadMutex.withLock {
+        cached ?: withContext(Dispatchers.IO) {
+            val navigation = readJson("navigation_graph.json", NavigationData::class.java)
+            val catalog = readJson("rooms.json", RoomCatalog::class.java)
+            validate(navigation, catalog)
+            LoadedIndoorData(navigation, catalog.rooms)
+        }.also { cached = it }
     }
 
     private fun <T> readJson(assetName: String, clazz: Class<T>): T = try {
@@ -151,4 +156,9 @@ class IndoorRepository(context: Context) {
         return inside
     }
 
+    private companion object {
+        @Volatile
+        private var cached: LoadedIndoorData? = null
+        private val loadMutex = Mutex()
+    }
 }

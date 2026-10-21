@@ -21,18 +21,6 @@ fun Context.categoryLabel(category: String): String = getString(
     },
 )
 
-fun Context.nodeTypeLabel(type: String): String = getString(
-    when (type.lowercase(Locale.ROOT)) {
-        "stairs" -> R.string.node_type_stairs
-        "elevator" -> R.string.node_type_elevator
-        "door" -> R.string.node_type_door
-        "entrance" -> R.string.node_type_entrance
-        "exit" -> R.string.node_type_exit
-        "junction" -> R.string.node_type_junction
-        else -> R.string.node_type_hallway
-    },
-)
-
 fun Room.localizedName(context: Context): String {
     val language = context.resources.configuration.locales[0]?.language
     return if (language == "en") nameEn?.takeIf(String::isNotBlank) ?: name else name

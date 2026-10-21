@@ -9,12 +9,16 @@ import android.content.pm.PackageManager
 import android.location.LocationManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -100,10 +104,12 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.location.LocationManagerCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -327,6 +333,7 @@ fun MapScreen(
                                 },
                                 onRoomTap = viewModel::showRoom,
                                 onTapCoordinate = viewModel::onMapTapCoordinate,
+                                onUserPan = { followGpsLocation = false },
                                 manualPositionSelectionMode = isPlacingManualPosition,
                                 openDoorsRoomIds = openDoorsRoomIds,
                                 onManualPositionInRoom = { room, x, y ->
@@ -365,8 +372,8 @@ fun MapScreen(
                             onSelectGps = {
                                 isPlacingManualPosition = false
                                 if (state.destination != null) isRouteSheetVisible = true
-                                if (state.locationMode == LocationMode.GPS) viewModel.setLocationMode(LocationMode.MANUAL)
-                                else requestGpsPermissionOrStart()
+                                // Повторное нажатие на уже выбранный GPS только перезапускает остановившийся поиск.
+                                if (state.locationMode != LocationMode.GPS || !state.isGpsActive) requestGpsPermissionOrStart()
                             },
                             onSelectManual = {
                                 isPlacingManualPosition = false
@@ -504,8 +511,7 @@ fun MapScreen(
                             state.locationMode == LocationMode.GPS && state.gpsAccuracyMeters != null -> Text(
                                 stringResource(R.string.location_accuracy, state.gpsAccuracyMeters.toInt()),
                                 modifier = Modifier
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.94f))
+                                    .mapOverlayLabel()
                                     .padding(horizontal = 12.dp, vertical = 8.dp),
                                 style = MaterialTheme.typography.labelMedium,
                             )
@@ -513,8 +519,7 @@ fun MapScreen(
                                 stringResource(R.string.manual_place_hint),
                                 modifier = Modifier
                                     .width(270.dp)
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.96f))
+                                    .mapOverlayLabel()
                                     .padding(horizontal = 12.dp, vertical = 9.dp),
                                 style = MaterialTheme.typography.labelMedium,
                             )
@@ -522,8 +527,7 @@ fun MapScreen(
                                 stringResource(R.string.location_hint),
                                 modifier = Modifier
                                     .width(270.dp)
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.94f))
+                                    .mapOverlayLabel()
                                     .padding(horizontal = 12.dp, vertical = 9.dp),
                                 style = MaterialTheme.typography.labelMedium,
                             )
@@ -531,8 +535,7 @@ fun MapScreen(
                                 stringResource(R.string.location_hint_other_floor, state.userPosition?.floor ?: state.selectedFloor),
                                 modifier = Modifier
                                     .width(270.dp)
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.94f))
+                                    .mapOverlayLabel()
                                     .padding(horizontal = 12.dp, vertical = 9.dp),
                                 style = MaterialTheme.typography.labelMedium,
                             )
@@ -541,8 +544,7 @@ fun MapScreen(
                             Text(
                                 stringResource(R.string.location_on_floor, state.userPosition.floor),
                                 modifier = Modifier
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.94f))
+                                    .mapOverlayLabel()
                                     .padding(horizontal = 12.dp, vertical = 8.dp),
                                 style = MaterialTheme.typography.labelMedium,
                             )
@@ -550,108 +552,104 @@ fun MapScreen(
                     }
 
                     val transitionHint = viewModel.transitionHint(state.selectedFloor)
-                    ExtendedFloatingActionButton(
-                        onClick = {
-                            when {
-                                state.locationMode == LocationMode.MANUAL && isPlacingManualPosition -> {
-                                    isPlacingManualPosition = false
-                                    if (state.destination != null) isRouteSheetVisible = true
-                                }
-                                state.locationMode == LocationMode.MANUAL && state.userPosition == null -> {
-                                    isPlacingManualPosition = true
-                                    viewModel.showMessage(context.getString(R.string.manual_place_hint))
-                                }
-                                else -> {
-                                    val point = state.userPosition
-                                    if (point == null) viewModel.goToMyLocation()
-                                    else if (point.floor != state.selectedFloor) {
-                                        pendingCameraCenter = point
-                                        viewModel.selectFloor(point.floor)
-                                    } else mapView?.centerOn(point)
-                                }
-                            }
-                        },
-                        icon = {
-                            Icon(
-                                if (isPlacingManualPosition) Icons.Default.Close else Icons.Default.MyLocation,
-                                contentDescription = null,
-                            )
-                        },
-                        text = {
-                            Text(
-                                stringResource(
-                                    when {
-                                        isPlacingManualPosition -> R.string.cancel_manual_placement
-                                        state.locationMode == LocationMode.MANUAL && state.userPosition == null -> R.string.manual_place_location
-                                        else -> R.string.my_location
-                                    },
-                                ),
-                            )
-                        },
-                        modifier = Modifier.align(Alignment.BottomEnd).padding(
-                            end = 16.dp,
-                            bottom = if (transitionHint != null) 148.dp else 16.dp,
-                        ),
-                        containerColor = if (isPlacingManualPosition) {
-                            MaterialTheme.colorScheme.secondaryContainer
-                        } else {
-                            MaterialTheme.colorScheme.primary
-                        },
-                        contentColor = if (isPlacingManualPosition) {
-                            MaterialTheme.colorScheme.onSecondaryContainer
-                        } else {
-                            MaterialTheme.colorScheme.onPrimary
-                        },
-                    )
-                    if (transitionHint != null) {
-                        Card(
-                            modifier = Modifier
-                                .align(Alignment.BottomCenter)
-                                .fillMaxWidth()
-                                .padding(start = 12.dp, end = 12.dp, bottom = 76.dp),
-                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.97f)),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                        ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 10.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            ) {
-                                Icon(Icons.Default.LocationOn, contentDescription = null, tint = MaterialTheme.colorScheme.secondary)
-                                Text(transitionHint, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodySmall)
-                                if (state.locationMode == LocationMode.GPS && state.userPosition?.floor != state.selectedFloor) {
-                                    TextButton(onClick = { viewModel.confirmGpsFloor(state.selectedFloor) }) {
-                                        Text(stringResource(R.string.confirm_floor))
+                    Column(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .fillMaxWidth()
+                            .padding(start = 12.dp, end = 12.dp, bottom = 12.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                        horizontalAlignment = Alignment.End,
+                    ) {
+                        ExtendedFloatingActionButton(
+                            onClick = {
+                                when {
+                                    state.locationMode == LocationMode.MANUAL && isPlacingManualPosition -> {
+                                        isPlacingManualPosition = false
+                                        if (state.destination != null) isRouteSheetVisible = true
+                                    }
+                                    state.locationMode == LocationMode.MANUAL && state.userPosition == null -> {
+                                        isPlacingManualPosition = true
+                                        viewModel.showMessage(context.getString(R.string.manual_place_hint))
+                                    }
+                                    else -> {
+                                        val point = state.userPosition
+                                        followGpsLocation = true
+                                        if (point == null) {
+                                            viewModel.goToMyLocation()
+                                        } else if (point.floor != state.selectedFloor) {
+                                            pendingCameraCenter = point
+                                            viewModel.selectFloor(point.floor)
+                                        } else {
+                                            mapView?.centerOn(point)
+                                        }
                                     }
                                 }
-                            }
+                            },
+                            icon = {
+                                Icon(
+                                    if (isPlacingManualPosition) Icons.Default.Close else Icons.Default.MyLocation,
+                                    contentDescription = null,
+                                )
+                            },
+                            text = {
+                                Text(
+                                    stringResource(
+                                        when {
+                                            isPlacingManualPosition -> R.string.cancel_manual_placement
+                                            state.locationMode == LocationMode.MANUAL && state.userPosition == null -> R.string.manual_place_location
+                                            else -> R.string.my_location
+                                        },
+                                    ),
+                                )
+                            },
+                            expanded = !(state.destination != null && isRouteSheetVisible && state.selectedRoom == null) ||
+                                isPlacingManualPosition,
+                            shape = RoundedCornerShape(14.dp),
+                            containerColor = if (isPlacingManualPosition) {
+                                MaterialTheme.colorScheme.secondaryContainer
+                            } else {
+                                MaterialTheme.colorScheme.primary
+                            },
+                            contentColor = if (isPlacingManualPosition) {
+                                MaterialTheme.colorScheme.onSecondaryContainer
+                            } else {
+                                MaterialTheme.colorScheme.onPrimary
+                            },
+                        )
+                        if (state.destination != null && state.selectedRoom == null && isRouteSheetVisible) {
+                            RoutePanel(
+                                state = state,
+                                transitionHint = transitionHint,
+                                onConfirmFloor = if (state.locationMode == LocationMode.GPS &&
+                                    state.userPosition?.floor != state.selectedFloor
+                                ) {
+                                    { viewModel.confirmGpsFloor(state.selectedFloor) }
+                                } else {
+                                    null
+                                },
+                                onSelectStartLocation = {
+                                    isRouteSheetVisible = false
+                                    isPlacingManualPosition = true
+                                    if (state.locationMode != LocationMode.MANUAL) viewModel.setLocationMode(LocationMode.MANUAL)
+                                    viewModel.showMessage(context.getString(R.string.manual_place_hint))
+                                },
+                                onStartNavigation = {
+                                    followGpsLocation = true
+                                    viewModel.startNavigation()
+                                },
+                                onCancelRoute = viewModel::clearRoute,
+                                onPreviousStep = viewModel::previousRouteStep,
+                                onNextStep = viewModel::advanceRouteStep,
+                                onShare = { shareLocation(context, viewModel) },
+                                onSaveRoute = onSaveCurrentRoute,
+                                distanceUnit = state.settings.distanceUnit,
+                                modifier = Modifier.fillMaxWidth(),
+                            )
                         }
                     }
-
                 }
             }
         }
-    }
-
-    if (state.destination != null && state.selectedRoom == null && isRouteSheetVisible) {
-        RouteBottomSheet(
-            state = state,
-            onDismiss = viewModel::clearRoute,
-            onSelectStartLocation = {
-                isRouteSheetVisible = false
-                isPlacingManualPosition = true
-                if (state.locationMode != LocationMode.MANUAL) viewModel.setLocationMode(LocationMode.MANUAL)
-            },
-            onStartNavigation = viewModel::startNavigation,
-            onCancelRoute = viewModel::clearRoute,
-            onPreviousStep = viewModel::previousRouteStep,
-            onNextStep = viewModel::advanceRouteStep,
-            onZoomIn = { mapView?.zoomIn() },
-            onZoomOut = { mapView?.zoomOut() },
-            onShare = { shareLocation(context, viewModel) },
-            onSaveRoute = onSaveCurrentRoute,
-            distanceUnit = state.settings.distanceUnit,
-        )
     }
 
     if (BuildConfig.OPEN_DOORS && isOpenDoorsSheetVisible) {
@@ -712,6 +710,13 @@ fun MapScreen(
     }
 }
 
+/** Плашка поверх карты в стиле карточек сайта: белый фон, тонкая рамка, умеренный радиус. */
+@Composable
+private fun Modifier.mapOverlayLabel(): Modifier = this
+    .clip(RoundedCornerShape(12.dp))
+    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.96f))
+    .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(12.dp))
+
 @Composable
 private fun ModeSwitch(
     selectedMode: LocationMode,
@@ -719,9 +724,10 @@ private fun ModeSwitch(
     onSelectManual: () -> Unit,
 ) {
     Surface(
-        shape = RoundedCornerShape(18.dp),
-        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f),
-        shadowElevation = 4.dp,
+        shape = RoundedCornerShape(14.dp),
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        shadowElevation = 3.dp,
     ) {
         Row(Modifier.padding(4.dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             ModeButton(stringResource(R.string.location_gps), selectedMode == LocationMode.GPS, onSelectGps)
@@ -732,7 +738,7 @@ private fun ModeSwitch(
 
 @Composable
 private fun ModeButton(text: String, selected: Boolean, onClick: () -> Unit) {
-    val shape = RoundedCornerShape(14.dp)
+    val shape = RoundedCornerShape(10.dp)
     Surface(
         modifier = Modifier
             .clip(shape)
@@ -794,29 +800,32 @@ private fun GpsWarningCard(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+/**
+ * Немодальная панель маршрута: карта под ней остаётся доступной для жестов,
+ * а свернуть подробности можно без отмены маршрута.
+ */
 @Composable
-private fun RouteBottomSheet(
+private fun RoutePanel(
     state: IndoorUiState,
-    onDismiss: () -> Unit,
+    transitionHint: String?,
+    onConfirmFloor: (() -> Unit)?,
     onSelectStartLocation: () -> Unit,
     onStartNavigation: () -> Unit,
     onCancelRoute: () -> Unit,
     onPreviousStep: () -> Unit,
     onNextStep: () -> Unit,
-    onZoomIn: () -> Unit,
-    onZoomOut: () -> Unit,
     onShare: () -> Unit,
     onSaveRoute: (Room) -> Unit,
     distanceUnit: DistanceUnit,
+    modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
     val destination = state.destination ?: return
     val configuration = LocalConfiguration.current
-    val maxSheetHeight = (configuration.screenHeightDp * 0.68f).dp
-    val sheetState = androidx.compose.material3.rememberModalBottomSheetState(skipPartiallyExpanded = false)
+    val maxStepsHeight = (configuration.screenHeightDp * 0.32f).dp
     var actionsExpanded by remember(destination.id) { mutableStateOf(false) }
     var showAllSteps by remember(destination.id) { mutableStateOf(false) }
+    var collapsed by remember(destination.id) { mutableStateOf(false) }
 
     val displaySteps = state.routeSteps.withIndex().filter { (_, instruction) ->
         instruction.action != RouteAction.ARRIVAL &&
@@ -834,13 +843,7 @@ private fun RouteBottomSheet(
         displaySteps.isEmpty() -> -1
         !state.isNavigationStarted -> 0
         matchedCurrentStep >= 0 -> matchedCurrentStep
-        state.currentRouteStepIndex >= state.routeSteps.lastIndex -> displaySteps.lastIndex
-        else -> 0
-    }
-    val visibleSteps = when {
-        showAllSteps -> displaySteps
-        activeDisplayIndex >= 0 -> listOf(displaySteps[activeDisplayIndex])
-        else -> emptyList()
+        else -> displaySteps.indexOfLast { it.index <= state.currentRouteStepIndex }.coerceAtLeast(0)
     }
     val floorLabel = stringResource(R.string.floor_number_format, destination.floor)
     val destinationHeading = destination.number?.let { stringResource(R.string.route_destination_room, it) }
@@ -850,292 +853,343 @@ private fun RouteBottomSheet(
     } else {
         stringResource(R.string.route_room_floor_detail, floorLabel, context.categoryLabel(destination.category))
     }
+    val remainingMeters = state.routeDistanceMeters?.let { total ->
+        (total * (1.0 - state.routeProgress.coerceIn(0f, 1f))).coerceAtLeast(0.0)
+    }
 
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        scrimColor = Color.Transparent,
-        containerColor = MaterialTheme.colorScheme.background,
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(14.dp),
+        color = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        shadowElevation = 10.dp,
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .heightIn(max = maxSheetHeight)
-                .verticalScroll(rememberScrollState())
-                .padding(start = 18.dp, end = 18.dp, bottom = 18.dp),
+                .animateContentSize()
+                .padding(start = 14.dp, end = 6.dp, top = 10.dp, bottom = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            Surface(
-                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
-                shape = RoundedCornerShape(20.dp),
-                color = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(14.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                Box(
+                    modifier = Modifier
+                        .size(42.dp)
+                        .clip(RoundedCornerShape(11.dp))
+                        .background(MaterialTheme.colorScheme.primaryContainer),
+                    contentAlignment = Alignment.Center,
                 ) {
-                    Surface(
-                        shape = RoundedCornerShape(14.dp),
-                        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f),
-                        contentColor = MaterialTheme.colorScheme.primary,
-                    ) {
-                        Icon(Icons.Default.Navigation, contentDescription = null, modifier = Modifier.padding(10.dp))
+                    Icon(Icons.Default.Navigation, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                }
+                Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(1.dp)) {
+                    Text(
+                        stringResource(R.string.route_sheet_eyebrow).uppercase(),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Text(
+                        destinationHeading,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    Text(
+                        destinationDetail,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+                Box {
+                    IconButton(onClick = { actionsExpanded = true }) {
+                        Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.quick_actions))
                     }
-                    Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                        Text(
-                            stringResource(R.string.route_sheet_eyebrow),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.SemiBold,
+                    DropdownMenu(expanded = actionsExpanded, onDismissRequest = { actionsExpanded = false }) {
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.change_start_location)) },
+                            leadingIcon = { Icon(Icons.Default.MyLocation, contentDescription = null) },
+                            onClick = {
+                                actionsExpanded = false
+                                onSelectStartLocation()
+                            },
                         )
-                        Text(
-                            destinationHeading,
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.save_route)) },
+                            leadingIcon = { Icon(Icons.Default.BookmarkAdd, contentDescription = null) },
+                            onClick = {
+                                actionsExpanded = false
+                                onSaveRoute(destination)
+                            },
                         )
-                        Text(
-                            destinationDetail,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.share_button)) },
+                            leadingIcon = { Icon(Icons.Default.Share, contentDescription = null) },
+                            onClick = {
+                                actionsExpanded = false
+                                onShare()
+                            },
                         )
-                    }
-                    Box {
-                        IconButton(onClick = { actionsExpanded = true }) {
-                            Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.quick_actions))
-                        }
-                        DropdownMenu(expanded = actionsExpanded, onDismissRequest = { actionsExpanded = false }) {
-                            DropdownMenuItem(
-                                text = { Text(stringResource(R.string.change_start_location)) },
-                                leadingIcon = { Icon(Icons.Default.MyLocation, contentDescription = null) },
-                                onClick = {
-                                    actionsExpanded = false
-                                    onSelectStartLocation()
-                                },
-                            )
-                            DropdownMenuItem(
-                                text = { Text(stringResource(R.string.save_route)) },
-                                leadingIcon = { Icon(Icons.Default.BookmarkAdd, contentDescription = null) },
-                                onClick = {
-                                    actionsExpanded = false
-                                    onSaveRoute(destination)
-                                },
-                            )
-                            DropdownMenuItem(
-                                text = { Text(stringResource(R.string.share_button)) },
-                                leadingIcon = { Icon(Icons.Default.Share, contentDescription = null) },
-                                onClick = {
-                                    actionsExpanded = false
-                                    onShare()
-                                },
-                            )
-                        }
-                    }
-                    IconButton(onClick = onCancelRoute) {
-                        Icon(Icons.Default.Close, contentDescription = stringResource(R.string.cancel_route))
                     }
                 }
-            }
-
-            if (state.route != null) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
-                    horizontalArrangement = Arrangement.End,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    FilledTonalIconButton(onClick = onZoomOut) {
-                        Icon(Icons.Default.Remove, contentDescription = stringResource(R.string.zoom_out))
-                    }
-                    FilledTonalIconButton(onClick = onZoomIn) {
-                        Icon(Icons.Default.Add, contentDescription = stringResource(R.string.zoom_in))
-                    }
+                IconButton(onClick = { collapsed = !collapsed }) {
+                    Icon(
+                        if (collapsed) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                        contentDescription = stringResource(if (collapsed) R.string.route_panel_expand else R.string.route_panel_collapse),
+                    )
                 }
             }
 
             if (state.routeDistanceMeters != null) {
-                Surface(
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 7.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    color = MaterialTheme.colorScheme.surface,
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(9.dp),
-                    ) {
-                        Icon(Icons.Default.Navigation, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                        Text(
-                            stringResource(
-                                R.string.route_card_summary,
-                                state.routeMinutes ?: 1,
-                                context.formatDistance(state.routeDistanceMeters, distanceUnit),
-                            ),
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.SemiBold,
-                        )
-                        if (state.isNavigationStarted) {
-                            LinearProgressIndicator(
-                                progress = state.routeProgress.coerceIn(0f, 1f),
-                                modifier = Modifier.weight(1f),
-                            )
-                        }
-                    }
-                }
-            }
-
-            if (state.route == null) {
-                Text(
-                    stringResource(
-                        if (state.userPosition == null) R.string.route_card_location_missing
-                        else R.string.route_card_no_path,
-                    ),
-                    modifier = Modifier.padding(top = 6.dp, bottom = 4.dp),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            } else {
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(top = 3.dp),
+                    modifier = Modifier.fillMaxWidth().padding(end = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    if (state.isNavigationStarted && activeDisplayIndex >= 0) {
+                    Text(
+                        stringResource(
+                            R.string.route_card_summary,
+                            state.routeMinutes ?: 1,
+                            context.formatDistance(state.routeDistanceMeters, distanceUnit),
+                        ),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    if (state.isNavigationStarted && remainingMeters != null) {
                         Text(
-                            stringResource(R.string.route_step_count, activeDisplayIndex + 1, displaySteps.size),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.primary,
-                        )
-                    } else if (!state.isNavigationStarted) {
-                        Text(
-                            stringResource(R.string.route_preview_hint),
+                            stringResource(R.string.route_remaining, context.formatDistance(remainingMeters, distanceUnit)),
                             modifier = Modifier.weight(1f),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                    TextButton(onClick = { showAllSteps = !showAllSteps }) {
-                        Text(stringResource(if (showAllSteps) R.string.route_hide_steps else R.string.route_show_steps))
-                        Icon(
-                            if (showAllSteps) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                            contentDescription = null,
+                            textAlign = TextAlign.End,
+                            maxLines = 1,
                         )
                     }
                 }
-                HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
-                visibleSteps.forEachIndexed { visibleIndex, indexedInstruction ->
-                    val displayIndex = displaySteps.indexOfFirst { it.index == indexedInstruction.index }
-                    val instruction = indexedInstruction.value
-                    val isCurrent = displayIndex == activeDisplayIndex
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 3.dp)
-                            .clip(RoundedCornerShape(14.dp))
-                            .background(
-                                if (isCurrent && state.isNavigationStarted) {
-                                    MaterialTheme.colorScheme.primaryContainer
-                                } else {
-                                    MaterialTheme.colorScheme.surface
-                                },
-                            )
-                            .padding(horizontal = 8.dp, vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    ) {
-                        Surface(
-                            modifier = Modifier.size(34.dp),
-                            shape = CircleShape,
-                            color = MaterialTheme.colorScheme.primaryContainer,
-                            contentColor = MaterialTheme.colorScheme.primary,
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Text(
-                                    (displayIndex + 1).toString(),
-                                    style = MaterialTheme.typography.labelLarge,
-                                    fontWeight = FontWeight.Bold,
-                                )
-                            }
-                        }
-                        Icon(
-                            routeActionIcon(instruction.action),
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(22.dp),
-                        )
-                        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(1.dp)) {
-                            Text(
-                                routeInstructionLabel(context, instruction, state),
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = if (isCurrent && state.isNavigationStarted) FontWeight.Bold else FontWeight.Medium,
-                                maxLines = if (showAllSteps) 2 else 1,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                            if (instruction.distanceMeters > 0.0) {
-                                Text(
-                                    context.formatDistance(instruction.distanceMeters, distanceUnit),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            }
-                        }
-                    }
-                    if (showAllSteps && visibleIndex < visibleSteps.lastIndex) {
-                        HorizontalDivider(modifier = Modifier.padding(start = 52.dp), color = MaterialTheme.colorScheme.surfaceVariant)
+                if (state.isNavigationStarted) {
+                    LinearProgressIndicator(
+                        progress = { state.routeProgress.coerceIn(0f, 1f) },
+                        modifier = Modifier.fillMaxWidth().padding(end = 8.dp).height(5.dp).clip(CircleShape),
+                        trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                    )
+                }
+            }
+
+            if (transitionHint != null) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(end = 8.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(MaterialTheme.colorScheme.tertiaryContainer)
+                        .padding(horizontal = 10.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Icon(
+                        Icons.Default.LocationOn,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onTertiaryContainer,
+                        modifier = Modifier.size(18.dp),
+                    )
+                    Text(
+                        transitionHint,
+                        modifier = Modifier.weight(1f),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onTertiaryContainer,
+                    )
+                    if (onConfirmFloor != null) {
+                        TextButton(onClick = onConfirmFloor) { Text(stringResource(R.string.confirm_floor)) }
                     }
                 }
             }
 
-            when {
-                state.route == null -> OutlinedButton(
-                    onClick = onSelectStartLocation,
-                    modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
-                ) {
-                    Icon(Icons.Default.MyLocation, contentDescription = null)
-                    Spacer(Modifier.width(6.dp))
-                    Text(stringResource(R.string.route_choose_start))
+            if (!collapsed) {
+                if (state.route == null) {
+                    Text(
+                        stringResource(
+                            if (state.userPosition == null) R.string.route_card_location_missing
+                            else R.string.route_card_no_path,
+                        ),
+                        modifier = Modifier.padding(end = 8.dp),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                } else if (activeDisplayIndex >= 0) {
+                    val stepsToShow = if (showAllSteps) displaySteps else listOf(displaySteps[activeDisplayIndex])
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(end = 8.dp)
+                            .heightIn(max = maxStepsHeight)
+                            .verticalScroll(rememberScrollState()),
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        stepsToShow.forEach { indexedInstruction ->
+                            val displayIndex = displaySteps.indexOfFirst { it.index == indexedInstruction.index }
+                            RouteStepRow(
+                                number = displayIndex + 1,
+                                instruction = indexedInstruction.value,
+                                label = routeInstructionLabel(context, indexedInstruction.value, state),
+                                isCurrent = displayIndex == activeDisplayIndex && state.isNavigationStarted,
+                                isDone = state.isNavigationStarted && displayIndex < activeDisplayIndex,
+                                distanceUnit = distanceUnit,
+                                singleLine = !showAllSteps,
+                            )
+                        }
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            if (state.isNavigationStarted) {
+                                stringResource(R.string.route_step_count, activeDisplayIndex + 1, displaySteps.size)
+                            } else {
+                                stringResource(R.string.route_preview_hint)
+                            },
+                            modifier = Modifier.weight(1f),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = if (state.isNavigationStarted) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.onSurfaceVariant
+                            },
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                        TextButton(onClick = { showAllSteps = !showAllSteps }) {
+                            Text(stringResource(if (showAllSteps) R.string.route_hide_steps else R.string.route_show_steps))
+                        }
+                    }
                 }
-                !state.isNavigationStarted -> Button(
-                    onClick = onStartNavigation,
-                    modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
+
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(end = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    Icon(Icons.Default.PlayArrow, contentDescription = null)
-                    Spacer(Modifier.width(6.dp))
-                    Text(stringResource(R.string.start_navigation))
-                }
-                state.locationMode == LocationMode.MANUAL -> Row(
-                    modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                ) {
+                    when {
+                        state.route == null -> Button(
+                            onClick = onSelectStartLocation,
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(12.dp),
+                        ) {
+                            Icon(Icons.Default.MyLocation, contentDescription = null)
+                            Spacer(Modifier.width(6.dp))
+                            Text(stringResource(R.string.route_choose_start), maxLines = 1)
+                        }
+                        !state.isNavigationStarted -> Button(
+                            onClick = onStartNavigation,
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(12.dp),
+                        ) {
+                            Icon(Icons.Default.PlayArrow, contentDescription = null)
+                            Spacer(Modifier.width(6.dp))
+                            Text(stringResource(R.string.start_navigation), maxLines = 1)
+                        }
+                        state.locationMode == LocationMode.MANUAL -> {
+                            OutlinedButton(
+                                onClick = onPreviousStep,
+                                enabled = state.currentRouteStepIndex > 0,
+                                modifier = Modifier.weight(1f),
+                                shape = RoundedCornerShape(12.dp),
+                            ) {
+                                Icon(Icons.Default.KeyboardArrowLeft, contentDescription = null)
+                                Text(stringResource(R.string.previous_step), maxLines = 1)
+                            }
+                            Button(
+                                onClick = onNextStep,
+                                enabled = state.currentRouteStepIndex < state.routeSteps.lastIndex,
+                                modifier = Modifier.weight(1f),
+                                shape = RoundedCornerShape(12.dp),
+                            ) {
+                                Text(stringResource(R.string.next_step), maxLines = 1)
+                                Icon(Icons.Default.KeyboardArrowRight, contentDescription = null)
+                            }
+                        }
+                        else -> Spacer(Modifier.weight(1f))
+                    }
                     OutlinedButton(
-                        onClick = onPreviousStep,
-                        enabled = state.currentRouteStepIndex > 0,
-                        modifier = Modifier.weight(1f),
+                        onClick = onCancelRoute,
+                        shape = RoundedCornerShape(12.dp),
+                        contentPadding = PaddingValues(horizontal = 12.dp),
                     ) {
-                        Icon(Icons.Default.KeyboardArrowLeft, contentDescription = null)
-                        Spacer(Modifier.width(4.dp))
-                        Text(stringResource(R.string.previous_step), maxLines = 1)
+                        Icon(Icons.Default.Close, contentDescription = stringResource(R.string.cancel_route))
+                        if (state.isNavigationStarted && state.locationMode != LocationMode.MANUAL) {
+                            Spacer(Modifier.width(4.dp))
+                            Text(stringResource(R.string.cancel_route), maxLines = 1)
+                        }
                     }
-                    Button(
-                        onClick = onNextStep,
-                        enabled = state.currentRouteStepIndex < state.routeSteps.lastIndex,
-                        modifier = Modifier.weight(1f),
-                    ) {
-                        Text(stringResource(R.string.next_step), maxLines = 1)
-                        Spacer(Modifier.width(4.dp))
-                        Icon(Icons.Default.KeyboardArrowRight, contentDescription = null)
-                    }
-                }
-                else -> OutlinedButton(
-                    onClick = onCancelRoute,
-                    modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
-                ) {
-                    Text(stringResource(R.string.cancel_route))
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun RouteStepRow(
+    number: Int,
+    instruction: RouteInstruction,
+    label: String,
+    isCurrent: Boolean,
+    isDone: Boolean,
+    distanceUnit: DistanceUnit,
+    singleLine: Boolean,
+) {
+    val context = LocalContext.current
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(
+                if (isCurrent) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.55f),
+            )
+            .padding(horizontal = 10.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+        Box(
+            modifier = Modifier
+                .size(30.dp)
+                .clip(CircleShape)
+                .background(if (isCurrent) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface),
+            contentAlignment = Alignment.Center,
+        ) {
+            RouteActionIcon(
+                action = instruction.action,
+                tint = if (isCurrent) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(18.dp),
+            )
+        }
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                label,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Medium,
+                color = if (isDone) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
+                maxLines = if (singleLine) 2 else 3,
+                overflow = TextOverflow.Ellipsis,
+            )
+            if (instruction.distanceMeters > 0.5) {
+                Text(
+                    context.formatDistance(instruction.distanceMeters, distanceUnit),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+        Text(
+            number.toString(),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 
@@ -1160,15 +1214,23 @@ private fun routeInstructionLabel(context: Context, instruction: RouteInstructio
     }
 }
 
-private fun routeActionIcon(action: RouteAction): androidx.compose.ui.graphics.vector.ImageVector = when (action) {
-    RouteAction.START -> Icons.Default.PlayArrow
-    RouteAction.STRAIGHT, RouteAction.STAIRS_UP, RouteAction.ELEVATOR -> Icons.Default.ArrowUpward
-    RouteAction.TURN_LEFT, RouteAction.SLIGHT_LEFT -> Icons.Default.KeyboardArrowLeft
-    RouteAction.TURN_RIGHT, RouteAction.SLIGHT_RIGHT -> Icons.Default.KeyboardArrowRight
-    RouteAction.U_TURN -> Icons.Default.Replay
-    RouteAction.DOOR -> Icons.Default.Home
-    RouteAction.STAIRS_DOWN -> Icons.Default.ArrowDownward
-    RouteAction.ARRIVAL -> Icons.Default.Flag
+@Composable
+private fun RouteActionIcon(action: RouteAction, tint: Color, modifier: Modifier = Modifier) {
+    if (action == RouteAction.STAIRS_UP || action == RouteAction.STAIRS_DOWN) {
+        Icon(painterResource(R.drawable.ic_stairs_24), contentDescription = null, tint = tint, modifier = modifier)
+        return
+    }
+    val vector = when (action) {
+        RouteAction.START -> Icons.Default.PlayArrow
+        RouteAction.STRAIGHT, RouteAction.ELEVATOR -> Icons.Default.ArrowUpward
+        RouteAction.TURN_LEFT, RouteAction.SLIGHT_LEFT -> Icons.Default.KeyboardArrowLeft
+        RouteAction.TURN_RIGHT, RouteAction.SLIGHT_RIGHT -> Icons.Default.KeyboardArrowRight
+        RouteAction.U_TURN -> Icons.Default.Replay
+        RouteAction.DOOR -> Icons.Default.Home
+        RouteAction.ARRIVAL -> Icons.Default.Flag
+        RouteAction.STAIRS_UP, RouteAction.STAIRS_DOWN -> Icons.Default.ArrowDownward
+    }
+    Icon(vector, contentDescription = null, tint = tint, modifier = modifier)
 }
 
 @Composable
@@ -1330,10 +1392,14 @@ private fun shareRoom(context: Context, room: Room) {
     shareText(context, shareMessage, context.getString(R.string.share_room_button))
 }
 
+/** Геолокация работает и без спутникового приёмника: достаточно включённой сетевой геопозиции. */
 private fun isGpsProviderEnabled(context: Context): Boolean = runCatching {
     val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as? LocationManager
-    locationManager?.isProviderEnabled(LocationManager.GPS_PROVIDER) == true
-}.getOrDefault(false)
+        ?: return@runCatching false
+    LocationManagerCompat.isLocationEnabled(locationManager) &&
+        (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
+            locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
+}.getOrDefault(true)
 
 private fun shareText(context: Context, text: String, chooserTitle: String) {
     val sendIntent = Intent(Intent.ACTION_SEND).apply {

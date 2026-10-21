@@ -24,16 +24,23 @@ object RouteStepGenerator {
         var completedMeters = startConnectorMeters.takeIf { it.isFinite() && it > 0.0 } ?: 0.0
         var straightMeters = 0.0
         var straightTarget: NavNode? = null
+        var straightStartProgress = 0f
         val total = totalDistanceMeters.takeIf { it.isFinite() && it > 0.0 } ?: 1.0
 
+        // progress шага — доля пути в точке, где шаг начинается: так текущий шаг GPS
+        // совпадает с тем, что пользователь делает сейчас, а не с уже пройденным отрезком.
         fun progress() = (completedMeters / total).toFloat().coerceIn(0f, 0.99f)
         fun flushStraight() {
-            if (straightMeters <= 0.05) return
+            if (straightMeters <= 0.05) {
+                straightMeters = 0.0
+                straightTarget = null
+                return
+            }
             steps += RouteInstruction(
                 action = RouteAction.STRAIGHT,
                 distanceMeters = straightMeters,
                 targetNodeId = straightTarget?.id,
-                progress = progress(),
+                progress = straightStartProgress,
             )
             straightMeters = 0.0
             straightTarget = null
@@ -61,27 +68,31 @@ object RouteStepGenerator {
             val transition = classifyTransition(from, to, edge)
             if (transition != null) {
                 flushStraight()
+                val startProgress = progress()
                 completedMeters += edgeMeters
                 steps += RouteInstruction(
                     action = transition,
                     distanceMeters = edgeMeters,
                     targetFloor = to.floor.takeIf { it != from.floor },
                     targetNodeId = to.id,
-                    progress = progress(),
+                    progress = startProgress,
                 )
                 continue
             }
 
             if (to.type.equals("door", ignoreCase = true)) {
                 flushStraight()
+                val startProgress = progress()
                 completedMeters += edgeMeters
                 steps += RouteInstruction(
                     action = RouteAction.DOOR,
+                    distanceMeters = edgeMeters,
                     targetNodeId = to.id,
                     destinationName = destinationName,
-                    progress = progress(),
+                    progress = startProgress,
                 )
             } else {
+                if (straightMeters <= 0.0) straightStartProgress = progress()
                 straightMeters += edgeMeters
                 completedMeters += edgeMeters
                 straightTarget = to
@@ -95,6 +106,26 @@ object RouteStepGenerator {
             progress = 1f,
         )
         return steps
+    }
+
+    /**
+     * Индекс подсказки для GPS-ведения: шаг, на котором находится пользователь, а за несколько
+     * метров до поворота, двери или лестницы — уже сам манёвр, чтобы его можно было подготовить.
+     */
+    fun activeStepIndex(
+        steps: List<RouteInstruction>,
+        progress: Float,
+        totalDistanceMeters: Double,
+        lookAheadMeters: Double = MANEUVER_LOOK_AHEAD_METERS,
+    ): Int {
+        if (steps.isEmpty()) return 0
+        if (progress >= ARRIVED_PROGRESS) return steps.lastIndex
+        val current = steps.indexOfLast { it.progress <= progress + PROGRESS_EPSILON }.coerceAtLeast(0)
+        val total = totalDistanceMeters.takeIf { it.isFinite() && it > 0.0 } ?: return current
+        val lookAhead = (lookAheadMeters / total).toFloat()
+        val nextManeuver = (current + 1 until steps.size).firstOrNull { steps[it].action != RouteAction.STRAIGHT }
+            ?: return current
+        return if (steps[nextManeuver].progress - progress <= lookAhead) nextManeuver else current
     }
 
     private fun classifyTransition(from: NavNode, to: NavNode, edge: NavEdge?): RouteAction? {
@@ -132,6 +163,9 @@ object RouteStepGenerator {
     private fun directedKey(from: String, to: String): String = "$from->$to"
 
     private const val DEFAULT_METERS_PER_UNIT = 0.083333
+    private const val MANEUVER_LOOK_AHEAD_METERS = 4.0
+    private const val ARRIVED_PROGRESS = 0.999f
+    private const val PROGRESS_EPSILON = 0.0005f
     private const val MIN_SEGMENT = 0.01
     private const val STRAIGHT_ANGLE_DEGREES = 18f
     private const val SLIGHT_TURN_MAX_DEGREES = 45f

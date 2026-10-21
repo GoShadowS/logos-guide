@@ -2,7 +2,6 @@
 <resources>
     <!-- App name. -->
     <string name="app_name">LOGOS: Guide</string>
-    <string name="app_tagline">Navigation around Logos College</string>
 
     <!-- Common interface. -->
     <string name="nav_map">Map</string>
@@ -14,19 +13,15 @@
     <string name="cancel">Cancel</string>
     <string name="save">Save</string>
     <string name="delete">Delete</string>
-    <string name="edit">Edit</string>
     <string name="continue_label">Next</string>
     <string name="skip">Skip</string>
     <string name="retry">Retry</string>
     <string name="loading">Loading…</string>
     <string name="loading_data">Loading maps and directory…</string>
-    <string name="loading_map">Loading floor plan…</string>
     <string name="unknown_error">Unknown error</string>
-    <string name="no_description">No description</string>
     <string name="floor_number_format">Floor %1$d</string>
     <string name="floor_title_format">Floor %1$d</string>
     <string name="cabinet_number_format">Room %1$s</string>
-    <string name="minutes_format">about %1$d min</string>
     <string name="meters_format">≈ %1$d m</string>
     <string name="kilometers_format">≈ %1$.1f km</string>
     <string name="steps_format">≈ %1$d steps</string>
@@ -56,20 +51,13 @@
     <string name="gps_permission_title">Allow location access?</string>
     <string name="gps_permission_rationale">GPS mode uses Android location services to estimate your position on the plan. Accuracy may be low indoors; manual mode works without permission.</string>
     <string name="gps_permission_continue">Continue</string>
-    <string name="gps_enable_title">Turn on location</string>
     <string name="gps_enable_message">Location services are turned off. Enable them to use GPS.</string>
     <string name="gps_enable_button">Turn on GPS</string>
     <string name="gps_retry">Retry GPS</string>
-    <string name="gps_use_manual">Use manual mode</string>
-    <string name="gps_settings_title">Location permissions</string>
-    <string name="gps_settings_description">Open the app’s system settings to grant or revoke location access.</string>
-    <string name="open_app_settings">App settings</string>
-    <string name="open_location_settings">Location settings</string>
     <string name="my_location">My place</string>
     <string name="quick_nearest_restroom">Nearest restroom</string>
     <string name="quick_nearest_stairs">Nearest stairs</string>
     <string name="quick_actions">Quick actions</string>
-    <string name="quick_actions_description">Restroom, stairs or set position</string>
     <string name="quick_open_doors">Open Day activities</string>
     <string name="manual_place_location">Set place</string>
     <string name="manual_move_location">Move place</string>
@@ -91,34 +79,20 @@
     <string name="quick_action_destination_not_found">No route to a nearby destination is available.</string>
     <string name="route_start_in_restricted_area">Your start point is inside a restricted area. Move it to an accessible corridor.</string>
     <string name="room_route_unavailable">A route to “%1$s” is not configured yet; its geometry or entrance needs verification.</string>
-    <string name="center_map">Go to my location</string>
     <string name="zoom_in">Zoom in</string>
     <string name="zoom_out">Zoom out</string>
-    <string name="floor_select">Choose a floor</string>
-    <string name="map_loading_svg">Loading SVG floor plan…</string>
-    <string name="map_render_error">Could not prepare the floor plan. Tap to retry.</string>
     <string name="map_load_error_title">Could not open navigation data</string>
-    <string name="map_load_error_message">Check the local navigation_graph.json and rooms.json files.</string>
-    <string name="floor_map_error_title">Floor map unavailable</string>
-    <string name="floor_map_error_message">The SVG map for “%1$s” is missing or unreadable. Check %2$s and its viewBox.</string>
     <string name="manual_start_hint">Mark “I’m here” on the map or turn on GPS first.</string>
     <string name="manual_position_required">Mark your position on the map first.</string>
     <string name="manual_position_outside_map">Choose a point inside a college room or corridor.</string>
     <string name="location_on_other_floor">Your marker is on floor %1$d. Open that floor to see it.</string>
-    <string name="no_location_to_center">Mark your position on the plan first.</string>
-    <string name="no_graph_nodes">There are no navigation nodes on this floor yet.</string>
     <string name="route_not_found">Route not found. Check corridor, stair and elevator connections in navigation_graph.json.</string>
-    <string name="transition_up_stairs">Go to node “%1$s” and take the stairs up to floor %2$d.</string>
-    <string name="transition_down_stairs">Go to node “%1$s” and take the stairs down to floor %2$d.</string>
-    <string name="transition_elevator">Go to node “%1$s” and take the elevator to floor %2$d.</string>
     <string name="transition_after_floor">After changing to floor %1$d, continue along the route. GPS cannot determine your floor — confirm it if GPS is on.</string>
     <string name="confirm_floor">I’m on this floor</string>
     <string name="gps_floor_no_fix">No fresh GPS fix. Wait for a reading or place your position manually on the selected floor.</string>
     <string name="floor_not_found">The selected floor could not be found in the local data.</string>
     <string name="arrival_message">You are near your destination: %1$s.</string>
-    <string name="coordinate_format">SVG viewBox: x=%1$.2f, y=%2$.2f</string>
     <string name="map_coordinates_description">Interactive vector floor map</string>
-    <string name="map_tap_description">Floor plan. Tap to mark your position</string>
     <string name="coordinate_overlay_format">x=%1$.2f  y=%2$.2f</string>
     <string name="share_location">Share location</string>
     <string name="share_room">Share room</string>
@@ -128,16 +102,8 @@
     <string name="share_near_room">I’m on %1$s, near “%2$s%3$s”.</string>
     <string name="share_floor">I’m on %1$s at the college.</string>
     <string name="share_location_prefix">%1$s — %2$s</string>
-    <string name="share_no_location">Location has not been marked yet.</string>
-    <string name="share_success">Text copied or shared using the system menu.</string>
-    <string name="share_failed">Could not open the sharing menu.</string>
     <string name="menu">Menu</string>
-    <string name="search_rooms">Search rooms</string>
-    <string name="open_favorites">Open favorites</string>
     <string name="about_app">About</string>
-    <string name="room_details">Room information</string>
-    <string name="room_not_found">The destination is no longer in the local directory.</string>
-    <string name="route_to_format">Route to %1$s</string>
     <string name="route_sheet_eyebrow">Indoor route</string>
     <string name="route_destination_room">Room %1$s</string>
     <string name="route_room_floor_detail">%1$s · %2$s</string>
@@ -146,34 +112,20 @@
     <string name="route_card_no_path">The route is not available yet. Check your starting point and route access.</string>
     <string name="route_choose_start">Choose a starting point on the map</string>
     <string name="change_start_location">Change starting point</string>
-    <string name="destination_format">Destination: %1$s</string>
-    <string name="route_distance_time">%1$s · about %2$d min</string>
     <string name="start_route">Build route</string>
     <string name="cancel_route">Cancel route</string>
     <string name="save_route">Save route</string>
     <string name="share_button">Share</string>
     <string name="share_room_button">Share room</string>
-    <string name="route_destination_floor">%1$s · %2$s</string>
-    <string name="how_to_start">Getting started</string>
-    <string name="start_hint">Choose GPS or mark your position on the plan, then find a room in Search or the directory.</string>
-    <string name="position_set">“I’m here” position is set</string>
-    <string name="choose_destination_hint">Choose a room on the map or open the directory.</string>
-    <string name="quick_favorite_cabinet">Room %1$s</string>
-    <string name="favorite_star_add">Add to favorites</string>
-    <string name="favorite_star_remove">Remove from favorites</string>
     <string name="room_number_floor_category">%1$s · %2$s · %3$s</string>
 
     <!-- Room details. -->
     <string name="room_floor_category">%1$s · %2$s · %3$s</string>
-    <string name="route_button">Build route</string>
     <string name="favorite_add">Add to favorites</string>
     <string name="favorite_remove">Remove from favorites</string>
     <string name="close_room_card">Close room card</string>
 
     <!-- Search and directory. -->
-    <string name="search_title">Search and directory</string>
-    <string name="rooms_count">%1$d rooms in directory</string>
-    <string name="search_label">Room name or number</string>
     <string name="search_hint">Number, part of a name or transliteration: 118, room 118</string>
     <string name="search_clear">Clear search</string>
     <string name="voice_search_start">Voice search</string>
@@ -190,13 +142,6 @@
     <string name="category_common">Common areas</string>
     <string name="category_entrance">Entrances and exits</string>
     <string name="category_other">Other rooms</string>
-    <string name="node_type_stairs">stairs</string>
-    <string name="node_type_elevator">elevator</string>
-    <string name="node_type_door">door</string>
-    <string name="node_type_entrance">entrance</string>
-    <string name="node_type_exit">exit</string>
-    <string name="node_type_junction">junction</string>
-    <string name="node_type_hallway">hallway</string>
     <string name="distance_unknown">—</string>
     <string name="all_floors">All floors</string>
     <string name="search_results_count">Rooms (%1$d)</string>
@@ -223,14 +168,10 @@
     <string name="move_folder_up">Move folder up</string>
     <string name="move_folder_down">Move folder down</string>
     <string name="delete_folder">Delete folder</string>
-    <string name="folder_deleted">Folder deleted. Its rooms were moved to “Unfiled”.</string>
-    <string name="folder_created">Folder created.</string>
-    <string name="folder_renamed">Folder name updated.</string>
     <string name="favorite_renamed">Name saved.</string>
     <string name="favorite_folder_updated">Favorite folder updated.</string>
     <string name="favorite_removed">Room removed from favorites</string>
     <string name="undo">Undo</string>
-    <string name="undo_delete">Deletion undone.</string>
     <string name="favorite_added_format">“%1$s” added to favorites.</string>
     <string name="favorite_removed_format">“%1$s” removed from favorites.</string>
     <string name="favorite_actions">Room actions</string>
@@ -267,22 +208,9 @@
     <string name="rename_folder_title">Rename folder</string>
     <string name="custom_name_title">Custom name</string>
     <string name="saved_route_name_title">Route name</string>
-    <string name="save_route_name_error">Enter a name for the saved route.</string>
-    <string name="import_success">Import complete: local entries were merged with the backup.</string>
-    <string name="export_success">Favorites backup saved.</string>
-    <string name="import_export_error">Could not import or export the backup.</string>
     <string name="history_error">Could not read history: %1$s</string>
-    <string name="remove_favorite_error">Could not remove room: %1$s</string>
-    <string name="remove_history_error">Could not delete history entry: %1$s</string>
-    <string name="remove_route_error">Could not delete route: %1$s</string>
     <string name="favorite_error">Could not update favorites: %1$s</string>
-    <string name="history_record_error">Could not record route history: %1$s</string>
-    <string name="catalog_load_error">Could not load the local directory: %1$s</string>
-    <string name="favorite_not_found">Room is no longer in the directory</string>
-    <string name="floor_point_label">Point on floor %1$d</string>
-    <string name="my_point_label">My location</string>
     <string name="route_length_recalculating">Distance will be recalculated</string>
-    <string name="backup_file_name">logos-favorites.json</string>
 
     <!-- Settings. -->
     <string name="settings_appearance">Appearance</string>
@@ -371,7 +299,6 @@
     <string name="settings_manual_fallback_description">A point less accurate than the threshold will not be shown</string>
     <string name="gps_caveat">GPS may be off by tens of metres indoors. Manual placement needs no permission.</string>
     <string name="settings_permissions">Location permissions</string>
-    <string name="settings_permissions_description">Manage GPS access in the app’s system settings</string>
     <string name="settings_history_enabled">Save route history</string>
     <string name="settings_history_description">History is stored in the local Room database</string>
     <string name="settings_history_limit">History entries · %1$d</string>
@@ -396,9 +323,7 @@
     <string name="reset_settings_title">Reset settings?</string>
     <string name="reset_settings_message">Preferences will return to their defaults. Favorites and history will not be deleted.</string>
     <string name="reset">Reset</string>
-    <string name="settings_saved_error">Could not save setting: %1$s</string>
     <string name="compass_unavailable">The compass sensor is not available on this device.</string>
-    <string name="route_recalculating">Recalculating route…</string>
     <string name="route_recalculated">Route updated for your position.</string>
 
     <!-- About screen and splash. -->
@@ -434,7 +359,6 @@
     <string name="onboarding_location_manual_note">If you decline, GPS mode will be unavailable, but you can mark your position on the map manually.</string>
     <string name="onboarding_allow_location">Allow location access</string>
     <string name="onboarding_map_title">Map controls</string>
-    <string name="onboarding_map_body">Pan the plan, zoom in on an area and open room cards.</string>
     <string name="onboarding_map_pan">👆 One finger — drag to pan the map.</string>
     <string name="onboarding_map_zoom">🤏 Two fingers — pinch to zoom in or out.</string>
     <string name="onboarding_map_tap">👆 Tap a room for details. To start inside it, choose “My place” and tap the room.</string>
@@ -467,8 +391,6 @@
     <string name="onboarding_permission_denied_title">GPS will not work</string>
     <string name="onboarding_permission_denied_body">Without permission, automatic positioning is unavailable. You can place the marker manually and grant permission later in app settings.</string>
     <string name="onboarding_open_settings">Open settings</string>
-    <string name="onboarding_permission_skipped">Manual positioning selected. You can grant permission later in Settings.</string>
-    <string name="tutorial_restarted">Tutorial started again.</string>
 
     <!-- Turn-by-turn navigation. -->
     <string name="step_start">Start moving from the starting point</string>
@@ -486,29 +408,18 @@
     <string name="step_stairs_down">Take the stairs down to floor %1$d</string>
     <string name="step_elevator">Take the elevator up to floor %1$d</string>
     <string name="step_arrival">You have arrived at “%1$s”!</string>
-    <string name="step_after_format">Then: %1$s</string>
-    <string name="distance_to_turn">to turn</string>
-    <string name="route_overview">Distance: %1$s • Time: about %2$d min • Completed: %3$d%%</string>
     <string name="start_navigation">Start route</string>
     <string name="previous_step">Previous step</string>
     <string name="route_step_count">Step %1$d of %2$d</string>
     <string name="route_preview_hint">Review the route, then tap “Start route” when you are ready.</string>
     <string name="route_show_steps">All steps</string>
     <string name="route_hide_steps">Collapse</string>
-    <string name="all_steps">All steps</string>
     <string name="next_step">Next step</string>
-    <string name="route_steps_title">Route steps</string>
-    <string name="route_progress_description">Route progress</string>
-    <string name="route_start_point">Starting point</string>
-    <string name="route_recalculating_deviation">You are off route. Recalculating…</string>
     <string name="route_no_steps">Turn-by-turn guidance is unavailable for this route.</string>
-    <string name="accessibility_route_progress">%1$d percent of the route completed</string>
 
     <!-- SVG assets, data and diagnostics. -->
     <string name="data_missing_floor">No floors are available in the project.</string>
     <string name="data_load_error">Could not load local data. Check navigation_graph.json and rooms.json.%1$s</string>
-    <string name="svg_floor_missing">The SVG map for “%1$s” is missing or unreadable.%2$s</string>
-    <string name="svg_check_file_viewbox">Check %1$s and its viewBox</string>
     <string name="settings_store_error">storage error</string>
     <string name="tts_unavailable">Speech synthesis is unavailable. Check that a voice is installed on the device.</string>
     <string name="tts_missing_russian">No Russian voice is installed. Install an offline voice in Android settings.</string>
@@ -534,9 +445,6 @@
     <string name="location_no_access">Location access is unavailable. Switch to manual mode.</string>
     <string name="location_start_error">Could not start location tracking: %1$s</string>
     <string name="location_check_device_settings">check the device settings</string>
-    <string name="data_invalid_floor_asset">Only SVG files are supported for floor %1$s.</string>
-    <string name="data_missing_viewbox">The required viewBox attribute is missing from %1$s.</string>
-    <string name="data_viewbox_mismatch">The viewBox of %1$s does not match the dimensions in the navigation graph.</string>
     <string name="data_empty_asset">assets/%1$s is empty or contains null.</string>
     <string name="data_open_asset_error">Could not open assets/%1$s: %2$s</string>
     <string name="data_parse_asset_error">Invalid format in assets/%1$s: %2$s</string>
@@ -563,22 +471,14 @@
     <string name="backup_version_unsupported">This favorites backup JSON version is not supported.</string>
     <string name="gps_manual_mode_switched">Switched to manual mode.</string>
     <string name="gps_provider_error_hint">%1$s %2$s</string>
-    <string name="route_no_graph_nodes">There are no navigation graph nodes on this floor yet.</string>
     <string name="route_summary_speech">Route to %1$s. The distance is about %2$d metres and the estimated time is %3$d minutes.</string>
-    <string name="share_location_not_marked">My location has not been marked yet.</string>
-    <string name="share_nearby_room">I am on %1$s, near “%2$s%3$s”.</string>
-    <string name="share_floor_only">I am on the college’s %1$s.</string>
-    <string name="share_point_on_floor">A point on %1$s</string>
     <string name="share_cabinet_number">, room %1$s</string>
     <string name="settings_save_error">Could not save the setting: %1$s</string>
-    <string name="route_recalculating_status">Recalculating route…</string>
     <string name="route_recalculated_status">Route updated for your current location.</string>
     <string name="transition_to_elevator_generic">Reach the transition node and take the elevator to floor %1$d.</string>
     <string name="transition_to_stairs_up_generic">Reach the transition node and take the stairs up to floor %1$d.</string>
     <string name="transition_to_stairs_down_generic">Reach the transition node and take the stairs down to floor %1$d.</string>
-    <string name="gps_out_of_route">You are more than 15 m off route. Recalculating…</string>
     <string name="history_start_point">A point on %1$s</string>
-    <string name="route_next_action_distance">Next action in %1$s</string>
     <string name="favorites_catalog_error">Could not load the local catalog: %1$s</string>
     <string name="favorite_remove_error">Could not remove the room: %1$s</string>
     <string name="history_remove_error">Could not remove the history entry: %1$s</string>
@@ -591,9 +491,11 @@
     <string name="backup_import_success">Import complete: local entries were merged with the backup.</string>
     <string name="saved_route_name_format">%1$s → %2$s</string>
     <string name="operation_failed">Could not complete the action. Please try again.</string>
-    <string name="svg_loader_invalid_asset">Map files must use the SVG format.</string>
-    <string name="svg_loader_error">Could not load SVG file %1$s: %2$s</string>
     <string name="unknown_viewmodel_class">Unknown ViewModel class: %1$s</string>
     <string name="backup_export_failed">Could not create the backup. Check access to the selected file.</string>
     <string name="backup_import_failed">Could not read the backup. Check file access and JSON format.</string>
+    <string name="route_panel_expand">Expand route panel</string>
+    <string name="route_panel_collapse">Collapse route panel</string>
+    <string name="route_remaining">%1$s left</string>
+    <string name="gps_accuracy_approximate">Approximate position: ±%1$d m accuracy (threshold %2$d m). Route guidance resumes once the signal improves.</string>
 </resources>

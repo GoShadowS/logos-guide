@@ -56,7 +56,10 @@ data class AppSettings(
     val fileLoggingEnabled: Boolean = false,
 ) {
     companion object {
-        const val BRAND_BLUE: Int = 0xFF245CE5.toInt()
-        const val PREVIOUS_BRAND_BLUE: Int = 0xFF2538F5.toInt()
+        /** Основной синий сайта logos-guide.ru. */
+        const val BRAND_BLUE: Int = 0xFF2158E0.toInt()
+        /** Прежние фирменные оттенки: сохранённые значения переводятся на актуальный синий. */
+        val LEGACY_BRAND_BLUES: Set<Int> = setOf(0xFF245CE5.toInt(), 0xFF2538F5.toInt())
+        val BRAND_BLUES: Set<Int> = LEGACY_BRAND_BLUES + BRAND_BLUE
     }
 }

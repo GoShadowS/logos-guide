@@ -83,11 +83,14 @@ class CanvasMapView @JvmOverloads constructor(
     private var animatedDashIntervals = FloatArray(2)
     private var lastFrameTime = 0L
     private var pendingCenter: MapPoint? = null
+    /** Положение маркера во время перетаскивания; в ViewModel передаётся только при отпускании пальца. */
+    private var dragPreview: PointF? = null
 
     var onManualPosition: ((Float, Float) -> Unit)? = null
     var onManualPositionInRoom: ((Room, Float, Float) -> Unit)? = null
     var onRoomTap: ((Room) -> Unit)? = null
     var onTapCoordinate: ((Double, Double) -> Unit)? = null
+    var onUserPan: (() -> Unit)? = null
 
     private val gridPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = 0x443858D8
@@ -116,11 +119,11 @@ class CanvasMapView @JvmOverloads constructor(
         style = Paint.Style.FILL
     }
     private val openDoorsBadgePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = 0xFFFFD267.toInt()
+        color = 0xFFFFC93D.toInt()
         style = Paint.Style.FILL
     }
     private val openDoorsStarPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = 0xFF0D1C3B.toInt()
+        color = 0xFF0F2547.toInt()
         style = Paint.Style.FILL
     }
     private val openDoorsStarPath = Path()
@@ -167,6 +170,7 @@ class CanvasMapView @JvmOverloads constructor(
         onManualPosition: (Float, Float) -> Unit,
         onRoomTap: (Room) -> Unit,
         onTapCoordinate: (Double, Double) -> Unit,
+        onUserPan: () -> Unit = {},
         manualPositionSelectionMode: Boolean = false,
         openDoorsRoomIds: Set<String> = emptySet(),
         onManualPositionInRoom: (Room, Float, Float) -> Unit = { _, x, y -> onManualPosition(x, y) },
@@ -215,6 +219,8 @@ class CanvasMapView @JvmOverloads constructor(
         this.onManualPositionInRoom = onManualPositionInRoom
         this.onRoomTap = onRoomTap
         this.onTapCoordinate = onTapCoordinate
+        this.onUserPan = onUserPan
+        if (positionChanged || locationModeChanged) dragPreview = null
         zoom = zoom.coerceIn(settings.minimumZoom, settings.maximumZoom)
         if (floorChanged) {
             zoom = 1f.coerceIn(settings.minimumZoom, settings.maximumZoom)
@@ -248,21 +254,11 @@ class CanvasMapView @JvmOverloads constructor(
         invalidate()
     }
 
-    fun resetCamera() {
-        zoom = 1f.coerceIn(settings.minimumZoom, settings.maximumZoom)
-        panX = 0f
-        panY = 0f
-        updateMatrix()
-        invalidate()
-    }
-
-    fun zoomLevel(): Float = zoom
-
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         val systemDark = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
         val darkTheme = settings.themeMode == ThemeMode.DARK || (settings.themeMode == ThemeMode.SYSTEM && systemDark)
-        canvas.drawColor(if (darkTheme) 0xFF07162E.toInt() else 0xFFF4F7FC.toInt())
+        canvas.drawColor(if (darkTheme) MAP_BACKGROUND_DARK else MAP_BACKGROUND_LIGHT)
         val currentFloor = floor
         if (currentFloor == null || width <= 0 || height <= 0) return
 
@@ -308,6 +304,18 @@ class CanvasMapView @JvmOverloads constructor(
             gestureDetector.onTouchEvent(event)
         } else if (event.pointerCount > 1) {
             movedSinceDown = true
+            dragPreview = null
+        }
+        when (event.actionMasked) {
+            MotionEvent.ACTION_UP -> dragPreview?.let { preview ->
+                dragPreview = null
+                onManualPosition?.invoke(preview.x, preview.y)
+                invalidate()
+            }
+            MotionEvent.ACTION_CANCEL -> if (dragPreview != null) {
+                dragPreview = null
+                invalidate()
+            }
         }
         return true
     }
@@ -319,8 +327,11 @@ class CanvasMapView @JvmOverloads constructor(
         val scaled = fitScale * zoom
         val baseLeft = (width - currentFloor.width * fitScale) / 2f
         val baseTop = (height - currentFloor.height * fitScale) / 2f
-        val rawTx = baseLeft * zoom + width / 2f * (1f - zoom) + panX - currentFloor.viewBoxX.toFloat() * scaled
-        val rawTy = baseTop * zoom + height / 2f * (1f - zoom) + panY - currentFloor.viewBoxY.toFloat() * scaled
+        val mapLeft = baseLeft * zoom + width / 2f * (1f - zoom)
+        val mapTop = baseTop * zoom + height / 2f * (1f - zoom)
+        clampPan(mapLeft, mapTop, currentFloor.width * scaled, currentFloor.height * scaled)
+        val rawTx = mapLeft - currentFloor.viewBoxX.toFloat() * scaled
+        val rawTy = mapTop - currentFloor.viewBoxY.toFloat() * scaled
         val rotation = if (settings.compassRotationEnabled) -compassHeadingDegrees else 0f
         val cosine: Float
         val sine: Float
@@ -334,8 +345,9 @@ class CanvasMapView @JvmOverloads constructor(
         }
         val centerX = width / 2f
         val centerY = height / 2f
-        val tx = centerX + cosine * (rawTx - centerX) - sine * (rawTy - centerY)
-        val ty = centerY + sine * (rawTx - centerX) + cosine * (rawTy - centerY)
+        // Сдвиг применяется после поворота: жест пальцем всегда двигает карту в ту же сторону на экране.
+        val tx = centerX + cosine * (rawTx - centerX) - sine * (rawTy - centerY) + panX
+        val ty = centerY + sine * (rawTx - centerX) + cosine * (rawTy - centerY) + panY
         matrixValues[0] = cosine * scaled
         matrixValues[1] = -sine * scaled
         matrixValues[2] = tx
@@ -347,6 +359,14 @@ class CanvasMapView @JvmOverloads constructor(
         matrixValues[8] = 1f
         mapMatrix.setValues(matrixValues)
         converter.refreshInverse()
+    }
+
+    /** Не даёт увести план за пределы экрана: на виду всегда остаётся заметная часть этажа. */
+    private fun clampPan(mapLeft: Float, mapTop: Float, mapWidth: Float, mapHeight: Float) {
+        val marginX = min(width * 0.5f, mapWidth * 0.5f)
+        val marginY = min(height * 0.5f, mapHeight * 0.5f)
+        panX = panX.coerceIn(marginX - mapWidth - mapLeft, width - marginX - mapLeft)
+        panY = panY.coerceIn(marginY - mapHeight - mapTop, height - marginY - mapTop)
     }
 
     private fun zoomAt(target: Float, focusX: Float, focusY: Float) {
@@ -607,24 +627,34 @@ class CanvasMapView @JvmOverloads constructor(
     }
 
     private fun drawUserMarker(canvas: Canvas, floor: FloorPlan, mapScale: Float) {
-        val point = userPosition?.takeIf { it.floor == floor.number } ?: return
-        if (settings.showAccuracyCircle && locationMode == LocationMode.GPS) {
-            val accuracy = accuracyMeters?.takeIf { it.isFinite() && it > 0f } ?: 0f
+        val preview = dragPreview
+        val point = if (preview != null && floor.number == userPosition?.floor) {
+            MapPoint(floor.number, preview.x, preview.y)
+        } else {
+            userPosition?.takeIf { it.floor == floor.number } ?: return
+        }
+        val accuracy = accuracyMeters?.takeIf { it.isFinite() && it > 0f }
+        val isApproximate = locationMode == LocationMode.GPS && accuracy != null && accuracy > settings.minimumAccuracyMeters
+        if (settings.showAccuracyCircle && locationMode == LocationMode.GPS && accuracy != null) {
             val radius = accuracy / floor.metersPerUnit.toFloat()
             if (radius > 0f) {
-                roomPaint.color = 0x331477F8
+                roomPaint.color = ACCURACY_FILL
                 canvas.drawCircle(point.x, point.y, radius, roomPaint)
-                debugPaint.color = 0x771477F8
+                debugPaint.color = ACCURACY_STROKE
                 debugPaint.strokeWidth = 1.2f * resources.displayMetrics.density / max(mapScale, 0.0001f)
                 canvas.drawCircle(point.x, point.y, radius, debugPaint)
             }
         }
         val radius = 11f * resources.displayMetrics.density / max(mapScale, 0.0001f)
-        canvas.drawCircle(point.x, point.y, radius * 1.28f, haloPaint)
-        roomPaint.color = if (locationMode == LocationMode.GPS) 0xFF1478F8.toInt() else 0xFF12A76A.toInt()
-        canvas.drawCircle(point.x, point.y, radius, roomPaint)
         haloPaint.color = Color.WHITE
-        val directionTarget = routeDirectionTarget
+        canvas.drawCircle(point.x, point.y, radius * 1.28f, haloPaint)
+        roomPaint.color = when {
+            locationMode == LocationMode.MANUAL -> MANUAL_MARKER_COLOR
+            isApproximate -> APPROXIMATE_MARKER_COLOR
+            else -> GPS_MARKER_COLOR
+        }
+        canvas.drawCircle(point.x, point.y, radius, roomPaint)
+        val directionTarget = routeDirectionTarget.takeIf { preview == null }
         if (directionTarget == null || !drawRouteDirectionArrow(canvas, point, directionTarget, radius)) {
             canvas.drawCircle(point.x, point.y, radius * 0.24f, haloPaint)
         }
@@ -661,7 +691,7 @@ class CanvasMapView @JvmOverloads constructor(
         val density = resources.displayMetrics.density
         val desiredScreenSize = (11f * resources.displayMetrics.scaledDensity * zoom).coerceIn(8f * density, 22f * density)
         textPaint.textSize = desiredScreenSize / max(mapScale, 0.0001f)
-        textPaint.color = 0xFF1D2741.toInt()
+        textPaint.color = 0xFF16233C.toInt()
         val padding = 3f * density / max(mapScale, 0.0001f)
         val textWidth = textPaint.measureText(text)
         val ascent = textPaint.ascent()
@@ -699,6 +729,7 @@ class CanvasMapView @JvmOverloads constructor(
 
         override fun onScaleBegin(detector: ScaleGestureDetector): Boolean {
             movedSinceDown = true
+            onUserPan?.invoke()
             focusPoint = converter.viewToSvg(detector.focusX, detector.focusY)
             return true
         }
@@ -736,12 +767,14 @@ class CanvasMapView @JvmOverloads constructor(
         override fun onScroll(first: MotionEvent?, current: MotionEvent, distanceX: Float, distanceY: Float): Boolean {
             movedSinceDown = true
             if (pointerOnMarker && locationMode == LocationMode.MANUAL) {
-                converter.viewToSvg(current.x, current.y)?.let { onManualPosition?.invoke(it.x, it.y) }
+                dragPreview = converter.viewToSvg(current.x, current.y)
+                invalidate()
             } else {
                 panX -= distanceX
                 panY -= distanceY
                 updateMatrix()
                 invalidate()
+                onUserPan?.invoke()
             }
             return true
         }
@@ -784,6 +817,13 @@ class CanvasMapView @JvmOverloads constructor(
 
     private companion object {
         const val MARKER_DRAG_RADIUS_DP = 34f
+        const val MAP_BACKGROUND_LIGHT = 0xFFEEF2FA.toInt()
+        const val MAP_BACKGROUND_DARK = 0xFF040B1D.toInt()
+        const val GPS_MARKER_COLOR = 0xFF2158E0.toInt()
+        const val APPROXIMATE_MARKER_COLOR = 0xFF7C8CA6.toInt()
+        const val MANUAL_MARKER_COLOR = 0xFF12A76A.toInt()
+        const val ACCURACY_FILL = 0x2A2158E0
+        const val ACCURACY_STROKE = 0x772158E0
         const val ROUTE_DIRECTION_EPSILON_SQUARED = 0.0001f
         val LOW_QUALITY_DRAW_FILTER = PaintFlagsDrawFilter(Paint.ANTI_ALIAS_FLAG, 0)
         val MEDIUM_QUALITY_DRAW_FILTER = PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG)
