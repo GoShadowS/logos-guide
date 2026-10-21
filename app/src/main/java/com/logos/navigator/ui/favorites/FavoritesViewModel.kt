@@ -134,7 +134,7 @@ class FavoritesViewModel(application: Application) : AndroidViewModel(applicatio
         repository.moveFavorite(roomId, direction)
     }
 
-    fun createCategory(name: String, colorArgb: Int = 0xFF3157F6.toInt()) = launchOperation(R.string.category_created) {
+    fun createCategory(name: String, colorArgb: Int = 0xFF2158E0.toInt()) = launchOperation(R.string.category_created) {
         repository.createCategory(name, "folder", colorArgb)
     }
 

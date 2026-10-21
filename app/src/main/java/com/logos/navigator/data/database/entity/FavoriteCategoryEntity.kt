@@ -10,6 +10,6 @@ data class FavoriteCategoryEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val name: String,
     val iconName: String = "folder",
-    val colorArgb: Int = 0xFF3157F6.toInt(),
+    val colorArgb: Int = 0xFF2158E0.toInt(),
     val sortOrder: Int = 0,
 )

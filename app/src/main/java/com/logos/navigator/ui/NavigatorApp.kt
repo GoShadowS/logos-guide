@@ -105,9 +105,12 @@ fun NavigatorApp(viewModel: MainViewModel) {
             favoritesViewModel.clearMessage()
         }
     }
-    LaunchedEffect(state.message, currentRoute) {
+    // На планшете карта открыта рядом с поиском и избранным: там сообщение покажет MapScreen.
+    val mapShowsMessages = currentRoute == ROUTE_MAP ||
+        (isTablet && (currentRoute == ROUTE_SEARCH || currentRoute == ROUTE_FAVORITES))
+    LaunchedEffect(state.message, mapShowsMessages) {
         val message = state.message ?: return@LaunchedEffect
-        if (currentRoute != ROUTE_MAP) {
+        if (!mapShowsMessages) {
             rootSnackbarHostState.showSnackbar(message)
             viewModel.clearMessage()
         }
@@ -475,4 +478,4 @@ private const val ROUTE_SEARCH = "search"
 private const val ROUTE_SETTINGS = "settings"
 private const val ROUTE_ABOUT = "about"
 private const val SEARCH_ALL_CATEGORIES = "all"
-private const val SPLASH_DURATION_MS = 1_800L
+private const val SPLASH_DURATION_MS = 900L

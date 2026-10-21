@@ -2,7 +2,6 @@
 <resources>
     <!-- Название приложения. -->
     <string name="app_name">ЛОГОС: Путеводитель</string>
-    <string name="app_tagline">Навигация по колледжу «Логос»</string>
 
     <!-- Общие элементы интерфейса. -->
     <string name="nav_map">Карта</string>
@@ -14,19 +13,15 @@
     <string name="cancel">Отмена</string>
     <string name="save">Сохранить</string>
     <string name="delete">Удалить</string>
-    <string name="edit">Изменить</string>
     <string name="continue_label">Далее</string>
     <string name="skip">Пропустить</string>
     <string name="retry">Повторить</string>
     <string name="loading">Загрузка…</string>
     <string name="loading_data">Загружаем карты и каталог…</string>
-    <string name="loading_map">Загружаем план этажа…</string>
     <string name="unknown_error">Неизвестная ошибка</string>
-    <string name="no_description">Описание отсутствует</string>
     <string name="floor_number_format">%1$d-й этаж</string>
     <string name="floor_title_format">Этаж %1$d</string>
     <string name="cabinet_number_format">Каб. %1$s</string>
-    <string name="minutes_format">около %1$d мин</string>
     <string name="meters_format">≈ %1$d м</string>
     <string name="kilometers_format">≈ %1$.1f км</string>
     <string name="steps_format">≈ %1$d шаг.</string>
@@ -56,20 +51,13 @@
     <string name="gps_permission_title">Разрешить геопозицию?</string>
     <string name="gps_permission_rationale">GPS-режим использует службы геолокации Android, чтобы приблизительно показать положение на плане. Внутри здания точность может быть низкой; ручной режим доступен без разрешений.</string>
     <string name="gps_permission_continue">Продолжить</string>
-    <string name="gps_enable_title">Включите геолокацию</string>
     <string name="gps_enable_message">Службы геолокации устройства выключены. Включите их, чтобы использовать GPS.</string>
     <string name="gps_enable_button">Включить GPS</string>
     <string name="gps_retry">Повторить GPS</string>
-    <string name="gps_use_manual">Перейти вручную</string>
-    <string name="gps_settings_title">Разрешения геолокации</string>
-    <string name="gps_settings_description">Откройте системные настройки приложения, чтобы выдать или отозвать доступ к геопозиции.</string>
-    <string name="open_app_settings">Настройки приложения</string>
-    <string name="open_location_settings">Настройки геолокации</string>
     <string name="my_location">Моё место</string>
     <string name="quick_nearest_restroom">Ближайший туалет</string>
     <string name="quick_nearest_stairs">Ближайшая лестница</string>
     <string name="quick_actions">Быстрые действия</string>
-    <string name="quick_actions_description">Туалет, лестница или отметка места</string>
     <string name="quick_open_doors">Площадки дня открытых дверей</string>
     <string name="manual_place_location">Указать место</string>
     <string name="manual_move_location">Переместить точку</string>
@@ -91,34 +79,20 @@
     <string name="quick_action_destination_not_found">Не удалось найти доступный маршрут до ближайшего пункта.</string>
     <string name="route_start_in_restricted_area">Точка старта находится в закрытой зоне. Переместите её в доступный коридор.</string>
     <string name="room_route_unavailable">Маршрут к «%1$s» пока не настроен: нужно подтвердить его геометрию или вход.</string>
-    <string name="center_map">К моей точке</string>
     <string name="zoom_in">Увеличить карту</string>
     <string name="zoom_out">Уменьшить карту</string>
-    <string name="floor_select">Выбор этажа</string>
-    <string name="map_loading_svg">Загружаем SVG-план этажа…</string>
-    <string name="map_render_error">Не удалось подготовить план этажа. Коснитесь, чтобы повторить.</string>
     <string name="map_load_error_title">Не удалось открыть навигационные данные</string>
-    <string name="map_load_error_message">Проверьте локальные файлы navigation_graph.json и rooms.json.</string>
-    <string name="floor_map_error_title">Карта этажа недоступна</string>
-    <string name="floor_map_error_message">SVG-карта этажа «%1$s» отсутствует или не читается. Проверьте файл %2$s и его viewBox.</string>
     <string name="manual_start_hint">Сначала отметьте «Я здесь» на карте или включите GPS.</string>
     <string name="manual_position_required">Сначала отметьте своё положение на карте.</string>
     <string name="manual_position_outside_map">Точку можно поставить только внутри помещений или коридоров колледжа.</string>
     <string name="location_on_other_floor">Ваш маркер находится на %1$d-м этаже. Откройте этот этаж, чтобы увидеть его.</string>
-    <string name="no_location_to_center">Сначала отметьте своё положение на плане.</string>
-    <string name="no_graph_nodes">На этом этаже пока нет узлов навигационного графа.</string>
     <string name="route_not_found">Маршрут не найден. Проверьте связи коридоров, лестниц и лифта в navigation_graph.json.</string>
-    <string name="transition_up_stairs">Дойдите до узла «%1$s» и поднимитесь по лестнице на %2$d-й этаж.</string>
-    <string name="transition_down_stairs">Дойдите до узла «%1$s» и спуститесь по лестнице на %2$d-й этаж.</string>
-    <string name="transition_elevator">Дойдите до узла «%1$s» и воспользуйтесь лифтом, чтобы попасть на %2$d-й этаж.</string>
     <string name="transition_after_floor">После перехода на %1$d-й этаж маршрут продолжается. GPS не определяет этаж — подтвердите его, если включён GPS.</string>
     <string name="confirm_floor">Я на этом этаже</string>
     <string name="gps_floor_no_fix">Нет свежей GPS-точки. Дождитесь измерения или установите положение вручную на выбранном этаже.</string>
     <string name="floor_not_found">Не удалось найти выбранный этаж в локальных данных.</string>
     <string name="arrival_message">Вы рядом с пунктом назначения: %1$s.</string>
-    <string name="coordinate_format">SVG viewBox: x=%1$.2f, y=%2$.2f</string>
     <string name="map_coordinates_description">Интерактивная векторная карта этажа</string>
-    <string name="map_tap_description">План этажа. Нажмите, чтобы отметить своё положение</string>
     <string name="coordinate_overlay_format">x=%1$.2f  y=%2$.2f</string>
     <string name="share_location">Поделиться местоположением</string>
     <string name="share_room">Поделиться помещением</string>
@@ -128,16 +102,8 @@
     <string name="share_near_room">Я нахожусь на %1$s, рядом с помещением «%2$s%3$s».</string>
     <string name="share_floor">Я нахожусь на %1$s колледжа.</string>
     <string name="share_location_prefix">%1$s — %2$s</string>
-    <string name="share_no_location">Местоположение пока не отмечено.</string>
-    <string name="share_success">Текст скопирован или передан в системное меню.</string>
-    <string name="share_failed">Не удалось открыть меню отправки.</string>
     <string name="menu">Меню</string>
-    <string name="search_rooms">Поиск помещений</string>
-    <string name="open_favorites">Открыть избранное</string>
     <string name="about_app">О приложении</string>
-    <string name="room_details">Информация о помещении</string>
-    <string name="room_not_found">Пункт назначения больше не найден в локальном каталоге.</string>
-    <string name="route_to_format">Маршрут до %1$s</string>
     <string name="route_sheet_eyebrow">Внутренний маршрут</string>
     <string name="route_destination_room">Кабинет %1$s</string>
     <string name="route_room_floor_detail">%1$s · %2$s</string>
@@ -146,34 +112,20 @@
     <string name="route_card_no_path">Путь пока не рассчитан. Проверьте стартовую точку и доступность маршрута.</string>
     <string name="route_choose_start">Указать точку старта на карте</string>
     <string name="change_start_location">Изменить точку старта</string>
-    <string name="destination_format">Пункт назначения: %1$s</string>
-    <string name="route_distance_time">%1$s · около %2$d мин</string>
     <string name="start_route">Проложить маршрут</string>
     <string name="cancel_route">Отменить маршрут</string>
     <string name="save_route">Сохранить маршрут</string>
     <string name="share_button">Поделиться</string>
     <string name="share_room_button">Поделиться помещением</string>
-    <string name="route_destination_floor">%1$s · %2$s</string>
-    <string name="how_to_start">Как начать</string>
-    <string name="start_hint">Выберите GPS или отметьте своё положение на плане, затем найдите помещение через поиск или каталог.</string>
-    <string name="position_set">Точка «Я здесь» установлена</string>
-    <string name="choose_destination_hint">Выберите кабинет на плане или откройте каталог помещений.</string>
-    <string name="quick_favorite_cabinet">Каб. %1$s</string>
-    <string name="favorite_star_add">Добавить в избранное</string>
-    <string name="favorite_star_remove">Убрать из избранного</string>
     <string name="room_number_floor_category">%1$s · %2$s · %3$s</string>
 
     <!-- Карточка помещения. -->
     <string name="room_floor_category">%1$s · %2$s · %3$s</string>
-    <string name="route_button">Проложить маршрут</string>
     <string name="favorite_add">Добавить в избранное</string>
     <string name="favorite_remove">Убрать из избранного</string>
     <string name="close_room_card">Закрыть карточку помещения</string>
 
     <!-- Поиск и каталог. -->
-    <string name="search_title">Поиск и каталог</string>
-    <string name="rooms_count">%1$d помещений в справочнике</string>
-    <string name="search_label">Название или номер кабинета</string>
     <string name="search_hint">Номер, часть названия или транслитерация: 118, каб 118, kab 118</string>
     <string name="search_clear">Очистить поиск</string>
     <string name="voice_search_start">Голосовой поиск</string>
@@ -190,13 +142,6 @@
     <string name="category_common">Общие помещения</string>
     <string name="category_entrance">Входы и выходы</string>
     <string name="category_other">Другие помещения</string>
-    <string name="node_type_stairs">лестница</string>
-    <string name="node_type_elevator">лифт</string>
-    <string name="node_type_door">дверь</string>
-    <string name="node_type_entrance">вход</string>
-    <string name="node_type_exit">выход</string>
-    <string name="node_type_junction">перекрёсток</string>
-    <string name="node_type_hallway">коридор</string>
     <string name="distance_unknown">—</string>
     <string name="all_floors">Все этажи</string>
     <string name="search_results_count">Помещения (%1$d)</string>
@@ -223,14 +168,10 @@
     <string name="move_folder_up">Переместить папку выше</string>
     <string name="move_folder_down">Переместить папку ниже</string>
     <string name="delete_folder">Удалить папку</string>
-    <string name="folder_deleted">Папка удалена. Помещения перемещены в «Без папки».</string>
-    <string name="folder_created">Папка создана.</string>
-    <string name="folder_renamed">Название папки обновлено.</string>
     <string name="favorite_renamed">Название сохранено.</string>
     <string name="favorite_folder_updated">Папка избранного обновлена.</string>
     <string name="favorite_removed">Помещение удалено из избранного</string>
     <string name="undo">Отменить</string>
-    <string name="undo_delete">Удаление отменено.</string>
     <string name="favorite_added_format">«%1$s» добавлено в избранное.</string>
     <string name="favorite_removed_format">«%1$s» удалено из избранного.</string>
     <string name="favorite_actions">Действия с помещением</string>
@@ -267,22 +208,9 @@
     <string name="rename_folder_title">Переименовать папку</string>
     <string name="custom_name_title">Своё название</string>
     <string name="saved_route_name_title">Название маршрута</string>
-    <string name="save_route_name_error">Укажите название сохранённого маршрута.</string>
-    <string name="import_success">Импорт завершён: локальные записи объединены с резервной копией.</string>
-    <string name="export_success">Резервная копия избранного сохранена.</string>
-    <string name="import_export_error">Не удалось выполнить импорт или экспорт.</string>
     <string name="history_error">Не удалось прочитать историю: %1$s</string>
-    <string name="remove_favorite_error">Не удалось удалить помещение: %1$s</string>
-    <string name="remove_history_error">Не удалось удалить запись истории: %1$s</string>
-    <string name="remove_route_error">Не удалось удалить маршрут: %1$s</string>
     <string name="favorite_error">Не удалось изменить избранное: %1$s</string>
-    <string name="history_record_error">Не удалось записать историю маршрута: %1$s</string>
-    <string name="catalog_load_error">Не удалось загрузить локальный каталог: %1$s</string>
-    <string name="favorite_not_found">Помещение удалено из каталога</string>
-    <string name="floor_point_label">Точка на %1$d-м этаже</string>
-    <string name="my_point_label">Моя точка</string>
     <string name="route_length_recalculating">Длина будет пересчитана</string>
-    <string name="backup_file_name">logos-favorites.json</string>
 
     <!-- Настройки. -->
     <string name="settings_appearance">Внешний вид</string>
@@ -371,7 +299,6 @@
     <string name="settings_manual_fallback_description">Точка с погрешностью выше порога не будет показана</string>
     <string name="gps_caveat">GPS внутри здания может ошибаться на десятки метров. Ручная точка доступна без разрешений.</string>
     <string name="settings_permissions">Разрешения геолокации</string>
-    <string name="settings_permissions_description">Управление доступом GPS в системных настройках приложения</string>
     <string name="settings_history_enabled">Сохранять историю маршрутов</string>
     <string name="settings_history_description">История хранится в локальной базе Room</string>
     <string name="settings_history_limit">Записей истории · %1$d</string>
@@ -396,9 +323,7 @@
     <string name="reset_settings_title">Сбросить настройки?</string>
     <string name="reset_settings_message">Предпочтения вернутся к значениям по умолчанию. Избранное и история не удаляются.</string>
     <string name="reset">Сбросить</string>
-    <string name="settings_saved_error">Не удалось сохранить настройку: %1$s</string>
     <string name="compass_unavailable">Датчик компаса недоступен на этом устройстве.</string>
-    <string name="route_recalculating">Пересчитываем маршрут…</string>
     <string name="route_recalculated">Маршрут обновлён с учётом вашего положения.</string>
 
     <!-- Экран «О приложении» и заставка. -->
@@ -434,7 +359,6 @@
     <string name="onboarding_location_manual_note">Если вы откажете, GPS-режим будет недоступен, но вы сможете вручную отметить себя на карте.</string>
     <string name="onboarding_allow_location">Разрешить доступ</string>
     <string name="onboarding_map_title">Управление картой</string>
-    <string name="onboarding_map_body">Перемещайтесь по плану, увеличивайте нужные участки и открывайте карточки кабинетов.</string>
     <string name="onboarding_map_pan">👆 Один палец — перетаскивание для панорамирования карты.</string>
     <string name="onboarding_map_zoom">🤏 Два пальца — щипок для приближения и отдаления.</string>
     <string name="onboarding_map_tap">👆 Нажмите на кабинет, чтобы открыть сведения. Чтобы начать изнутри, выберите «Моё место» и нажмите на кабинет.</string>
@@ -467,8 +391,6 @@
     <string name="onboarding_permission_denied_title">GPS не будет работать</string>
     <string name="onboarding_permission_denied_body">Без разрешения автоматическое определение местоположения недоступно. Вы сможете ставить точку вручную и при желании выдать разрешение позже в настройках приложения.</string>
     <string name="onboarding_open_settings">Открыть настройки</string>
-    <string name="onboarding_permission_skipped">Вы выбрали ручное определение местоположения. Разрешение можно выдать позже в настройках.</string>
-    <string name="tutorial_restarted">Обучение запущено заново.</string>
 
     <!-- Пошаговая навигация. -->
     <string name="step_start">Начните движение от точки старта</string>
@@ -486,29 +408,18 @@
     <string name="step_stairs_down">Спуститесь на %1$d-й этаж по лестнице</string>
     <string name="step_elevator">Воспользуйтесь лифтом и поднимитесь на %1$d-й этаж</string>
     <string name="step_arrival">Вы прибыли в «%1$s»!</string>
-    <string name="step_after_format">Затем: %1$s</string>
-    <string name="distance_to_turn">до поворота</string>
-    <string name="route_overview">Расстояние: %1$s • Время: около %2$d мин • Пройдено: %3$d%%</string>
     <string name="start_navigation">Начать маршрут</string>
     <string name="previous_step">Предыдущий шаг</string>
     <string name="route_step_count">Шаг %1$d из %2$d</string>
     <string name="route_preview_hint">Проверьте путь и нажмите «Начать маршрут», когда будете готовы.</string>
     <string name="route_show_steps">Все шаги</string>
     <string name="route_hide_steps">Свернуть</string>
-    <string name="all_steps">Все шаги</string>
     <string name="next_step">Следующий шаг</string>
-    <string name="route_steps_title">Шаги маршрута</string>
-    <string name="route_progress_description">Прогресс маршрута</string>
-    <string name="route_start_point">Точка старта</string>
-    <string name="route_recalculating_deviation">Вы отклонились от маршрута. Пересчитываем путь…</string>
     <string name="route_no_steps">Пошаговые подсказки недоступны для этого маршрута.</string>
-    <string name="accessibility_route_progress">Пройдено %1$d процентов маршрута</string>
 
     <!-- SVG, данные и диагностика. -->
     <string name="data_missing_floor">В проекте нет доступных этажей.</string>
     <string name="data_load_error">Не удалось загрузить локальные данные. Проверьте navigation_graph.json и rooms.json.%1$s</string>
-    <string name="svg_floor_missing">SVG-карта этажа «%1$s» не найдена или не читается.%2$s</string>
-    <string name="svg_check_file_viewbox">Проверьте файл %1$s и его viewBox</string>
     <string name="settings_store_error">ошибка хранилища</string>
     <string name="tts_unavailable">Синтез речи недоступен. Проверьте установленный на устройстве голос.</string>
     <string name="tts_missing_russian">На устройстве нет русского голоса. Установите офлайн-голос в настройках Android.</string>
@@ -534,9 +445,6 @@
     <string name="location_no_access">Нет доступа к геопозиции. Переключитесь на ручной режим.</string>
     <string name="location_start_error">Не удалось запустить геопозицию: %1$s</string>
     <string name="location_check_device_settings">проверьте настройки устройства</string>
-    <string name="data_invalid_floor_asset">Для этажа %1$s разрешены только SVG-файлы.</string>
-    <string name="data_missing_viewbox">В файле %1$s отсутствует обязательный атрибут viewBox.</string>
-    <string name="data_viewbox_mismatch">viewBox карты %1$s не совпадает с размерами, указанными в навигационном графе.</string>
     <string name="data_empty_asset">Файл assets/%1$s пустой или содержит null.</string>
     <string name="data_open_asset_error">Не удалось открыть assets/%1$s: %2$s</string>
     <string name="data_parse_asset_error">Ошибка формата assets/%1$s: %2$s</string>
@@ -563,22 +471,14 @@
     <string name="backup_version_unsupported">Версия JSON-файла избранного не поддерживается.</string>
     <string name="gps_manual_mode_switched">Переключён ручной режим.</string>
     <string name="gps_provider_error_hint">%1$s %2$s</string>
-    <string name="route_no_graph_nodes">На этом этаже пока нет узлов навигационного графа.</string>
     <string name="route_summary_speech">Маршрут до %1$s. Длина около %2$d метров, примерное время — %3$d минут.</string>
-    <string name="share_location_not_marked">Моё местоположение пока не отмечено.</string>
-    <string name="share_nearby_room">Я нахожусь на %1$s, рядом с помещением «%2$s%3$s».</string>
-    <string name="share_floor_only">Я нахожусь на %1$s колледжа.</string>
-    <string name="share_point_on_floor">Точка на %1$s</string>
     <string name="share_cabinet_number">, каб. %1$s</string>
     <string name="settings_save_error">Не удалось сохранить настройку: %1$s</string>
-    <string name="route_recalculating_status">Пересчитываем маршрут…</string>
     <string name="route_recalculated_status">Маршрут обновлён с учётом вашего положения.</string>
     <string name="transition_to_elevator_generic">Дойдите до узла перехода и воспользуйтесь лифтом, чтобы попасть на %1$d-й этаж.</string>
     <string name="transition_to_stairs_up_generic">Дойдите до узла перехода и поднимитесь по лестнице на %1$d-й этаж.</string>
     <string name="transition_to_stairs_down_generic">Дойдите до узла перехода и спуститесь по лестнице на %1$d-й этаж.</string>
-    <string name="gps_out_of_route">Вы отклонились от маршрута более чем на 15 м. Пересчитываем путь…</string>
     <string name="history_start_point">Точка на %1$s</string>
-    <string name="route_next_action_distance">Следующее действие через %1$s</string>
     <string name="favorites_catalog_error">Не удалось загрузить локальный каталог: %1$s</string>
     <string name="favorite_remove_error">Не удалось удалить помещение: %1$s</string>
     <string name="history_remove_error">Не удалось удалить запись истории: %1$s</string>
@@ -591,9 +491,11 @@
     <string name="backup_import_success">Импорт завершён: локальные записи объединены с резервной копией.</string>
     <string name="saved_route_name_format">%1$s → %2$s</string>
     <string name="operation_failed">Не удалось завершить действие. Повторите попытку.</string>
-    <string name="svg_loader_invalid_asset">Карты должны быть файлами SVG.</string>
-    <string name="svg_loader_error">Не удалось загрузить SVG-файл %1$s: %2$s</string>
     <string name="unknown_viewmodel_class">Неизвестный класс ViewModel: %1$s</string>
     <string name="backup_export_failed">Не удалось создать резервную копию. Проверьте доступ к выбранному файлу.</string>
     <string name="backup_import_failed">Не удалось прочитать резервную копию. Проверьте доступ к файлу и формат JSON.</string>
+    <string name="route_panel_expand">Развернуть панель маршрута</string>
+    <string name="route_panel_collapse">Свернуть панель маршрута</string>
+    <string name="route_remaining">Осталось %1$s</string>
+    <string name="gps_accuracy_approximate">Положение приблизительное: погрешность ±%1$d м (порог %2$d м). Подсказки маршрута продолжатся, когда сигнал уточнится.</string>
 </resources>

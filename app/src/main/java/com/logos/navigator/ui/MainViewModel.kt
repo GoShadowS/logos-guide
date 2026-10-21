@@ -23,6 +23,7 @@ import com.logos.navigator.data.model.GeoCoordinate
 import com.logos.navigator.data.model.IndoorUiState
 import com.logos.navigator.data.model.RouteAction
 import com.logos.navigator.data.model.RouteInstruction
+import com.logos.navigator.data.model.RoutePreference
 import com.logos.navigator.data.model.SpeechLanguage
 import com.logos.navigator.data.model.LocationMode
 import com.logos.navigator.data.model.MapPoint
@@ -33,6 +34,7 @@ import com.logos.navigator.data.model.SvgPoint
 import com.logos.navigator.data.repository.FavoritesRepository
 import com.logos.navigator.data.repository.IndoorRepository
 import com.logos.navigator.navigation.GeoReferencer
+import com.logos.navigator.navigation.PositionSmoother
 import com.logos.navigator.navigation.RouteProgressCalculator
 import com.logos.navigator.navigation.RouteStepGenerator
 import com.logos.navigator.navigation.SiteIndoorRouter
@@ -81,6 +83,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     /** Если ручную точку поставили внутри комнаты, маршрут начинается у её двери. */
     private var manualStartRoomId: String? = null
     private var lastRouteRecalculationAt = 0L
+    private var consecutiveOffRouteFixes = 0
+    private val positionSmoother = PositionSmoother()
     private var routeSession = 0L
     private var recordedRouteSession = -1L
     private var announcedRouteSession = -1L
@@ -296,6 +300,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun setLocationMode(mode: LocationMode) {
         updateSettings { it.copy(lastLocationMode = mode) }
+        positionSmoother.reset()
+        consecutiveOffRouteFixes = 0
         if (mode == LocationMode.MANUAL) {
             gpsTimeoutJob?.cancel()
             gpsTimeoutJob = null
@@ -438,38 +444,50 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             return
         }
         val settings = _state.value.settings
-        if (accuracy != null && accuracy > settings.minimumAccuracyMeters) {
+        val isPrecise = accuracy == null || accuracy <= settings.minimumAccuracyMeters
+        if (!isPrecise && settings.switchToManualOnPoorGps) {
+            val warning = appContext.getString(
+                R.string.gps_accuracy_too_low,
+                accuracy?.toInt() ?: 0,
+                settings.minimumAccuracyMeters.toInt(),
+            )
+            _state.update { it.copy(userPosition = null, gpsAccuracyMeters = accuracy, gpsWarning = warning, isGpsActive = true) }
+            setLocationMode(LocationMode.MANUAL)
+            showMessage(
+                appContext.getString(
+                    R.string.gps_provider_error_hint,
+                    warning,
+                    appContext.getString(R.string.gps_manual_mode_switched),
+                ),
+            )
+            return
+        }
+        val displayLimit = maxOf(settings.minimumAccuracyMeters * POOR_FIX_DISPLAY_FACTOR, POOR_FIX_DISPLAY_LIMIT_METERS)
+        if (accuracy != null && accuracy > displayLimit) {
+            // Такая точка может оказаться в любом конце здания: не показываем её, чтобы не запутать.
+            positionSmoother.reset()
             val warning = appContext.getString(
                 R.string.gps_accuracy_too_low,
                 accuracy.toInt(),
                 settings.minimumAccuracyMeters.toInt(),
             )
             _state.update { it.copy(userPosition = null, gpsAccuracyMeters = accuracy, gpsWarning = warning, isGpsActive = true) }
-            if (settings.switchToManualOnPoorGps) {
-                setLocationMode(LocationMode.MANUAL)
-                showMessage(
-                    appContext.getString(
-                        R.string.gps_provider_error_hint,
-                        warning,
-                        appContext.getString(R.string.gps_manual_mode_switched),
-                    ),
-                )
-            }
             return
         }
-        if (!SiteIndoorRouter.isInsideCollege(floor.number, svgPoint.first, svgPoint.second, _state.value.rooms)) {
+        val (smoothedX, smoothedY) = positionSmoother.update(
+            floor = floorNumber,
+            x = svgPoint.first,
+            y = svgPoint.second,
+            accuracyMeters = accuracy?.toDouble(),
+            timestampMs = SystemClock.elapsedRealtime(),
+            metersPerUnit = floor.metersPerUnit,
+        )
+        if (!SiteIndoorRouter.isInsideCollege(floor.number, smoothedX, smoothedY, _state.value.rooms)) {
+            // Маршрут сохраняется: точка часто «выпадает» за стену на несколько метров и затем возвращается.
             _state.update {
                 it.copy(
                     userPosition = null,
                     isManualPositionConfirmed = false,
-                    route = null,
-                    routeOriginPosition = null,
-                    isNavigationStarted = false,
-                    routeSteps = emptyList(),
-                    currentRouteStepIndex = 0,
-                    routeProgress = 0f,
-                    routeDistanceMeters = null,
-                    routeMinutes = null,
                     gpsAccuracyMeters = accuracy,
                     gpsWarning = appContext.getString(R.string.gps_position_outside_map),
                     isGpsActive = true,
@@ -477,9 +495,17 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
             return
         }
-        val point = MapPoint(floor = floorNumber, x = svgPoint.first.toFloat(), y = svgPoint.second.toFloat())
+        val point = MapPoint(floor = floorNumber, x = smoothedX.toFloat(), y = smoothedY.toFloat())
         lastPositionFloor = floorNumber
-        val warning = if (accuracy == null) appContext.getString(R.string.gps_accuracy_missing) else null
+        val warning = when {
+            accuracy == null -> appContext.getString(R.string.gps_accuracy_missing)
+            !isPrecise -> appContext.getString(
+                R.string.gps_accuracy_approximate,
+                accuracy?.toInt() ?: 0,
+                settings.minimumAccuracyMeters.toInt(),
+            )
+            else -> null
+        }
         _state.update {
             it.copy(
                 userPosition = point,
@@ -489,6 +515,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 isGpsActive = true,
             )
         }
+        // Приблизительная точка только показывается: прогресс, пересчёт и прибытие ждут точного сигнала.
+        if (!isPrecise) return
         _state.value.destination?.let { destination ->
             val latest = _state.value
             when {
@@ -496,7 +524,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 latest.route == null && latest.settings.automaticRouteOnSelection -> buildRoute(destination)
             }
         }
-        maybeNotifyArrival(point, accuracy)
+        _state.value.userPosition?.let { maybeNotifyArrival(it, accuracy) }
     }
 
     private fun onGpsAvailability(isAvailable: Boolean) {
@@ -545,6 +573,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
         gpsFloorNumber = floorNumber
         lastPositionFloor = floorNumber
+        positionSmoother.reset()
         updateGpsPosition(location, floorNumber)
     }
 
@@ -837,9 +866,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         if (!current.isNavigationStarted || current.locationMode != LocationMode.MANUAL || current.routeSteps.isEmpty()) return
         val nextIndex = (current.currentRouteStepIndex + 1).coerceAtMost(current.routeSteps.lastIndex)
         if (nextIndex == current.currentRouteStepIndex) return
-        val step = current.routeSteps[nextIndex]
-        updateManualRouteStep(current, nextIndex, maxOf(current.routeProgress, step.progress))
+        updateManualRouteStep(current, nextIndex)
         announceCurrentRouteStep()
+        if (nextIndex == current.routeSteps.lastIndex) notifyArrival(current.destination)
     }
 
     /** Возвращает ручное пошаговое ведение к предыдущей подсказке. */
@@ -848,20 +877,28 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         if (!current.isNavigationStarted || current.locationMode != LocationMode.MANUAL || current.routeSteps.isEmpty()) return
         val previousIndex = (current.currentRouteStepIndex - 1).coerceAtLeast(0)
         if (previousIndex == current.currentRouteStepIndex) return
-        val step = current.routeSteps[previousIndex]
-        updateManualRouteStep(current, previousIndex, step.progress)
+        if (current.currentRouteStepIndex == current.routeSteps.lastIndex) arrivalRoomId = null
+        updateManualRouteStep(current, previousIndex)
         announceCurrentRouteStep()
     }
 
-    private fun updateManualRouteStep(current: IndoorUiState, stepIndex: Int, progress: Float) {
+    /** Ставит маркер в точку, где начинается выбранная подсказка: конец предыдущего шага или старт маршрута. */
+    private fun updateManualRouteStep(current: IndoorUiState, stepIndex: Int) {
         val step = current.routeSteps.getOrNull(stepIndex) ?: return
-        val targetNode = step.targetNodeId?.let { targetId -> current.route?.firstOrNull { it.id == targetId } }
-        val position = targetNode?.let { node -> MapPoint(node.floor, node.x.toFloat(), node.y.toFloat()) }
+        val route = current.route.orEmpty()
+        val startNodeId = current.routeSteps.getOrNull(stepIndex - 1)?.targetNodeId
+        val position = when {
+            stepIndex == 0 -> current.routeOriginPosition
+                ?: route.firstOrNull()?.let { MapPoint(it.floor, it.x.toFloat(), it.y.toFloat()) }
+            else -> (startNodeId ?: step.targetNodeId)
+                ?.let { id -> route.firstOrNull { it.id == id } }
+                ?.let { node -> MapPoint(node.floor, node.x.toFloat(), node.y.toFloat()) }
+        }
         if (position != null) lastPositionFloor = position.floor
         _state.update {
             it.copy(
                 currentRouteStepIndex = stepIndex,
-                routeProgress = progress.coerceIn(0f, 1f),
+                routeProgress = step.progress.coerceIn(0f, 1f),
                 userPosition = position ?: it.userPosition,
                 isManualPositionConfirmed = if (position != null) true else it.isManualPositionConfirmed,
                 selectedFloor = position?.floor ?: it.selectedFloor,
@@ -889,24 +926,46 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         ) ?: return
 
         if (projection.deviationMeters > OFF_ROUTE_DISTANCE_METERS) {
+            // Одиночный «выброс» GPS не перестраивает маршрут: нужно несколько точек подряд вне линии.
+            consecutiveOffRouteFixes++
             val now = SystemClock.elapsedRealtime()
-            if (lastRouteRecalculationAt == 0L || now - lastRouteRecalculationAt >= ROUTE_RECALCULATION_COOLDOWN_MS) {
+            val cooledDown = lastRouteRecalculationAt == 0L || now - lastRouteRecalculationAt >= ROUTE_RECALCULATION_COOLDOWN_MS
+            if (consecutiveOffRouteFixes >= OFF_ROUTE_FIXES_BEFORE_RECALCULATION && cooledDown) {
+                consecutiveOffRouteFixes = 0
                 lastRouteRecalculationAt = now
                 buildRoute(destination)
                 if (_state.value.route != null) {
                     showMessage(appContext.getString(R.string.route_recalculated_status))
+                    if (_state.value.settings.voiceGuidanceEnabled) announceCurrentRouteStep()
                 }
             }
             return
         }
+        consecutiveOffRouteFixes = 0
 
         if (maybeSwitchGpsFloorAtRouteTransition(point, current, path, destination, routeGraph)) return
 
-        val progress = projection.progress
-        val nextIndex = current.routeSteps.indexOfLast { it.progress <= progress + ROUTE_STEP_PROGRESS_EPSILON }
-            .coerceAtLeast(0)
+        // Небольшой откат назад — это дрожание GPS, а не разворот: прогресс не уменьшаем.
+        val isJitterBack = projection.progress < current.routeProgress &&
+            current.routeProgress - projection.progress <= PROGRESS_REGRESSION_TOLERANCE
+        val progress = if (isJitterBack) current.routeProgress else projection.progress
+        val nextIndex = RouteStepGenerator.activeStepIndex(current.routeSteps, progress, projection.totalMeters)
         val changedStep = nextIndex != current.currentRouteStepIndex
-        _state.update { it.copy(routeProgress = progress, currentRouteStepIndex = nextIndex) }
+        // Рядом с линией маркер «прилипает» к маршруту, чтобы не скакать по соседним кабинетам.
+        val snapped = if (projection.deviationMeters <= ROUTE_SNAP_DISTANCE_METERS &&
+            projection.snappedX.isFinite() && projection.snappedY.isFinite()
+        ) {
+            MapPoint(point.floor, projection.snappedX.toFloat(), projection.snappedY.toFloat())
+        } else {
+            point
+        }
+        _state.update {
+            it.copy(
+                userPosition = snapped,
+                routeProgress = progress,
+                currentRouteStepIndex = nextIndex,
+            )
+        }
         if (changedStep && nextIndex > 0) announceCurrentRouteStep()
     }
 
@@ -948,9 +1007,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         ) ?: return false
         if (targetProjection.deviationMeters > AUTO_FLOOR_TRANSITION_MAX_ROUTE_DEVIATION_METERS) return false
 
-        val nextIndex = current.routeSteps.indexOfLast {
-            it.progress <= targetProjection.progress + ROUTE_STEP_PROGRESS_EPSILON
-        }.coerceAtLeast(0)
+        val nextIndex = RouteStepGenerator.activeStepIndex(
+            current.routeSteps,
+            targetProjection.progress,
+            targetProjection.totalMeters,
+        )
         gpsFloorNumber = to.floor
         lastPositionFloor = to.floor
         _state.update {
@@ -981,29 +1042,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             return
         }
         try {
+            // onInit может прийти синхронно из конструктора — откладываем обработку до присваивания поля.
             textToSpeech = TextToSpeech(getApplication()) { status ->
-                val engine = textToSpeech ?: return@TextToSpeech
-                if (status != TextToSpeech.SUCCESS) {
-                    pendingSpeech = null
-                    showMessage(appContext.getString(R.string.tts_unavailable))
-                    return@TextToSpeech
-                }
-                val speechLocale = requestedSpeechLocale()
-                val languageStatus = engine.setLanguage(speechLocale)
-                if (languageStatus == TextToSpeech.LANG_MISSING_DATA || languageStatus == TextToSpeech.LANG_NOT_SUPPORTED) {
-                    pendingSpeech = null
-                    val missingVoiceString = if (speechLocale.language == Locale.ENGLISH.language) {
-                        R.string.tts_missing_english
-                    } else {
-                        R.string.tts_missing_russian
-                    }
-                    showMessage(appContext.getString(missingVoiceString))
-                    return@TextToSpeech
-                }
-                textToSpeechReady = true
-                speakPendingRoute()
+                viewModelScope.launch(Dispatchers.Main) { onTextToSpeechInit(status) }
             }
         } catch (_: Exception) {
+            textToSpeech = null
             pendingSpeech = null
             showMessage(
                 appContext.getString(
@@ -1012,6 +1056,37 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 ),
             )
         }
+    }
+
+    private fun onTextToSpeechInit(status: Int) {
+        val engine = textToSpeech ?: return
+        if (status != TextToSpeech.SUCCESS) {
+            releaseTextToSpeech(engine)
+            showMessage(appContext.getString(R.string.tts_unavailable))
+            return
+        }
+        val speechLocale = requestedSpeechLocale()
+        val languageStatus = engine.setLanguage(speechLocale)
+        if (languageStatus == TextToSpeech.LANG_MISSING_DATA || languageStatus == TextToSpeech.LANG_NOT_SUPPORTED) {
+            releaseTextToSpeech(engine)
+            val missingVoiceString = if (speechLocale.language == Locale.ENGLISH.language) {
+                R.string.tts_missing_english
+            } else {
+                R.string.tts_missing_russian
+            }
+            showMessage(appContext.getString(missingVoiceString))
+            return
+        }
+        textToSpeechReady = true
+        speakPendingRoute()
+    }
+
+    /** Освобождает движок после ошибки, чтобы следующее озвучивание попробовало создать его заново. */
+    private fun releaseTextToSpeech(engine: TextToSpeech?) {
+        pendingSpeech = null
+        textToSpeechReady = false
+        runCatching { engine?.shutdown() }
+        if (textToSpeech === engine) textToSpeech = null
     }
 
     private fun speakPendingRoute() {
@@ -1086,9 +1161,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         return room.copy(x = door.x, y = door.y)
     }
 
-    /** Лифт доступен только при явном включении, как и в старом графе; иначе выбирается кратчайшая лестница. */
-    private fun routeTransition(settings: AppSettings): SiteIndoorRouter.Transition =
-        if (settings.useElevator) SiteIndoorRouter.Transition.LIFT else SiteIndoorRouter.Transition.STAIRS
+    /**
+     * Лифт используется только при явном разрешении. «Без лестниц» ведёт к лифту, «без лифта» — к лестнице,
+     * «кратчайший» сравнивает все разрешённые переходы.
+     */
+    private fun routeTransition(settings: AppSettings): SiteIndoorRouter.Transition = when {
+        !settings.useElevator -> SiteIndoorRouter.Transition.STAIRS
+        settings.routePreference == RoutePreference.AVOID_STAIRS -> SiteIndoorRouter.Transition.LIFT
+        settings.routePreference == RoutePreference.AVOID_ELEVATOR -> SiteIndoorRouter.Transition.STAIRS
+        else -> SiteIndoorRouter.Transition.ANY
+    }
 
     private fun nonRouteableRoomAt(point: MapPoint): Room? = _state.value.rooms.firstOrNull { room ->
         if (room.floor != point.floor || room.routeAvailable) return@firstOrNull false
@@ -1135,11 +1217,20 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val destinationY = routeEndpoint?.y ?: destination.y ?: return
         val floor = navigationData?.floors?.firstOrNull { it.number == point.floor } ?: return
         val distanceMeters = hypot(destinationX - point.x, destinationY - point.y) * floor.metersPerUnit
-        if (distanceMeters <= ARRIVAL_RADIUS_METERS && arrivalRoomId != destination.id) {
-            arrivalRoomId = destination.id
-            if (_state.value.settings.arrivalVibrationEnabled) vibrate()
-            showMessage(appContext.getString(R.string.arrival_message, destination.localizedName(appContext)))
+        if (distanceMeters <= ARRIVAL_RADIUS_METERS) {
+            if (_state.value.isNavigationStarted) {
+                _state.update { it.copy(routeProgress = 1f, currentRouteStepIndex = it.routeSteps.lastIndex.coerceAtLeast(0)) }
+            }
+            notifyArrival(destination)
         }
+    }
+
+    /** Одно уведомление о прибытии на маршрут: вибрация и сообщение. */
+    private fun notifyArrival(destination: Room?) {
+        if (destination == null || arrivalRoomId == destination.id) return
+        arrivalRoomId = destination.id
+        if (_state.value.settings.arrivalVibrationEnabled) vibrate()
+        showMessage(appContext.getString(R.string.arrival_message, destination.localizedName(appContext)))
     }
 
     private fun vibrate() {
@@ -1396,7 +1487,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         const val AUTO_FLOOR_TRANSITION_MAX_ROUTE_DEVIATION_METERS = 15.0
         const val OFF_ROUTE_DISTANCE_METERS = 15.0
         const val ROUTE_RECALCULATION_COOLDOWN_MS = 10_000L
-        const val ROUTE_STEP_PROGRESS_EPSILON = 0.0005f
+        const val OFF_ROUTE_FIXES_BEFORE_RECALCULATION = 2
+        const val ROUTE_SNAP_DISTANCE_METERS = 6.0
+        const val PROGRESS_REGRESSION_TOLERANCE = 0.08f
+        const val POOR_FIX_DISPLAY_FACTOR = 2.5f
+        const val POOR_FIX_DISPLAY_LIMIT_METERS = 45f
         const val ARRIVAL_VIBRATION_MS = 180L
     }
 }

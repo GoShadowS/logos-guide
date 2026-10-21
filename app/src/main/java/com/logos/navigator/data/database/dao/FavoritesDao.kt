@@ -4,7 +4,6 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Update
 import com.logos.navigator.data.database.entity.FavoriteRoomEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -13,17 +12,11 @@ interface FavoritesDao {
     @Query("SELECT * FROM favorite_rooms ORDER BY sortOrder ASC, addedAt DESC")
     fun observeAll(): Flow<List<FavoriteRoomEntity>>
 
-    @Query("SELECT * FROM favorite_rooms WHERE categoryId = :categoryId ORDER BY sortOrder ASC, addedAt DESC")
-    fun observeByCategory(categoryId: Long): Flow<List<FavoriteRoomEntity>>
-
     @Query("SELECT * FROM favorite_rooms ORDER BY sortOrder ASC, addedAt DESC")
     suspend fun getAll(): List<FavoriteRoomEntity>
 
     @Query("SELECT * FROM favorite_rooms WHERE roomId = :roomId LIMIT 1")
     suspend fun findByRoomId(roomId: String): FavoriteRoomEntity?
-
-    @Query("SELECT * FROM favorite_rooms WHERE id = :id LIMIT 1")
-    suspend fun findById(id: Long): FavoriteRoomEntity?
 
     @Query("SELECT COALESCE(MAX(sortOrder), -1) + 1 FROM favorite_rooms")
     suspend fun nextSortOrder(): Int
@@ -33,9 +26,6 @@ interface FavoritesDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun restore(entity: FavoriteRoomEntity): Long
-
-    @Update
-    suspend fun update(entity: FavoriteRoomEntity)
 
     @Query("DELETE FROM favorite_rooms WHERE roomId = :roomId")
     suspend fun deleteByRoomId(roomId: String)

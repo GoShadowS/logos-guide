@@ -583,7 +583,7 @@ private fun SwipeDeleteFavorite(
                     )
                 }
                 .clickable(onClick = onClick),
-            shape = RoundedCornerShape(18.dp),
+            shape = RoundedCornerShape(14.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
         ) {
@@ -676,7 +676,7 @@ private fun HistoryCard(
     val destinationLabel = destination?.number?.let { stringResource(R.string.cabinet_number_format, it) }
         ?: destination?.let { stringResource(R.string.floor_number_format, it.floor) }
         ?: stringResource(R.string.deleted_destination)
-    Card(shape = RoundedCornerShape(18.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
+    Card(shape = RoundedCornerShape(14.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
         Column(Modifier.fillMaxWidth().padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(destination?.localizedName(context) ?: stringResource(R.string.deleted_destination), fontWeight = FontWeight.SemiBold, style = MaterialTheme.typography.titleSmall)
             Text(
@@ -713,7 +713,7 @@ private fun SavedRouteCard(
         stringResource(R.string.saved_route_metadata_format, stringResource(R.string.floor_title_format, floor), distanceLabel)
     } ?: distanceLabel
     var menuExpanded by remember { mutableStateOf(false) }
-    Card(shape = RoundedCornerShape(18.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
+    Card(shape = RoundedCornerShape(14.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
         Column(Modifier.fillMaxWidth().padding(14.dp), verticalArrangement = Arrangement.spacedBy(5.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Default.Bookmark, contentDescription = null, tint = MaterialTheme.colorScheme.primary)

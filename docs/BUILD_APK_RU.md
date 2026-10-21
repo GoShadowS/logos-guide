@@ -112,8 +112,8 @@ app/src/main/res/values-en/                  # EN строки
 - `map1lower.svg` → `app/src/main/assets/floors/floor_1.svg`;
 - `map2lower.svg` → `app/src/main/assets/floors/floor_2.svg`;
 - `map1lower_cabinet.png` и `map2lower_cabinet.png` остаются только в `maps_and_design/` как справочные растровые планы; в APK они не копируются и не рендерятся;
-- `maps_and_design/logo.png` → `app/src/main/res/drawable-nodpi/logo.png` (та же PNG используется в иконке приложения, приветственном экране онбординга, шапке карты и разделе «О приложении»);
-- `splash.png` → `app/src/main/res/drawable-nodpi/splash_screen.png`.
+- логотип хранится только в `app/src/main/res/drawable-nodpi/logo.png` (иконка приложения, онбординг, шапка карты и раздел «О приложении»);
+- заставка — `app/src/main/res/drawable-nodpi/splash_screen.png`.
 
 Если заменяете SVG-карту, сохраните `.svg`, обновите `mapAsset`, `viewBoxX`, `viewBoxY`, `width` и `height` в `navigation_graph.json`, затем заново проверьте координаты узлов, комнат и GPS-якорей. Для планов текущие viewBox — `0 0 758 552` и `0 0 767 561`. Не экспортируйте план в PNG. Ресурсы в `res` должны быть названы латиницей, строчными буквами, без пробелов; например `logo.png`. Пошаговый гайд измерения SVG-координат: [`JSON_DATA_GUIDE.md`](JSON_DATA_GUIDE.md).
 
@@ -317,7 +317,7 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 Если организация включает R8:
 
 1. Установите `isMinifyEnabled = true` только после отдельной тестовой сборки.
-2. Проверьте `app/proguard-rules.pro`: модели `com.logos.navigator.data.model` сохраняются для Gson; сохраняются generic signatures/аннотации. Удалите только ставшие ненужными правила библиотек после проверки зависимостей.
+2. Проверьте `app/proguard-rules.pro`: модели `com.logos.navigator.data.model`, сущности `data.database.entity` и DTO экспорта сохраняются для Gson; сохраняются generic signatures/аннотации. Удалите только ставшие ненужными правила библиотек после проверки зависимостей.
 3. Соберите `./gradlew assembleRelease` и установите release APK на тестовое устройство.
 4. Проверьте чтение обоих JSON, миграцию Room, импорт/экспорт резервной копии, открытие обеих Canvas-карт, поиск и подсветку помещений, а также построение маршрута.
 5. Если R8 переименовал поля Gson, добавьте явные `@SerializedName` либо точечные keep-правила и повторите тест.

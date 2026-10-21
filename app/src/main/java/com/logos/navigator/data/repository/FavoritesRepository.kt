@@ -31,8 +31,6 @@ class FavoritesRepository(context: Context, private val database: AppDatabase) {
     val savedRoutes: Flow<List<SavedRouteEntity>> = savedRoutesDao.observeAll()
     fun history(maximum: Int): Flow<List<RouteHistoryEntity>> = historyDao.observeRecent(maximum.coerceIn(1, 100))
 
-    suspend fun isFavorite(roomId: String): Boolean = favoritesDao.findByRoomId(roomId) != null
-
     /** @return true если помещение добавлено, false если оно было удалено. */
     suspend fun toggleFavorite(roomId: String): Boolean = database.withTransaction {
         val current = favoritesDao.findByRoomId(roomId)
@@ -201,10 +199,38 @@ class FavoritesRepository(context: Context, private val database: AppDatabase) {
                 appContext.getString(R.string.backup_version_unsupported)
             }
             database.withTransaction {
-                payload.categories.orEmpty().forEach { categoriesDao.insertImported(it) }
-                payload.favorites.orEmpty().forEach { favoritesDao.restore(it) }
-                payload.history.orEmpty().forEach { historyDao.insert(it.copy(id = 0)) }
-                payload.savedRoutes.orEmpty().forEach { savedRoutesDao.insert(it.copy(id = 0)) }
+                // Импорт дополняет локальные данные: идентификаторы из файла не должны перезаписывать
+                // существующие папки и избранное с теми же id, поэтому строки получают новые id.
+                val categoryIds = HashMap<Long, Long>()
+                val existingCategories = categoriesDao.observeAllOnce()
+                var nextCategoryOrder = categoriesDao.nextSortOrder()
+                payload.categories.orEmpty().forEach { category ->
+                    val existing = existingCategories.firstOrNull { it.name.equals(category.name, ignoreCase = true) }
+                    categoryIds[category.id] = existing?.id
+                        ?: categoriesDao.insert(category.copy(id = 0, sortOrder = nextCategoryOrder++))
+                }
+                var nextFavoriteOrder = favoritesDao.nextSortOrder()
+                payload.favorites.orEmpty().forEach { favorite ->
+                    if (favoritesDao.findByRoomId(favorite.roomId) == null) {
+                        favoritesDao.insert(
+                            favorite.copy(
+                                id = 0,
+                                categoryId = favorite.categoryId?.let(categoryIds::get),
+                                sortOrder = nextFavoriteOrder++,
+                            ),
+                        )
+                    }
+                }
+                val knownHistory = historyDao.getAll().map { it.toRoomId to it.timestamp }.toSet()
+                payload.history.orEmpty()
+                    .filter { (it.toRoomId to it.timestamp) !in knownHistory }
+                    .forEach { historyDao.insert(it.copy(id = 0)) }
+                val knownRoutes = savedRoutesDao.getAll().map { Triple(it.fromRoomId, it.toRoomId, it.createdAt) }.toSet()
+                payload.savedRoutes.orEmpty()
+                    .filter { Triple(it.fromRoomId, it.toRoomId, it.createdAt) !in knownRoutes }
+                    .forEach { route ->
+                        savedRoutesDao.insert(route.copy(id = 0, categoryId = route.categoryId?.let(categoryIds::get)))
+                    }
             }
         } catch (cancelled: CancellationException) {
             throw cancelled

@@ -44,6 +44,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -55,6 +56,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.logos.navigator.BuildConfig
 import com.logos.navigator.R
+import com.logos.navigator.ui.theme.LogosColors
 
 private const val PROJECT_URL = "https://logos-guide.ru/"
 private const val LICENSE_ASSET = "licenses/apache-2.0.txt"
@@ -94,8 +96,9 @@ fun AboutScreen(onBack: () -> Unit) {
         ) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                shape = RoundedCornerShape(14.dp),
+                // Тёмно-синий блок повторяет hero-секцию logos-guide.ru.
+                colors = CardDefaults.cardColors(containerColor = LogosColors.BlueNight),
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(18.dp),
@@ -105,29 +108,29 @@ fun AboutScreen(onBack: () -> Unit) {
                     Image(
                         painter = painterResource(R.drawable.logo),
                         contentDescription = stringResource(R.string.splash_description),
-                        modifier = Modifier.size(72.dp).clip(RoundedCornerShape(18.dp)),
+                        modifier = Modifier.size(72.dp).clip(RoundedCornerShape(14.dp)),
                     )
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Text(
                             stringResource(R.string.organization_name),
                             style = MaterialTheme.typography.headlineSmall,
                             fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            color = Color.White,
                         )
                         Text(
                             stringResource(R.string.app_name),
                             style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            color = Color(0xFFA9C6FF),
                         )
                         Surface(
                             shape = RoundedCornerShape(50),
-                            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f),
+                            color = LogosColors.Yellow,
                         ) {
                             Text(
                                 stringResource(R.string.about_version_value, BuildConfig.VERSION_NAME),
                                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
                                 style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.primary,
+                                color = LogosColors.BlueDeep,
                                 fontWeight = FontWeight.SemiBold,
                             )
                         }
@@ -137,7 +140,7 @@ fun AboutScreen(onBack: () -> Unit) {
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
+                shape = RoundedCornerShape(14.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             ) {
                 Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
@@ -155,7 +158,7 @@ fun AboutScreen(onBack: () -> Unit) {
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
+                shape = RoundedCornerShape(14.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             ) {
                 Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -188,7 +191,7 @@ fun AboutScreen(onBack: () -> Unit) {
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
+                shape = RoundedCornerShape(14.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             ) {
                 Row(
@@ -268,5 +271,6 @@ private fun AboutLine(label: String, value: String) {
 }
 
 private fun openExternalLink(context: android.content.Context, url: String) {
-    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+    // На устройстве может не быть браузера: отсутствие обработчика не должно ронять приложение.
+    runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) }
 }
