@@ -6,6 +6,19 @@ plugins {
     id("com.google.devtools.ksp")
 }
 
+val releaseVersionName = "1.1.0-release"
+val releaseVersionCode = 4
+val releaseStoreFile = providers.environmentVariable("ANDROID_RELEASE_STORE_FILE").orNull
+val releaseStorePassword = providers.environmentVariable("ANDROID_RELEASE_STORE_PASSWORD").orNull
+val releaseKeyAlias = providers.environmentVariable("ANDROID_RELEASE_KEY_ALIAS").orNull
+val releaseKeyPassword = providers.environmentVariable("ANDROID_RELEASE_KEY_PASSWORD").orNull
+val releaseSigningConfigured = listOf(
+    releaseStoreFile,
+    releaseStorePassword,
+    releaseKeyAlias,
+    releaseKeyPassword,
+).all { !it.isNullOrBlank() }
+
 android {
     namespace = "com.logos.navigator"
     compileSdk = 37
@@ -14,9 +27,20 @@ android {
         applicationId = "com.logos.navigator"
         minSdk = 24
         targetSdk = 36
-        versionCode = 3
-        versionName = "1.0.0-opendoors"
+        versionCode = releaseVersionCode
+        versionName = releaseVersionName
         vectorDrawables.useSupportLibrary = true
+    }
+
+    signingConfigs {
+        if (releaseSigningConfigured) {
+            create("release") {
+                storeFile = file(requireNotNull(releaseStoreFile))
+                storePassword = requireNotNull(releaseStorePassword)
+                keyAlias = requireNotNull(releaseKeyAlias)
+                keyPassword = requireNotNull(releaseKeyPassword)
+            }
+        }
     }
 
     buildFeatures {
@@ -37,6 +61,9 @@ android {
         }
         release {
             isMinifyEnabled = false
+            if (releaseSigningConfigured) {
+                signingConfig = signingConfigs.getByName("release")
+            }
             buildConfigField("boolean", "OPEN_DOORS", "true")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -55,7 +82,7 @@ android {
     }
 }
 
-val releaseApkFileName = "logos-guide-1.0.0-opendoors.apk"
+val releaseApkFileName = "logos-guide-$releaseVersionName.apk"
 val releaseApkOutputDirectory = layout.buildDirectory.dir("outputs/apk/release")
 val androidStudioReleaseApkDirectory = layout.projectDirectory.dir("release").asFile
 val copyReleaseApk = tasks.register("copyReleaseApk") {

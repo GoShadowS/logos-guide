@@ -4,7 +4,6 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
-/** Пользовательская папка/категория избранного. Цвет хранится в формате ARGB. */
 @Entity(tableName = "favorite_categories", indices = [Index(value = ["sortOrder"])])
 data class FavoriteCategoryEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,

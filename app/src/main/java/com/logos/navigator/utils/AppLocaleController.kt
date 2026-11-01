@@ -3,12 +3,12 @@ package com.logos.navigator.utils
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import com.logos.navigator.data.model.AppLanguage
+import java.util.Locale
 
-/** Применяет локаль приложения через штатный API AppCompat для Android 7+. */
 object AppLocaleController {
     fun apply(language: AppLanguage) {
         val locales = when (language) {
-            AppLanguage.SYSTEM -> LocaleListCompat.getEmptyLocaleList()
+            AppLanguage.SYSTEM -> systemLocaleOverride()
             AppLanguage.RUSSIAN -> LocaleListCompat.forLanguageTags("ru")
             AppLanguage.ENGLISH -> LocaleListCompat.forLanguageTags("en")
         }
@@ -17,8 +17,18 @@ object AppLocaleController {
         }
     }
 
-    /** При запуске не сбрасываем системный выбор языка, заданный пользователем в Android. */
     fun applyStoredOverride(language: AppLanguage) {
-        if (language != AppLanguage.SYSTEM) apply(language)
+        apply(language)
     }
+
+    private fun systemLocaleOverride(): LocaleListCompat {
+        val systemLanguage = LocaleListCompat.getDefault().get(0)?.language ?: Locale.getDefault().language
+        return if (systemLanguage in SUPPORTED_LANGUAGES) {
+            LocaleListCompat.getEmptyLocaleList()
+        } else {
+            LocaleListCompat.forLanguageTags("en")
+        }
+    }
+
+    private val SUPPORTED_LANGUAGES = setOf("ru", "en")
 }

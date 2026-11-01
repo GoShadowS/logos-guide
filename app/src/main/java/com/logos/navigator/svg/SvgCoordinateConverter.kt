@@ -3,14 +3,12 @@ package com.logos.navigator.svg
 import android.graphics.Matrix
 import android.graphics.PointF
 
-/** Преобразует экранные точки и координаты SVG; обратная матрица обновляется только вместе с камерой. */
 class SvgCoordinateConverter(private val svgToViewMatrix: Matrix) {
     private val viewToSvgMatrix = Matrix()
     private val points = FloatArray(2)
     private var inverseValid = false
     private var inverseDirty = true
 
-    /** Помечает обратное преобразование устаревшим; вычисление откладывается до следующего тапа. */
     fun refreshInverse() {
         inverseDirty = true
     }

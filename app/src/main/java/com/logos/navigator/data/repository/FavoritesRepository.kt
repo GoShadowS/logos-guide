@@ -17,7 +17,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
 import java.io.IOException
 
-/** Репозиторий избранного: транзакции, сортировка, история, сохранённые маршруты и JSON-экспорт. */
 class FavoritesRepository(context: Context, private val database: AppDatabase) {
     private val appContext = context.applicationContext
     private val favoritesDao = database.favoritesDao()
@@ -31,7 +30,6 @@ class FavoritesRepository(context: Context, private val database: AppDatabase) {
     val savedRoutes: Flow<List<SavedRouteEntity>> = savedRoutesDao.observeAll()
     fun history(maximum: Int): Flow<List<RouteHistoryEntity>> = historyDao.observeRecent(maximum.coerceIn(1, 100))
 
-    /** @return true если помещение добавлено, false если оно было удалено. */
     suspend fun toggleFavorite(roomId: String): Boolean = database.withTransaction {
         val current = favoritesDao.findByRoomId(roomId)
         if (current != null) {
@@ -61,7 +59,6 @@ class FavoritesRepository(context: Context, private val database: AppDatabase) {
         favoritesDao.assignCategory(roomId, categoryId)
     }
 
-    /** Меняет порядок соседнего элемента и атомарно сохраняет новые sortOrder. */
     suspend fun moveFavorite(roomId: String, direction: Int) = database.withTransaction {
         if (direction == 0) return@withTransaction
         val rows = favoritesDao.getAll().toMutableList()
@@ -199,8 +196,6 @@ class FavoritesRepository(context: Context, private val database: AppDatabase) {
                 appContext.getString(R.string.backup_version_unsupported)
             }
             database.withTransaction {
-                // Импорт дополняет локальные данные: идентификаторы из файла не должны перезаписывать
-                // существующие папки и избранное с теми же id, поэтому строки получают новые id.
                 val categoryIds = HashMap<Long, Long>()
                 val existingCategories = categoriesDao.observeAllOnce()
                 var nextCategoryOrder = categoriesDao.nextSortOrder()
@@ -253,7 +248,6 @@ class FavoritesRepository(context: Context, private val database: AppDatabase) {
     }
 }
 
-/** DTO экспорта; массивы nullable для корректной обработки старых/неполных резервных копий. */
 private data class FavoritesExport(
     val schemaVersion: Int = 2,
     val categories: List<FavoriteCategoryEntity>? = emptyList(),

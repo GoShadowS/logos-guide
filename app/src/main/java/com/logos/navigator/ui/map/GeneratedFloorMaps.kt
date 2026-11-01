@@ -1,4 +1,3 @@
-// Автоматически создано tools/generate_kotlin_floor_maps.py. Не редактировать вручную.
 package com.logos.navigator.ui.map
 
 import android.graphics.Canvas
@@ -13,22 +12,19 @@ import android.graphics.Shader
 import androidx.core.graphics.PathParser
 import kotlin.math.roundToInt
 
-/** Векторные планы здания, собранные из исходных SVG для нативной отрисовки Canvas/Path. */
 internal object GeneratedFloorMaps {
     private data class MapDrawOp(
         val path: Path,
         val fillPaint: Paint?,
         val strokePaint: Paint?,
-        /** Каждый список — объединённая фигура одного SVG clipPath. */
         val clipGroups: List<List<Path>>,
-        /** SVG-маски этих планов содержат белые контуры и эквивалентны обрезке по Path. */
         val maskPaths: List<Path>,
         val sourceId: String,
     )
 
     private fun svgPath(data: String, matrixValues: FloatArray?, fillType: Path.FillType): Path {
         val path = PathParser.createPathFromPathData(data)
-            ?: error("Некорректный SVG path в сгенерированной карте")
+            ?: error("Invalid SVG path in generated map")
         if (matrixValues != null) {
             path.transform(Matrix().apply { setValues(matrixValues) })
         }
@@ -87,7 +83,6 @@ internal object GeneratedFloorMaps {
         operations.forEach { operation ->
             val saveCount = canvas.save()
             operation.clipGroups.forEach { group ->
-                // Фигуры одного clipPath объединяются, а разные clipPath пересекаются.
                 val union = Path()
                 group.forEach { union.addPath(it) }
                 canvas.clipPath(union)
@@ -1734,7 +1729,6 @@ internal object GeneratedFloorMaps {
         return picture
     }
 
-    /** Рисует в координатах исходного viewBox; масштабирование выполняется матрицей карты. */
     fun draw(canvas: Canvas, floorNumber: Int) {
         when (floorNumber) {
             1 -> floor1Picture.draw(canvas)
@@ -1742,7 +1736,6 @@ internal object GeneratedFloorMaps {
         }
     }
 
-    /** Возвращает полигон SVG-элемента для прежней логики hit-test и редких fallback-геометрий. */
     fun roomPolygons(floorNumber: Int, elementIds: List<String>): List<List<PointF>> {
         val source = when (floorNumber) {
             1 -> f1RoomPolygons

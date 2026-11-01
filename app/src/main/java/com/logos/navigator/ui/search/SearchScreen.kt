@@ -68,7 +68,9 @@ import androidx.compose.ui.unit.dp
 import com.logos.navigator.R
 import com.logos.navigator.data.model.FloorPlan
 import com.logos.navigator.data.model.Room
+import com.logos.navigator.utils.appLocale
 import com.logos.navigator.utils.categoryLabel
+import com.logos.navigator.utils.isEnglishLocale
 import com.logos.navigator.utils.localizedDescription
 import com.logos.navigator.utils.localizedName
 import com.logos.navigator.utils.matchingNumberLabel
@@ -136,11 +138,7 @@ fun SearchScreen(
     }
 
     fun startVoiceSearch() {
-        val locale = context.resources.configuration.locales
-            .takeIf { !it.isEmpty }
-            ?.get(0)
-            ?: java.util.Locale.getDefault()
-        val languageTag = if (locale.language == "en") "en-US" else "ru-RU"
+        val languageTag = if (context.appLocale().language == "en") "en-US" else "ru-RU"
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
             putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
             putExtra(RecognizerIntent.EXTRA_LANGUAGE, languageTag)
@@ -216,10 +214,7 @@ fun SearchScreen(
         if (query.isBlank()) {
             emptyList()
         } else {
-            val isEnglish = context.resources.configuration.locales
-                .takeIf { !it.isEmpty }
-                ?.get(0)
-                ?.language == "en"
+            val isEnglish = context.isEnglishLocale()
             val suggestions = matchingRooms.take(3).flatMap { room ->
                 val name = room.localizedName(context)
                 buildList {

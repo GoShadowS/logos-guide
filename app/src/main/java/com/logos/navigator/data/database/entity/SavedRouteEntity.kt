@@ -4,7 +4,6 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
-/** Сохранённая связка точек; путь повторно рассчитывается по актуальному локальному графу. */
 @Entity(tableName = "saved_routes", indices = [Index(value = ["createdAt"]), Index(value = ["categoryId"])])
 data class SavedRouteEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,

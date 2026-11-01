@@ -28,11 +28,13 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -57,13 +59,20 @@ import androidx.compose.ui.unit.dp
 import com.logos.navigator.BuildConfig
 import com.logos.navigator.R
 import com.logos.navigator.ui.theme.LogosColors
+import com.logos.navigator.update.AppUpdateUiState
 
 private const val PROJECT_URL = "https://logos-guide.ru/"
 private const val LICENSE_ASSET = "licenses/apache-2.0.txt"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AboutScreen(onBack: () -> Unit) {
+internal fun AboutScreen(
+    onBack: () -> Unit,
+    updateState: AppUpdateUiState,
+    onCheckForUpdates: () -> Unit,
+    onDownloadUpdate: () -> Unit,
+    onInstallUpdate: () -> Unit,
+) {
     val context = LocalContext.current
     var isLicenseSheetVisible by rememberSaveable { mutableStateOf(false) }
     val licenseText = remember(context) {
@@ -97,7 +106,6 @@ fun AboutScreen(onBack: () -> Unit) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(14.dp),
-                // Тёмно-синий блок повторяет hero-секцию logos-guide.ru.
                 colors = CardDefaults.cardColors(containerColor = LogosColors.BlueNight),
             ) {
                 Row(
@@ -155,6 +163,13 @@ fun AboutScreen(onBack: () -> Unit) {
                     AboutLine(stringResource(R.string.about_purpose_label), stringResource(R.string.about_purpose_value))
                 }
             }
+
+            UpdateCard(
+                state = updateState,
+                onCheckForUpdates = onCheckForUpdates,
+                onDownloadUpdate = onDownloadUpdate,
+                onInstallUpdate = onInstallUpdate,
+            )
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -263,6 +278,86 @@ fun AboutScreen(onBack: () -> Unit) {
 }
 
 @Composable
+private fun UpdateCard(
+    state: AppUpdateUiState,
+    onCheckForUpdates: () -> Unit,
+    onDownloadUpdate: () -> Unit,
+    onInstallUpdate: () -> Unit,
+) {
+    val update = state.availableUpdate
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+    ) {
+        Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Text(
+                stringResource(R.string.update_section_title),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.SemiBold,
+            )
+            Text(
+                stringResource(R.string.update_section_description),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            if (update != null) {
+                Text(
+                    stringResource(R.string.update_available_format, update.versionName),
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium,
+                )
+            }
+            when {
+                state.isChecking -> Text(stringResource(R.string.update_checking))
+                state.isDownloading -> {
+                    Text(stringResource(R.string.update_downloading))
+                    LinearProgressIndicator(
+                        progress = { state.downloadProgress / 100f },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    Text(stringResource(R.string.update_progress_format, state.downloadProgress))
+                }
+                state.message != null -> Text(
+                    state.message,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            if (update == null) {
+                Button(
+                    onClick = onCheckForUpdates,
+                    enabled = !state.isChecking && !state.isDownloading,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(stringResource(R.string.update_check_button))
+                }
+            } else {
+                Button(
+                    onClick = if (state.downloadedApk == null) onDownloadUpdate else onInstallUpdate,
+                    enabled = !state.isChecking && !state.isDownloading,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(
+                        stringResource(
+                            if (state.downloadedApk == null) R.string.update_download_button
+                            else R.string.update_install_button,
+                        ),
+                    )
+                }
+                TextButton(
+                    onClick = onCheckForUpdates,
+                    enabled = !state.isChecking && !state.isDownloading,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(stringResource(R.string.update_check_button))
+                }
+            }
+        }
+    }
+}
+
+@Composable
 private fun AboutLine(label: String, value: String) {
     Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
         Text(label, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -271,6 +366,5 @@ private fun AboutLine(label: String, value: String) {
 }
 
 private fun openExternalLink(context: android.content.Context, url: String) {
-    // На устройстве может не быть браузера: отсутствие обработчика не должно ронять приложение.
     runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) }
 }

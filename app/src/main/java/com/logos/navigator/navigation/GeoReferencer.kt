@@ -5,11 +5,6 @@ import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.cos
 
-/**
- * Аффинная привязка WGS-84 (широта/долгота) к координатам SVG viewBox этажа.
- * Для трёх и более опорных точек коэффициенты оцениваются методом наименьших квадратов;
- * для двух применяется подобное преобразование с масштабом и поворотом.
- */
 object GeoReferencer {
     private const val EARTH_RADIUS_METERS = 6_371_000.0
     private const val DEGREES_TO_RADIANS = PI / 180.0
@@ -55,7 +50,6 @@ object GeoReferencer {
     }
 
     private fun fitAffine(samples: List<DoubleArray>, outputColumn: Int): DoubleArray? {
-        // Масштабируем метрические координаты, чтобы нормальные уравнения были устойчивее.
         val eastScale = samples.maxOf { abs(it[0]) }.coerceAtLeast(MIN_COORDINATE_SCALE)
         val northScale = samples.maxOf { abs(it[1]) }.coerceAtLeast(MIN_COORDINATE_SCALE)
         val normal = Array(3) { DoubleArray(4) }
@@ -71,7 +65,6 @@ object GeoReferencer {
     }
 
     private fun solve3x3(matrix: Array<DoubleArray>): DoubleArray? {
-        // Метод Гаусса с частичным выбором главного элемента.
         for (column in 0..2) {
             var pivot = column
             for (row in column + 1..2) {
@@ -108,7 +101,6 @@ object GeoReferencer {
         val unitLengthSquared = unitX * unitX + unitY * unitY
         if (geoLengthSquared < MIN_BASELINE_SQUARED || unitLengthSquared < MIN_BASELINE_SQUARED) return null
 
-        // Комплексное подобное преобразование: (east,north) -> (SVG x,y).
         val scaleCos = (unitX * geoEast + unitY * geoNorth) / geoLengthSquared
         val scaleSin = (unitY * geoEast - unitX * geoNorth) / geoLengthSquared
         val deltaEast = userEast - first[0]

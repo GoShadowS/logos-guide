@@ -30,7 +30,6 @@ class RouteStepGeneratorTest {
         assertEquals(listOf(RouteAction.START, RouteAction.STRAIGHT, RouteAction.ARRIVAL), steps.map { it.action })
         assertEquals(listOf("start", "goal", "goal"), steps.map { it.targetNodeId })
         assertEquals(10.0, steps[1].distanceMeters, 0.0001)
-        // Прогресс шага — точка, где он начинается: прямой участок стартует после 10 м подхода.
         assertEquals(1f / 3f, steps[1].progress, 0.0001f)
         assertEquals(1f, steps.last().progress, 0.0001f)
     }
@@ -51,11 +50,8 @@ class RouteStepGeneratorTest {
             listOf(RouteAction.START, RouteAction.STRAIGHT, RouteAction.TURN_RIGHT, RouteAction.STRAIGHT, RouteAction.ARRIVAL),
             steps.map { it.action },
         )
-        // В начале — первый прямой участок.
         assertEquals(1, RouteStepGenerator.activeStepIndex(steps, progress = 0.1f, totalDistanceMeters = 40.0))
-        // За 2 м до поворота показываем сам поворот.
         assertEquals(2, RouteStepGenerator.activeStepIndex(steps, progress = 0.45f, totalDistanceMeters = 40.0))
-        // После поворота — второй прямой участок, у цели — прибытие.
         assertEquals(3, RouteStepGenerator.activeStepIndex(steps, progress = 0.6f, totalDistanceMeters = 40.0))
         assertEquals(4, RouteStepGenerator.activeStepIndex(steps, progress = 1f, totalDistanceMeters = 40.0))
     }

@@ -8,18 +8,24 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationRail
@@ -28,6 +34,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -64,16 +71,19 @@ import com.logos.navigator.ui.search.SearchScreen
 import com.logos.navigator.ui.settings.SettingsScreen
 import com.logos.navigator.ui.splash.SplashScreen
 import com.logos.navigator.ui.theme.LogosTheme
+import com.logos.navigator.update.AppUpdateUiState
+import com.logos.navigator.update.AppUpdateViewModel
 import com.logos.navigator.utils.AppLocaleController
 import kotlinx.coroutines.delay
 import kotlin.math.hypot
 
-/** Корневой Compose UI: onboarding, адаптивная навигация, локали и экраны проекта. */
 @Composable
 fun NavigatorApp(viewModel: MainViewModel) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val favoritesViewModel: FavoritesViewModel = composeViewModel()
     val favoritesState by favoritesViewModel.state.collectAsStateWithLifecycle()
+    val appUpdateViewModel: AppUpdateViewModel = composeViewModel()
+    val appUpdateState by appUpdateViewModel.state.collectAsStateWithLifecycle()
     val navController = rememberNavController()
     val context = LocalContext.current
     val configuration = LocalConfiguration.current
@@ -105,7 +115,6 @@ fun NavigatorApp(viewModel: MainViewModel) {
             favoritesViewModel.clearMessage()
         }
     }
-    // На планшете карта открыта рядом с поиском и избранным: там сообщение покажет MapScreen.
     val mapShowsMessages = currentRoute == ROUTE_MAP ||
         (isTablet && (currentRoute == ROUTE_SEARCH || currentRoute == ROUTE_FAVORITES))
     LaunchedEffect(state.message, mapShowsMessages) {
@@ -156,6 +165,8 @@ fun NavigatorApp(viewModel: MainViewModel) {
                 viewModel = viewModel,
                 favoritesViewModel = favoritesViewModel,
                 favoritesState = favoritesState,
+                updateViewModel = appUpdateViewModel,
+                updateState = appUpdateState,
                 favoriteIds = favoriteIds,
                 quickFavorites = quickFavorites,
                 navController = navController,
@@ -164,7 +175,53 @@ fun NavigatorApp(viewModel: MainViewModel) {
                 rootSnackbarHostState = rootSnackbarHostState,
             )
         }
+        if (splashFinished && !state.isLoading && state.settings.onboardingCompleted) {
+            AppUpdatePrompt(state = appUpdateState, viewModel = appUpdateViewModel)
+        }
     }
+}
+
+@Composable
+private fun AppUpdatePrompt(state: AppUpdateUiState, viewModel: AppUpdateViewModel) {
+    val update = state.availableUpdate ?: return
+    if (!state.showPrompt) return
+    AlertDialog(
+        onDismissRequest = viewModel::dismissUpdatePrompt,
+        title = { Text(stringResource(R.string.update_dialog_title)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(stringResource(R.string.update_dialog_message, update.versionName))
+                if (state.isDownloading) {
+                    LinearProgressIndicator(
+                        progress = { state.downloadProgress / 100f },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    Text(stringResource(R.string.update_progress_format, state.downloadProgress))
+                }
+                state.message?.let { Text(it) }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    if (state.downloadedApk == null) viewModel.downloadUpdate() else viewModel.installUpdate()
+                },
+                enabled = !state.isChecking && !state.isDownloading,
+            ) {
+                Text(
+                    stringResource(
+                        if (state.downloadedApk == null) R.string.update_download_button
+                        else R.string.update_install_button,
+                    ),
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = viewModel::dismissUpdatePrompt) {
+                Text(stringResource(R.string.update_later_button))
+            }
+        },
+    )
 }
 
 @Composable
@@ -172,6 +229,8 @@ private fun MainNavigation(
     viewModel: MainViewModel,
     favoritesViewModel: FavoritesViewModel,
     favoritesState: com.logos.navigator.ui.favorites.FavoritesUiState,
+    updateViewModel: AppUpdateViewModel,
+    updateState: AppUpdateUiState,
     favoriteIds: Set<String>,
     quickFavorites: List<com.logos.navigator.data.model.Room>,
     navController: NavHostController,
@@ -399,7 +458,13 @@ private fun MainNavigation(
                     )
                 }
                 composable(ROUTE_ABOUT) {
-                    AboutScreen(onBack = { navController.popBackStack() })
+                    AboutScreen(
+                        onBack = { navController.popBackStack() },
+                        updateState = updateState,
+                        onCheckForUpdates = { updateViewModel.checkForUpdates(force = true) },
+                        onDownloadUpdate = updateViewModel::downloadUpdate,
+                        onInstallUpdate = updateViewModel::installUpdate,
+                    )
                 }
             }
         }
@@ -448,7 +513,6 @@ private fun navigateTo(navController: NavHostController, route: String) {
     }
 }
 
-/** Переключает нижние вкладки возвратом к уже открытому экрану, а не дублирует его в back stack. */
 private fun navigateToTab(navController: NavHostController, route: String) {
     if (navController.currentDestination?.route == route) return
     if (!navController.popBackStack(route, inclusive = false, saveState = true)) {

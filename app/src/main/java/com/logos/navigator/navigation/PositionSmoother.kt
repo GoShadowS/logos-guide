@@ -3,18 +3,12 @@ package com.logos.navigator.navigation
 import kotlin.math.hypot
 import kotlin.math.sqrt
 
-/**
- * Сглаживает GPS-точки на плане этажа простым фильтром Калмана с моделью «пешеход стоит или идёт».
- * Неточные измерения сдвигают маркер слабее точных, поэтому он не прыгает по кабинетам при каждом фиксе.
- */
 class PositionSmoother(
-    /** Скорость, с которой допускается смещение оценки между измерениями, м/с. */
     private val walkingSpeedMetersPerSecond: Double = DEFAULT_WALKING_SPEED,
 ) {
     private var floor: Int? = null
     private var x = 0.0
     private var y = 0.0
-    /** Дисперсия оценки в квадратных метрах. */
     private var varianceSquareMeters = 0.0
     private var lastTimestampMs = 0L
 
@@ -24,10 +18,6 @@ class PositionSmoother(
         lastTimestampMs = 0L
     }
 
-    /**
-     * Добавляет измерение в координатах SVG и возвращает сглаженную точку.
-     * Смена этажа, долгий перерыв или резкий скачок далеко за пределы погрешности сбрасывают фильтр.
-     */
     fun update(
         floor: Int,
         x: Double,
@@ -52,7 +42,6 @@ class PositionSmoother(
         val predictedVariance = varianceSquareMeters + travel * travel + MIN_PROCESS_VARIANCE
         val jumpMeters = hypot(x - this.x, y - this.y) * scale
         if (jumpMeters > OUTLIER_SIGMAS * sqrt(predictedVariance + measurementVariance) && sigma <= sqrt(predictedVariance)) {
-            // Точное измерение далеко от старой оценки: человек действительно переместился (например, после лестницы).
             return restart(floor, x, y, measurementVariance, timestampMs)
         }
 

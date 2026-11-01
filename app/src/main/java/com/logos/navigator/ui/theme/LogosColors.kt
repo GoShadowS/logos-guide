@@ -2,7 +2,6 @@ package com.logos.navigator.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-/** Фирменные цвета сайта logos-guide.ru, общие для Compose-экранов и карты. */
 object LogosColors {
     val Blue = Color(0xFF2158E0)
     val BlueBright = Color(0xFF1A56F0)

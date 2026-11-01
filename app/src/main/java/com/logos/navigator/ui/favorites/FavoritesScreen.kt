@@ -88,6 +88,7 @@ import com.logos.navigator.data.database.entity.RouteHistoryEntity
 import com.logos.navigator.R
 import com.logos.navigator.data.database.entity.SavedRouteEntity
 import com.logos.navigator.data.model.Room
+import com.logos.navigator.utils.appLocale
 import com.logos.navigator.utils.categoryLabel
 import com.logos.navigator.utils.formatDistance
 import com.logos.navigator.utils.localizedDescription
@@ -336,6 +337,7 @@ fun FavoritesScreen(
                             items(historyEntries, key = RouteHistoryEntity::id) { entry ->
                                 HistoryCard(
                                     entry = entry,
+                                    origin = entry.fromRoomId?.let { id -> state.rooms.firstOrNull { it.id == id } },
                                     destination = state.rooms.firstOrNull { it.id == entry.toRoomId },
                                     onRepeat = { onRepeatRoute(entry.fromRoomId, entry.toRoomId) },
                                     onDelete = {
@@ -668,6 +670,7 @@ private fun SwipeDeleteFavorite(
 @Composable
 private fun HistoryCard(
     entry: RouteHistoryEntity,
+    origin: Room?,
     destination: Room?,
     onRepeat: () -> Unit,
     onDelete: () -> Unit,
@@ -676,15 +679,18 @@ private fun HistoryCard(
     val destinationLabel = destination?.number?.let { stringResource(R.string.cabinet_number_format, it) }
         ?: destination?.let { stringResource(R.string.floor_number_format, it.floor) }
         ?: stringResource(R.string.deleted_destination)
+    val originLabel = origin?.localizedName(context)
+        ?: entry.fromFloor?.let { context.getString(R.string.history_start_point, context.getString(R.string.floor_number_format, it)) }
+        ?: stringResource(R.string.from_my_location)
     Card(shape = RoundedCornerShape(14.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
         Column(Modifier.fillMaxWidth().padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(destination?.localizedName(context) ?: stringResource(R.string.deleted_destination), fontWeight = FontWeight.SemiBold, style = MaterialTheme.typography.titleSmall)
             Text(
-                stringResource(R.string.history_route_description, entry.fromLabel ?: stringResource(R.string.from_my_location), destinationLabel),
+                stringResource(R.string.history_route_description, originLabel, destinationLabel),
                 style = MaterialTheme.typography.bodySmall,
             )
             Text(
-                "${context.formatDistance(entry.pathLengthMeters)} · ${DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(Date(entry.timestamp))}",
+                "${context.formatDistance(entry.pathLengthMeters)} · ${DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, context.appLocale()).format(Date(entry.timestamp))}",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

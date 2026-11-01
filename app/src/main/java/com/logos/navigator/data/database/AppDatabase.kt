@@ -35,7 +35,6 @@ abstract class AppDatabase : RoomDatabase() {
         @Volatile
         private var instance: AppDatabase? = null
 
-        /** Переход с первой схемы избранного к схеме с папками и историей маршрутов. */
         val MIGRATION_1_2: Migration = object : Migration(1, 2) {
             override fun migrate(database: SupportSQLiteDatabase) {
                 database.execSQL("ALTER TABLE favorite_rooms ADD COLUMN customName TEXT")

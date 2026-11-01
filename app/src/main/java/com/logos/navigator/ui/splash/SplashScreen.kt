@@ -13,7 +13,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.logos.navigator.R
 
-/** Заставка построена на переданном колледжем изображении (res/drawable-nodpi/splash_screen.png). */
 @Composable
 fun SplashScreen(modifier: Modifier = Modifier) {
     Box(

@@ -28,7 +28,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.IOException
 
-/** Снимок Room и локального каталога, используемый экраном «Избранное». */
 data class FavoritesUiState(
     val isLoading: Boolean = true,
     val isWorking: Boolean = false,
@@ -41,7 +40,6 @@ data class FavoritesUiState(
     val error: String? = null,
 )
 
-/** Локальные избранное, папки, история и сохранённые маршруты. */
 @OptIn(ExperimentalCoroutinesApi::class)
 class FavoritesViewModel(application: Application) : AndroidViewModel(application) {
     private val appContext = application.applicationContext
@@ -249,7 +247,6 @@ class FavoritesViewModel(application: Application) : AndroidViewModel(applicatio
         }
     }
 
-    /** Показывает пользовательские проверки из репозитория, но не выводит сырой текст ошибок Room/SQL. */
     private fun exceptionMessage(exception: Throwable): String = when (exception) {
         is IOException, is IllegalArgumentException -> exception.message?.takeIf(String::isNotBlank)
             ?: appContext.getString(R.string.operation_failed)

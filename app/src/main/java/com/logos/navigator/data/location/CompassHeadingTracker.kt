@@ -9,7 +9,6 @@ import android.view.Surface
 import android.view.WindowManager
 import kotlin.math.abs
 
-/** Читает heading с локального датчика Rotation Vector; данные не отправляются наружу. */
 class CompassHeadingTracker(context: Context) : SensorEventListener {
     private val appContext = context.applicationContext
     private val sensorManager = appContext.getSystemService(Context.SENSOR_SERVICE) as SensorManager
@@ -40,7 +39,6 @@ class CompassHeadingTracker(context: Context) : SensorEventListener {
         if (event.sensor.type != Sensor.TYPE_ROTATION_VECTOR) return
         SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values)
         SensorManager.getOrientation(rotationMatrix, orientation)
-        // Азимут датчика задан для портретной ориентации: в альбомной добавляем поворот экрана.
         val rawDegrees = Math.toDegrees(orientation[0].toDouble()).toFloat() + displayRotationDegrees()
         val heading = normalize(rawDegrees)
         smoothedHeading = if (smoothedHeading.isNaN()) {
@@ -48,7 +46,6 @@ class CompassHeadingTracker(context: Context) : SensorEventListener {
         } else {
             normalize(smoothedHeading + SMOOTHING * shortestDelta(smoothedHeading, heading))
         }
-        // Мелкое дрожание стрелки не перерисовывает карту.
         if (lastEmittedHeading.isNaN() || abs(shortestDelta(lastEmittedHeading, smoothedHeading)) >= MIN_EMIT_DELTA_DEGREES) {
             lastEmittedHeading = smoothedHeading
             callback?.invoke(smoothedHeading)

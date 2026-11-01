@@ -15,7 +15,6 @@ import com.google.android.gms.location.Priority
 import com.logos.navigator.R
 import com.logos.navigator.data.model.LocationAccuracyMode
 
-/** Обёртка над Fused Location Provider. Геоданные не отправляются приложением на сервер. */
 class FusedLocationTracker(context: Context) {
     private val appContext = context.applicationContext
     private var client: com.google.android.gms.location.FusedLocationProviderClient? = null
@@ -78,7 +77,6 @@ class FusedLocationTracker(context: Context) {
                 .addOnSuccessListener { location ->
                     if (requestGeneration == generation) location?.let(onLocation)
                 }
-                // Отказ в чтении кэшированной точки не отменяет запрос новых GPS-измерений.
                 .addOnFailureListener {
                     if (requestGeneration == generation) onAvailability(false)
                 }

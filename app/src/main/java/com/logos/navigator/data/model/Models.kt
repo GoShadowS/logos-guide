@@ -2,7 +2,6 @@ package com.logos.navigator.data.model
 
 import com.google.gson.annotations.SerializedName
 
-/** Описание SVG-плана: x/y/width/height соответствуют viewBox документа. */
 data class FloorPlan(
     val number: Int,
     val title: String,
@@ -12,9 +11,9 @@ data class FloorPlan(
     val metersPerUnit: Double = 0.083333,
     val viewBoxX: Double = 0.0,
     val viewBoxY: Double = 0.0,
+    val titleEn: String? = null,
 )
 
-/** Узел графа располагается в координатах viewBox карты своего этажа. */
 data class NavNode(
     val id: String,
     val floor: Int,
@@ -30,7 +29,6 @@ data class NavNode(
     val requiresAccessibility: Boolean? = false,
 )
 
-/** Непроходимая область плана; внутри неё нельзя ставить маршрутные узлы и начинать маршрут. */
 data class RestrictedArea(
     val id: String,
     val floor: Int,
@@ -39,18 +37,15 @@ data class RestrictedArea(
     val polygons: List<List<SvgPoint>> = emptyList(),
 )
 
-/** Ребро — проходимый участок коридора или межэтажный переход. Вес задаётся в метрах. */
 data class NavEdge(
     @SerializedName("from") val from: String,
     @SerializedName("to") val to: String,
     val weight: Double,
     val type: String = "corridor",
-    // При пропущенном поле Gson оставляет null; null трактуется как двустороннее ребро.
     val bidirectional: Boolean? = true,
     val requiresAccessibility: Boolean? = false,
 )
 
-/** GPS-опорная точка, сопоставленная точке в системе координат SVG конкретного этажа. */
 data class GeoAnchor(
     val floor: Int,
     val id: String,
@@ -80,19 +75,15 @@ data class Room(
     @SerializedName("description_ru") val description: String? = null,
     @SerializedName("description_en") val descriptionEn: String? = null,
     val nodeId: String? = null,
-    /** null означает, что положение помещения нельзя надёжно определить по текущему плану. */
     val x: Double? = null,
     val y: Double? = null,
-    /** Необязательный SVG ID; для сложных форм точный полигон хранится в JSON. */
     val svgElementId: String? = null,
     val svgElementIds: List<String> = emptyList(),
     val doorNodeId: String? = null,
     val doorNodeIds: List<String> = emptyList(),
     val centerX: Double? = null,
     val centerY: Double? = null,
-    /** Старый однополигональный формат оставлен для совместимости с сохранёнными наборами данных. */
     val polygon: List<SvgPoint> = emptyList(),
-    /** Несколько несмежных контуров одного физического помещения, например кабинета 230. */
     val polygons: List<List<SvgPoint>> = emptyList(),
     @SerializedName("aliases_ru") val aliasesRu: List<String> = emptyList(),
     @SerializedName("aliases_en") val aliasesEn: List<String> = emptyList(),
@@ -126,7 +117,6 @@ data class RouteInstruction(
 
 enum class LocationMode { GPS, MANUAL }
 
-/** Единый источник состояния экранов Compose. */
 data class IndoorUiState(
     val isLoading: Boolean = true,
     val loadError: String? = null,

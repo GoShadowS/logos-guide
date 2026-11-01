@@ -44,7 +44,6 @@ fun LogosTheme(
     }
     val typography = remember { logosTypography() }
     val shapes = remember {
-        // Сайт использует чёткие рамки и умеренные радиусы 8–14 px.
         Shapes(
             extraSmall = RoundedCornerShape(6.dp),
             small = RoundedCornerShape(8.dp),
@@ -82,7 +81,6 @@ fun LogosTheme(
     }
 }
 
-/** Палитра logos-guide.ru: глубокий синий акцент, холодный светлый фон и тёмно-синий текст. */
 private fun logosLightColors(accentArgb: Int) = lightColorScheme(
     primary = Color(accentArgb),
     onPrimary = Color.White,
@@ -160,7 +158,6 @@ private fun logosDarkColors(accentArgb: Int): androidx.compose.material3.ColorSc
     )
 }
 
-/** Чистый гротеск без засечек, как на сайте; заголовки плотнее и жирнее основного текста. */
 private fun logosTypography(): Typography {
     val defaults = Typography()
     val sans = FontFamily.SansSerif

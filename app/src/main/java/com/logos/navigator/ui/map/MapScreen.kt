@@ -127,6 +127,7 @@ import com.logos.navigator.utils.categoryLabel
 import com.logos.navigator.utils.formatDistance
 import com.logos.navigator.utils.localizedDescription
 import com.logos.navigator.utils.localizedName
+import com.logos.navigator.utils.localizedTitle
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -372,7 +373,6 @@ fun MapScreen(
                             onSelectGps = {
                                 isPlacingManualPosition = false
                                 if (state.destination != null) isRouteSheetVisible = true
-                                // Повторное нажатие на уже выбранный GPS только перезапускает остановившийся поиск.
                                 if (state.locationMode != LocationMode.GPS || !state.isGpsActive) requestGpsPermissionOrStart()
                             },
                             onSelectManual = {
@@ -403,7 +403,7 @@ fun MapScreen(
                             Box {
                                 val currentFloorTitle = state.navigation?.floors
                                     ?.firstOrNull { it.number == state.selectedFloor }
-                                    ?.title ?: stringResource(R.string.floor_title_format, state.selectedFloor)
+                                    ?.localizedTitle(context) ?: stringResource(R.string.floor_title_format, state.selectedFloor)
                                 FilterChip(
                                     selected = true,
                                     onClick = { floorMenuExpanded = true },
@@ -413,7 +413,7 @@ fun MapScreen(
                                 DropdownMenu(expanded = floorMenuExpanded, onDismissRequest = { floorMenuExpanded = false }) {
                                     state.navigation?.floors.orEmpty().sortedBy { it.number }.forEach { floorOption ->
                                         DropdownMenuItem(
-                                            text = { Text(floorOption.title) },
+                                            text = { Text(floorOption.localizedTitle(context)) },
                                             onClick = {
                                                 floorMenuExpanded = false
                                                 viewModel.selectFloor(floorOption.number)
@@ -710,7 +710,6 @@ fun MapScreen(
     }
 }
 
-/** Плашка поверх карты в стиле карточек сайта: белый фон, тонкая рамка, умеренный радиус. */
 @Composable
 private fun Modifier.mapOverlayLabel(): Modifier = this
     .clip(RoundedCornerShape(12.dp))
@@ -800,10 +799,6 @@ private fun GpsWarningCard(
     }
 }
 
-/**
- * Немодальная панель маршрута: карта под ней остаётся доступной для жестов,
- * а свернуть подробности можно без отмены маршрута.
- */
 @Composable
 private fun RoutePanel(
     state: IndoorUiState,
@@ -1392,7 +1387,6 @@ private fun shareRoom(context: Context, room: Room) {
     shareText(context, shareMessage, context.getString(R.string.share_room_button))
 }
 
-/** Геолокация работает и без спутникового приёмника: достаточно включённой сетевой геопозиции. */
 private fun isGpsProviderEnabled(context: Context): Boolean = runCatching {
     val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as? LocationManager
         ?: return@runCatching false

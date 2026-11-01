@@ -6,7 +6,6 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
-/** Bbox предварительно отсеивает заведомо неподходящие комнаты перед ray casting. */
 fun polygonBounds(polygon: List<PointF>): RectF? {
     if (polygon.isEmpty()) return null
     var left = Float.POSITIVE_INFINITY
@@ -22,7 +21,6 @@ fun polygonBounds(polygon: List<PointF>): RectF? {
     return RectF(left, top, right, bottom)
 }
 
-/** Проверяет попадание точки в произвольный полигон методом Ray Casting. */
 fun isPointInPolygon(point: PointF, polygon: List<PointF>): Boolean {
     if (polygon.size < 3) return false
     val bounds = polygonBounds(polygon) ?: return false

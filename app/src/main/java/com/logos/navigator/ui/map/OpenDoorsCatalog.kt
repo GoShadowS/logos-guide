@@ -2,14 +2,13 @@ package com.logos.navigator.ui.map
 
 import android.content.Context
 import com.logos.navigator.data.model.Room
+import com.logos.navigator.utils.isEnglishLocale
 
-/** Текст площадки на двух языках; при отсутствии английского локаля используется русский. */
 data class OpenDoorsText(
     val ru: String,
     val en: String,
 ) {
-    fun resolve(context: Context): String =
-        if (context.resources.configuration.locales[0].language == "en") en else ru
+    fun resolve(context: Context): String = if (context.isEnglishLocale()) en else ru
 }
 
 data class OpenDoorsVenue(
@@ -21,7 +20,6 @@ data class OpenDoorsVenue(
     val highlights: List<OpenDoorsText>,
 )
 
-/** Событийный каталог копирует проверенные карточки сайта и включается только в release. */
 object OpenDoorsCatalog {
     val venues = listOf(
         OpenDoorsVenue(
