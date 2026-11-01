@@ -244,7 +244,7 @@ fun SearchScreen(
                         onValueChange = { query = it },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
-                        shape = RoundedCornerShape(22.dp),
+                        shape = RoundedCornerShape(14.dp),
                         placeholder = {
                             Text(stringResource(R.string.search_hint), maxLines = 1, overflow = TextOverflow.Ellipsis)
                         },
@@ -410,7 +410,7 @@ private fun RoomListCard(
     }
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(18.dp),
+        shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
     ) {

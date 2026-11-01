@@ -10,7 +10,7 @@ import kotlin.math.abs
 import kotlin.math.hypot
 
 object SiteIndoorRouter {
-    enum class Transition { LIFT, STAIRS }
+    enum class Transition { LIFT, STAIRS, ANY }
 
     data class RoutePlan(
         val nodes: List<NavNode>,
@@ -438,8 +438,11 @@ object SiteIndoorRouter {
 
     private fun transferKeys(transition: Transition): List<String> = when (transition) {
         Transition.LIFT -> listOf("lift")
-        Transition.STAIRS -> listOf("stairs-west", "stairs-middle", "stairs-north")
+        Transition.STAIRS -> STAIR_KEYS
+        Transition.ANY -> STAIR_KEYS + "lift"
     }
+
+    private val STAIR_KEYS = listOf("stairs-west", "stairs-middle", "stairs-north")
 
     private fun pathLength(points: List<SvgPoint>): Double = points.zipWithNext().sumOf { (from, to) ->
         hypot(to.x - from.x, to.y - from.y)

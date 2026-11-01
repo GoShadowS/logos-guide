@@ -25,9 +25,6 @@ interface CategoriesDao {
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insert(category: FavoriteCategoryEntity): Long
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertImported(category: FavoriteCategoryEntity): Long
-
     @Update
     suspend fun update(category: FavoriteCategoryEntity)
 

@@ -22,7 +22,12 @@ data class RouteProjection(
     val deviationMeters: Double,
     val traveledMeters: Double,
     val totalMeters: Double,
+    val snappedX: Double = Double.NaN,
+    val snappedY: Double = Double.NaN,
 ) {
+    val remainingMeters: Double
+        get() = (totalMeters - traveledMeters).coerceAtLeast(0.0)
+
     val progress: Float
         get() = if (!totalMeters.isFinite() || totalMeters <= DISTANCE_EPSILON) {
             1f
@@ -80,6 +85,8 @@ object RouteProgressCalculator {
 
         var nearestDeviationMeters = Double.POSITIVE_INFINITY
         var traveledMeters = 0.0
+        var snappedX = Double.NaN
+        var snappedY = Double.NaN
 
         fun considerSegment(
             floor: Int,
@@ -103,6 +110,8 @@ object RouteProgressCalculator {
             if (deviation.isFinite() && deviation < nearestDeviationMeters) {
                 nearestDeviationMeters = deviation
                 traveledMeters = distanceBeforeSegment + segmentDistanceMeters * ratio
+                snappedX = projectedX
+                snappedY = projectedY
             }
         }
 
@@ -167,12 +176,16 @@ object RouteProgressCalculator {
                 floors,
             )
             traveledMeters = metersAtNode[nearest.index]
+            snappedX = nearest.value.x
+            snappedY = nearest.value.y
         }
 
         return RouteProjection(
             deviationMeters = nearestDeviationMeters,
             traveledMeters = traveledMeters.coerceIn(0.0, distances.totalMeters.coerceAtLeast(0.0)),
             totalMeters = distances.totalMeters,
+            snappedX = snappedX,
+            snappedY = snappedY,
         )
     }
 
