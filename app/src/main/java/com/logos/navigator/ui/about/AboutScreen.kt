@@ -66,7 +66,7 @@ private const val LICENSE_ASSET = "licenses/apache-2.0.txt"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AboutScreen(
+internal fun AboutScreen(
     onBack: () -> Unit,
     updateState: AppUpdateUiState,
     onCheckForUpdates: () -> Unit,
