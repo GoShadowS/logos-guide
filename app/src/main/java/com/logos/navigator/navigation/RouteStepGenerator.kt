@@ -9,7 +9,6 @@ import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.hypot
 
-/** Создаёт последовательность понятных действий из маршрутной ломаной и весов переходов. */
 object RouteStepGenerator {
     fun generate(
         graph: NavigationData,
@@ -113,7 +112,6 @@ object RouteStepGenerator {
         val outgoingX = next.x - current.x
         val outgoingY = next.y - current.y
         if (hypot(incomingX, incomingY) < MIN_SEGMENT || hypot(outgoingX, outgoingY) < MIN_SEGMENT) return null
-        // SVG-координаты растут вниз по экрану: положительный угол означает поворот направо.
         val cross = incomingX * outgoingY - incomingY * outgoingX
         val dot = incomingX * outgoingX + incomingY * outgoingY
         val degrees = Math.toDegrees(atan2(cross, dot)).toFloat()

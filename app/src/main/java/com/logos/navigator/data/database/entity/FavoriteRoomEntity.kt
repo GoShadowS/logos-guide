@@ -4,7 +4,6 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
-/** Помещение из встроенного каталога, помеченное пользователем как избранное. */
 @Entity(
     tableName = "favorite_rooms",
     indices = [Index(value = ["roomId"], unique = true), Index(value = ["categoryId"]), Index(value = ["sortOrder"])],

@@ -67,7 +67,6 @@ import com.logos.navigator.data.model.AppLanguage
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
 
-/** Первичный мастер настройки приложения и обучения основным действиям. */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun OnboardingScreen(

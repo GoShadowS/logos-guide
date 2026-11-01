@@ -52,7 +52,7 @@ function FloorRoom({ room, selected, onSelect, onFloorRequest, gameTargetId, gam
     if (now - prior.time < 450 && Math.hypot(event.clientX - prior.x, event.clientY - prior.y) < 36) {
       lastTap.current.time = 0
       switchedAt.current = now
-      skipClick.current = true // Touch browsers may still dispatch click after pointerup.
+      skipClick.current = true
       event.preventDefault()
       event.stopPropagation()
       switchFloor()
@@ -102,7 +102,6 @@ export default function FloorMap({ floor = 1, selectedId = '', onSelect, onFloor
     const stage = viewport.querySelector('.floor-map-stage')
     if (!stage) return
     const scale = stage.getBoundingClientRect().width / width
-    // Don't move a staircase between the first and second tap on a phone.
     const timer = window.setTimeout(() => {
       viewport.scrollLeft = Math.max(0, focusPoint[0] * scale - viewport.clientWidth / 2)
       viewport.scrollTop = Math.max(0, focusPoint[1] * scale - viewport.clientHeight / 2)
@@ -122,7 +121,7 @@ export default function FloorMap({ floor = 1, selectedId = '', onSelect, onFloor
     const rect = svg.getBoundingClientRect()
     const point = coordinates ? [coordinates.x, coordinates.y] : [((event.clientX - rect.left) / rect.width) * width, ((event.clientY - rect.top) / rect.height) * height]
     event.preventDefault()
-    event.stopPropagation() // Do not select a room while placing a precise pin.
+    event.stopPropagation()
     onPointSelect({ floor, x: Math.round(point[0] * 10) / 10, y: Math.round(point[1] * 10) / 10 })
   }
 

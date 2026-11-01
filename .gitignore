@@ -1,4 +1,3 @@
-# Android Studio / Gradle
 .gradle/
 .idea/
 **/build/
@@ -7,21 +6,17 @@ local.properties
 .externalNativeBuild/
 .cxx/
 
-# Подписывающие ключи и локальные секреты никогда не добавляются в Git
 *.jks
 *.keystore
 keystore.properties
 
-# Локальные проверки / Python
 .venv/
 __pycache__/
 *.py[cod]
 .pytest_cache/
 
-# Не относится к Android-приложению
 /preview/
 /docs/PREVIEW_RU.md
 
-# ОС и редакторы
 .DS_Store
 Thumbs.db

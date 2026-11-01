@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- App name. -->
     <string name="app_name">LOGOS: Guide</string>
     <string name="app_tagline">Navigation around Logos College</string>
 
-    <!-- Common interface. -->
     <string name="nav_map">Map</string>
     <string name="nav_favorites">Favorites</string>
     <string name="nav_search">Search</string>
@@ -25,13 +23,22 @@
     <string name="no_description">No description</string>
     <string name="floor_number_format">Floor %1$d</string>
     <string name="floor_title_format">Floor %1$d</string>
+    <string name="map_label_academic_office">ACADEMIC OFFICE</string>
+    <string name="map_label_assembly_hall">ASSEMBLY HALL</string>
+    <string name="map_label_directors_office">DIRECTOR’S OFFICE</string>
+    <string name="map_label_entrance">ENTRANCE</string>
+    <string name="map_label_hall">HALL</string>
+    <string name="map_label_first_floor">FLOOR 1</string>
+    <string name="map_label_lab_short">LAB</string>
+    <string name="map_label_library">LIBRARY</string>
+    <string name="map_label_practical_short">PRACTICAL</string>
+    <string name="map_label_psychologist_short">PSYCH.</string>
     <string name="cabinet_number_format">Room %1$s</string>
     <string name="minutes_format">about %1$d min</string>
     <string name="meters_format">≈ %1$d m</string>
     <string name="kilometers_format">≈ %1$.1f km</string>
     <string name="steps_format">≈ %1$d steps</string>
 
-    <!-- Map and location. -->
     <string name="map_screen_title">College map</string>
     <string name="map_screen_subtitle">Find a room and plan a route</string>
     <string name="location_gps">GPS</string>
@@ -163,14 +170,12 @@
     <string name="favorite_star_remove">Remove from favorites</string>
     <string name="room_number_floor_category">%1$s · %2$s · %3$s</string>
 
-    <!-- Room details. -->
     <string name="room_floor_category">%1$s · %2$s · %3$s</string>
     <string name="route_button">Build route</string>
     <string name="favorite_add">Add to favorites</string>
     <string name="favorite_remove">Remove from favorites</string>
     <string name="close_room_card">Close room card</string>
 
-    <!-- Search and directory. -->
     <string name="search_title">Search and directory</string>
     <string name="rooms_count">%1$d rooms in directory</string>
     <string name="search_label">Room name or number</string>
@@ -204,7 +209,6 @@
     <string name="no_results_title">No results found</string>
     <string name="no_results_body">Change your query or clear the filters. Search and the directory work offline.</string>
 
-    <!-- Favorites, history and saved routes. -->
     <string name="favorites_title">Favorites</string>
     <string name="favorites_local_only">Stored on this device</string>
     <string name="favorite_tab_rooms">Rooms</string>
@@ -284,7 +288,6 @@
     <string name="route_length_recalculating">Distance will be recalculated</string>
     <string name="backup_file_name">logos-favorites.json</string>
 
-    <!-- Settings. -->
     <string name="settings_appearance">Appearance</string>
     <string name="settings_map">Map</string>
     <string name="settings_navigation">Navigation</string>
@@ -297,9 +300,9 @@
     <string name="theme_dark">Dark</string>
     <string name="settings_language">App language</string>
     <string name="language_system">System default</string>
-    <string name="language_russian">Русский</string>
+    <string name="language_russian">Russian</string>
     <string name="language_english">English</string>
-    <string name="language_russian_flag">🇷🇺  Русский</string>
+    <string name="language_russian_flag">🇷🇺  Russian</string>
     <string name="language_english_flag">🇬🇧  English</string>
     <string name="settings_accent">Accent color</string>
     <string name="accent_logos">Logos blue</string>
@@ -401,7 +404,6 @@
     <string name="route_recalculating">Recalculating route…</string>
     <string name="route_recalculated">Route updated for your position.</string>
 
-    <!-- About screen and splash. -->
     <string name="about_title">About</string>
     <string name="about_version_value">Version %1$s</string>
     <string name="about_project_section">Project</string>
@@ -418,13 +420,31 @@
     <string name="about_project_credits">Authorship</string>
     <string name="about_project_credits_value">Developed by students of Logos Technical College</string>
     <string name="about_mode_label">Operation</string>
-    <string name="about_mode_value">Offline — maps and directory are stored in the app</string>
+    <string name="about_mode_value">Maps, directory and routes work offline; updates require internet</string>
     <string name="about_purpose_label">Purpose</string>
     <string name="about_purpose_value">Indoor wayfinding at the college</string>
     <string name="about_project_warning">Routes are based on the supplied plans. Before use, verify room coordinates, passable paths, doors and floor connections in the building.</string>
+    <string name="update_section_title">Updates</string>
+    <string name="update_section_description">New versions are checked and downloaded through free GitHub Releases.</string>
+    <string name="update_check_button">Check for updates</string>
+    <string name="update_checking">Checking for updates…</string>
+    <string name="update_up_to_date">The latest version is installed.</string>
+    <string name="update_check_failed">Could not check for updates. Check the internet connection.</string>
+    <string name="update_available_format">Version %1$s is available.</string>
+    <string name="update_dialog_title">Update available</string>
+    <string name="update_dialog_message">Version %1$s. Downloading requires internet. Android will ask you to confirm installation.</string>
+    <string name="update_download_button">Download</string>
+    <string name="update_install_button">Install</string>
+    <string name="update_later_button">Later</string>
+    <string name="update_downloading">Downloading update…</string>
+    <string name="update_progress_format">Downloaded %1$d%%</string>
+    <string name="update_downloaded">The APK was downloaded and verified.</string>
+    <string name="update_download_failed">The APK could not be downloaded or verified. Try again later.</string>
+    <string name="update_install_permission">Allow this app to install APK files in settings, then tap Install.</string>
+    <string name="update_installer_opened">The system installer is open. Confirm installation in Android.</string>
+    <string name="update_installer_failed">Could not open the system installer.</string>
     <string name="splash_description">LOGOS: Guide splash screen</string>
 
-    <!-- Ten-step interactive tutorial. -->
     <string name="onboarding_welcome_title">Welcome to LOGOS: Guide!</string>
     <string name="onboarding_welcome_body">A convenient guide to Logos College.</string>
     <string name="onboarding_welcome_tip">Floor maps, room search and offline routes.</string>
@@ -470,7 +490,6 @@
     <string name="onboarding_permission_skipped">Manual positioning selected. You can grant permission later in Settings.</string>
     <string name="tutorial_restarted">Tutorial started again.</string>
 
-    <!-- Turn-by-turn navigation. -->
     <string name="step_start">Start moving from the starting point</string>
     <string name="step_start_room">Leave “%1$s” through its door</string>
     <string name="step_straight">Go straight</string>
@@ -504,7 +523,6 @@
     <string name="route_no_steps">Turn-by-turn guidance is unavailable for this route.</string>
     <string name="accessibility_route_progress">%1$d percent of the route completed</string>
 
-    <!-- SVG assets, data and diagnostics. -->
     <string name="data_missing_floor">No floors are available in the project.</string>
     <string name="data_load_error">Could not load local data. Check navigation_graph.json and rooms.json.%1$s</string>
     <string name="svg_floor_missing">The SVG map for “%1$s” is missing or unreadable.%2$s</string>
@@ -517,7 +535,7 @@
     <string name="favorite_history_error">Could not record route history: %1$s</string>
     <string name="room_not_in_catalog">The destination is no longer in the local directory.</string>
     <string name="tap_coordinates_format">SVG viewBox: x=%1$.2f, y=%2$.2f</string>
-    <string name="app_offline_description">Offline guide with SVG plans, search, A*, GPS and manual positioning, Favorites, Room and DataStore.</string>
+    <string name="app_offline_description">Maps, directory and routes work offline; checking for and downloading updates requires internet.</string>
     <string name="settings_title">Settings</string>
     <string name="settings_changes_apply">Changes take effect immediately</string>
     <string name="action_back">Back</string>

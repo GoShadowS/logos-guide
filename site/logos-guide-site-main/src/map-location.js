@@ -39,8 +39,6 @@ export function addGpsAnchor(anchors, floor, point, coords) {
   return { ...anchors, [floor]: current.length === 1 ? [current[0], next] : [next] }
 }
 
-// A pair of user-recorded GPS ↔ plan points gives a 2D similarity transform.
-// One point is only an anchor, not indoor positioning: never pretend it moves.
 export function projectGpsPoint(coords, anchors) {
   if (!coords || !anchors?.length) return null
   const first = anchors[0]
@@ -52,7 +50,6 @@ export function projectGpsPoint(coords, anchors) {
   const planX = second.x - first.x
   const planY = second.y - first.y
   const [east, south] = geoDelta(first, coords)
-  // [a -b; b a], where a,b express scale and rotation of the plan.
   const a = (planX * dx + planY * dy) / metresSquared
   const b = (planY * dx - planX * dy) / metresSquared
   return {

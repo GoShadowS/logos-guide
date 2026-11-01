@@ -35,7 +35,6 @@
 <rect x="-0.70713" y="0.70713" width="60.8131" height="28.2852" transform="matrix(-1 0 0 1 146.813 328)" fill="#DFE6FF" stroke="#ACAEB3" stroke-width="1.41426"/>
 <rect x="147.293" y="384.293" width="60.5857" height="55.5857" transform="rotate(180 147.293 384.293)" fill="#DFE6FF" stroke="#ACAEB3" stroke-width="1.41426"/>
 <rect x="-0.70713" y="0.70713" width="60.8131" height="32.9994" transform="matrix(-1 0 0 1 147.083 382.793)" fill="#DFE6FF" stroke="#ACAEB3" stroke-width="1.41426"/>
-<!-- West wing: rooms 207 and 225 align with the corridor and stay inside the viewBox. -->
 <path d="M0 417H62V477H86V560H0V417Z" fill="#DFE6FF" stroke="#ACAEB3" stroke-width="1.41426"/>
 <rect x="86" y="417" width="62" height="143" fill="#DFE6FF" stroke="#ACAEB3" stroke-width="1.41426"/>
 <mask id="path-33-inside-4_2025_233" fill="white">

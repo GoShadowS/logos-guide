@@ -4,7 +4,6 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- Упрощённая стрелка компаса в фирменных цветах. -->
     <path
         android:fillColor="#FFFFFF"
         android:pathData="M54,18 C34.12,18 18,34.12 18,54 C18,73.88 34.12,90 54,90 C73.88,90 90,73.88 90,54 C90,34.12 73.88,18 54,18 Z M67.8,39.2 L57.2,62.6 L40.2,68.8 L50.8,45.4 Z" />

@@ -3,6 +3,7 @@
     {
       "number": 1,
       "title": "1 этаж",
+      "titleEn": "Floor 1",
       "mapAsset": "floors/floor_1.svg",
       "width": 758,
       "height": 552,
@@ -13,6 +14,7 @@
     {
       "number": 2,
       "title": "2 этаж",
+      "titleEn": "Floor 2",
       "mapAsset": "floors/floor_2.svg",
       "width": 767,
       "height": 561,

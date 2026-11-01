@@ -9,7 +9,6 @@ import com.logos.navigator.ui.MainViewModel
 import com.logos.navigator.ui.MainViewModelFactory
 import com.logos.navigator.ui.NavigatorApp
 
-/** Единственная Activity приложения; переходы и экраны построены на Compose Navigation. */
 class MainActivity : AppCompatActivity() {
     private val viewModel: MainViewModel by viewModels { MainViewModelFactory(application) }
 

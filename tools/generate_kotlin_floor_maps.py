@@ -1,9 +1,4 @@
 #!/usr/bin/env python3
-"""Генерирует Kotlin Canvas/Path-представление двух исходных планов.
-
-SVG остаются эталонными исходниками и используются только этим генератором/валидаторами;
-Android-приложение не загружает и не разбирает SVG во время работы.
-"""
 
 from __future__ import annotations
 
@@ -20,7 +15,7 @@ TOOLS_DIR = Path(__file__).resolve().parent
 REPO_ROOT = TOOLS_DIR.parent
 sys.path.insert(0, str(TOOLS_DIR))
 
-from extract_svg_geometry import IDENTITY, Matrix, multiply, parse_transform, view_box, walk_shapes  # noqa: E402
+from extract_svg_geometry import IDENTITY, Matrix, multiply, parse_transform, view_box, walk_shapes
 SVG_TAGS_THAT_ARE_DEFINITIONS = {"defs", "mask", "clipPath", "linearGradient", "metadata", "title", "desc"}
 INHERITED_PAINT_ATTRIBUTES = {
     "fill", "fill-opacity", "fill-rule", "stroke", "stroke-opacity", "stroke-width",
@@ -38,10 +33,8 @@ REFERENCE_SVGS = {
     2: REPO_ROOT / "maps_and_design/map2lower.svg",
 }
 
-
 def local_name(tag: str) -> str:
     return tag.rsplit("}", 1)[-1]
-
 
 def validate_svg_attributes(root: ET.Element) -> None:
     group_style = INHERITED_PAINT_ATTRIBUTES | {"id", "opacity", "transform", "clip-path"}
@@ -76,7 +69,6 @@ def validate_svg_attributes(root: ET.Element) -> None:
             if element.get("fill", "black").lower() != "white":
                 raise ValueError(f"mask {element.get('id')} должен состоять из белых непрозрачных контуров")
 
-
 def reference_signature(element: ET.Element) -> tuple[object, ...]:
     attributes = tuple(sorted(
         (name, value)
@@ -91,7 +83,6 @@ def reference_signature(element: ET.Element) -> tuple[object, ...]:
         tuple(reference_signature(child) for child in list(element)),
     )
 
-
 def validate_reference_copy(floor_number: int, runtime_source: Path) -> None:
     reference = REFERENCE_SVGS[floor_number]
     source_root = ET.parse(runtime_source).getroot()
@@ -101,7 +92,6 @@ def validate_reference_copy(floor_number: int, runtime_source: Path) -> None:
             f"{runtime_source.relative_to(REPO_ROOT)} отличается от эталона "
             f"{reference.relative_to(REPO_ROOT)} не только добавленными ID комнат"
         )
-
 
 def f32(value: float) -> str:
     if not math.isfinite(value):
@@ -113,17 +103,13 @@ def f32(value: float) -> str:
         text += ".0"
     return text + "f"
 
-
 def kotlin_string(value: str) -> str:
     return json.dumps(value, ensure_ascii=False)
 
-
 def matrix_expression(matrix: Matrix) -> str:
     a, b, c, d, e, f = matrix
-    # Android Matrix хранит [scaleX, skewX, tx, skewY, scaleY, ty, ...].
     values = (a, c, e, b, d, f, 0.0, 0.0, 1.0)
     return "floatArrayOf(" + ", ".join(f32(value) for value in values) + ")"
-
 
 def parse_number_value(raw: str | None, name: str, default: float = 0.0) -> float:
     if raw is None:
@@ -133,10 +119,8 @@ def parse_number_value(raw: str | None, name: str, default: float = 0.0) -> floa
         raise ValueError(f"Неподдерживаемое значение {name}={raw!r}")
     return float(match.group(1))
 
-
 def read_number(element: ET.Element, name: str, default: float = 0.0) -> float:
     return parse_number_value(element.get(name), name, default)
-
 
 def path_expression(element: ET.Element, matrix: Matrix, fill_rule: str = "nonzero") -> str:
     tag = local_name(element.tag)
@@ -168,7 +152,6 @@ def path_expression(element: ET.Element, matrix: Matrix, fill_rule: str = "nonze
         )
     raise ValueError(f"Неподдерживаемый SVG-элемент в контуре: {tag}")
 
-
 def parse_color(value: str, opacity: float = 1.0) -> tuple[int, int, int, int]:
     raw = value.strip().lower()
     named = {"black": "#000000", "white": "#ffffff", "red": "#ff0000", "blue": "#0000ff"}
@@ -191,12 +174,10 @@ def parse_color(value: str, opacity: float = 1.0) -> tuple[int, int, int, int]:
     alpha = max(0, min(255, round(alpha * opacity)))
     return alpha, red, green, blue
 
-
 def argb_literal(color: tuple[int, int, int, int]) -> str:
     alpha, red, green, blue = color
     value = (alpha << 24) | (red << 16) | (green << 8) | blue
     return f"0x{value:08X}.toInt()"
-
 
 def parse_opacity(value: str | None, default: float = 1.0) -> float:
     if value is None:
@@ -206,7 +187,6 @@ def parse_opacity(value: str | None, default: float = 1.0) -> float:
         raise ValueError(f"Некорректная opacity: {value!r}")
     return max(0.0, min(1.0, result))
 
-
 def stop_offset(value: str | None, default: float) -> float:
     if value is None:
         return default
@@ -214,7 +194,6 @@ def stop_offset(value: str | None, default: float) -> float:
     if raw.endswith("%"):
         return max(0.0, min(1.0, float(raw[:-1]) / 100.0))
     return max(0.0, min(1.0, float(raw)))
-
 
 def reference_id(value: str | None, attribute: str) -> str | None:
     if value is None or value == "none":
@@ -224,10 +203,8 @@ def reference_id(value: str | None, attribute: str) -> str | None:
         raise ValueError(f"Неподдерживаемая ссылка {attribute}={value!r}")
     return match.group(1)
 
-
 def compose(parent: Matrix, element: ET.Element) -> Matrix:
     return multiply(parent, parse_transform(element.get("transform")))
-
 
 def uniform_scale(matrix: Matrix) -> float | None:
     a, b, c, d, _, _ = matrix
@@ -237,7 +214,6 @@ def uniform_scale(matrix: Matrix) -> float | None:
         return None
     return (scale_x + scale_y) / 2.0
 
-
 def gradient_expression(gradient: ET.Element) -> str:
     if gradient.get("gradientUnits", "objectBoundingBox") != "userSpaceOnUse":
         raise ValueError(f"Для gradient {gradient.get('id')} ожидался userSpaceOnUse")
@@ -245,8 +221,6 @@ def gradient_expression(gradient: ET.Element) -> str:
         raise ValueError(f"Неподдерживаемый spreadMethod в {gradient.get('id')}")
     if gradient.get("gradientTransform"):
         matrix = parse_transform(gradient.get("gradientTransform"))
-        # Для текущих карт преобразования градиентов нет. Не принимать выражения,
-        # которые нельзя без потери смысла представить координатами LinearGradient.
         if matrix != IDENTITY:
             raise ValueError(f"Преобразование градиента {gradient.get('id')} требует отдельной обработки")
     x1 = read_number(gradient, "x1")
@@ -267,8 +241,6 @@ def gradient_expression(gradient: ET.Element) -> str:
         stops.append((offset, argb_literal(parse_color(color, alpha))))
     if len(stops) < 2:
         raise ValueError(f"В gradient {gradient.get('id')} меньше двух color stops")
-    # Android LinearGradient требует позиции, если их длина совпадает с цветами;
-    # позиции с равными значениями допускаются и сохраняют SVG-переходы.
     colors = ", ".join(color for _, color in stops)
     positions = ", ".join(f32(offset) for offset, _ in stops)
     return (
@@ -276,7 +248,6 @@ def gradient_expression(gradient: ET.Element) -> str:
         f"{f32(x1)}, {f32(y1)}, {f32(x2)}, {f32(y2)}, "
         f"intArrayOf({colors}), floatArrayOf({positions}), Shader.TileMode.CLAMP)"
     )
-
 
 def definition_paths(element: ET.Element, parent_matrix: Matrix) -> list[str]:
     result: list[str] = []
@@ -299,7 +270,6 @@ def definition_paths(element: ET.Element, parent_matrix: Matrix) -> list[str]:
     if not result:
         raise ValueError(f"Пустое определение {local_name(element.tag)} {element.get('id')}")
     return result
-
 
 def paint_expression(
     color: str | None,
@@ -324,7 +294,6 @@ def paint_expression(
         f"strokeWidth = {f32(stroke_width)}, strokeCap = Paint.Cap.{stroke_cap.upper()}, "
         f"strokeJoin = Paint.Join.{stroke_join.upper()}, strokeMiter = {f32(miter_limit)}, shader = {shader})"
     )
-
 
 def generate_floor(floor_number: int, svg_path: Path) -> tuple[str, dict[str, object]]:
     validate_reference_copy(floor_number, svg_path)
@@ -517,13 +486,11 @@ def generate_floor(floor_number: int, svg_path: Path) -> tuple[str, dict[str, ob
     }
     return "\n".join(lines), metadata
 
-
 def generate_source() -> tuple[str, list[dict[str, object]]]:
     per_floor = [generate_floor(floor_number, path) for floor_number, path in FLOORS]
     floor_blocks = [block for block, _ in per_floor]
     metadata = [item for _, item in per_floor]
-    code = '''// Автоматически создано tools/generate_kotlin_floor_maps.py. Не редактировать вручную.
-package com.logos.navigator.ui.map
+    code = '''package com.logos.navigator.ui.map
 
 import android.graphics.Canvas
 import android.graphics.Color
@@ -537,22 +504,19 @@ import android.graphics.Shader
 import androidx.core.graphics.PathParser
 import kotlin.math.roundToInt
 
-/** Векторные планы здания, собранные из исходных SVG для нативной отрисовки Canvas/Path. */
 internal object GeneratedFloorMaps {
     private data class MapDrawOp(
         val path: Path,
         val fillPaint: Paint?,
         val strokePaint: Paint?,
-        /** Каждый список — объединённая фигура одного SVG clipPath. */
         val clipGroups: List<List<Path>>,
-        /** SVG-маски этих планов содержат белые контуры и эквивалентны обрезке по Path. */
         val maskPaths: List<Path>,
         val sourceId: String,
     )
 
     private fun svgPath(data: String, matrixValues: FloatArray?, fillType: Path.FillType): Path {
         val path = PathParser.createPathFromPathData(data)
-            ?: error("Некорректный SVG path в сгенерированной карте")
+            ?: error("Invalid SVG path in generated map")
         if (matrixValues != null) {
             path.transform(Matrix().apply { setValues(matrixValues) })
         }
@@ -611,7 +575,6 @@ internal object GeneratedFloorMaps {
         operations.forEach { operation ->
             val saveCount = canvas.save()
             operation.clipGroups.forEach { group ->
-                // Фигуры одного clipPath объединяются, а разные clipPath пересекаются.
                 val union = Path()
                 group.forEach { union.addPath(it) }
                 canvas.clipPath(union)
@@ -642,7 +605,6 @@ internal object GeneratedFloorMaps {
         return picture
     }
 
-    /** Рисует в координатах исходного viewBox; масштабирование выполняется матрицей карты. */
     fun draw(canvas: Canvas, floorNumber: Int) {
         when (floorNumber) {
             1 -> floor1Picture.draw(canvas)
@@ -650,7 +612,6 @@ internal object GeneratedFloorMaps {
         }
     }
 
-    /** Возвращает полигон SVG-элемента для прежней логики hit-test и редких fallback-геометрий. */
     fun roomPolygons(floorNumber: Int, elementIds: List<String>): List<List<PointF>> {
         val source = when (floorNumber) {
             1 -> f1RoomPolygons
@@ -663,9 +624,8 @@ internal object GeneratedFloorMaps {
 '''
     return code, metadata
 
-
 def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description="Генерация векторных Android-карт из SVG-планов")
     parser.add_argument("--check", action="store_true", help="проверить, что Kotlin-файл совпадает с исходными SVG")
     args = parser.parse_args()
     try:
@@ -689,7 +649,6 @@ def main() -> int:
     for item in metadata:
         print(f"  этаж {item['floor']}: {item['drawOperations']} контуров, {item['roomPolygons']} room-полигонов, viewBox={item['viewBox']}")
     return 0
-
 
 if __name__ == "__main__":
     raise SystemExit(main())

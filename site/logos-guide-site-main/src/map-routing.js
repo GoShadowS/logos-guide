@@ -31,7 +31,6 @@ function endpoint(value) {
   if (typeof value !== 'string' && !isManualPoint(value, rooms)) return null
 
   if (!room) {
-    // A manually selected point in an actual corridor, not inside a room.
     const [x, y] = [value.x, value.y]
     const inMain = y >= 156 && y <= (value.floor === 1 ? 179 : 182) && x <= 610
     const inWest = x >= 62 && x <= 86 && y >= 179
@@ -52,8 +51,6 @@ function endpoint(value) {
 
   if (typeof value !== 'string') {
     const from = [value.x, value.y]
-    // Stay inside the selected room until its one known doorway. In particular,
-    // a point in the lower west wing must not jump across the corridor.
     const via = branch === 'west' ? [door[0], from[1]] : [from[0], door[1]]
     path = [from, via, ...path]
   }
@@ -100,8 +97,6 @@ export function buildIndoorRoute(start, targetId, transition = 'lift') {
   return candidates.sort((first, second) => first.length - second.length)[0] || { byFloor: {}, transfer: null, length: 0 }
 }
 
-// Called by both the full-size plan and route previews, so the same stairwell
-// and the same wall-aware path are displayed on both floors.
 export function calculateIndoorRoute(start, targetId, floor, transition = 'lift') {
   return buildIndoorRoute(start, targetId, transition).byFloor[floor] || emptyRoute
 }

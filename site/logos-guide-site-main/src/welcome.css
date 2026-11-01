@@ -1,8 +1,4 @@
-/* Приветственный диалог при первом заходе + насыщенная тёмная тема.
-   Файл подключается последним, поэтому его тёмные переменные и поверхности
-   intentionally перекрывают более бледные значения из refinement.css. */
 
-/* ---------- Welcome dialog ---------- */
 .welcome-backdrop {
   position: fixed; inset: 0; z-index: 120;
   display: grid; place-items: center; overflow-y: auto;
@@ -70,7 +66,6 @@
   .welcome-app-copy { display: flex; flex-direction: column; align-items: center; }
 }
 
-/* ---------- Насыщенная тёмная тема ---------- */
 html[data-theme='dark'] {
   --bg: #040b1d;
   --surface: #0a1c3f;

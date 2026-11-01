@@ -32,6 +32,7 @@ import com.logos.navigator.navigation.RouteDirectionCalculator
 import com.logos.navigator.svg.SvgCoordinateConverter
 import com.logos.navigator.svg.isPointInPolygon
 import com.logos.navigator.svg.polygonBounds
+import com.logos.navigator.utils.isEnglishLocale
 import kotlin.math.hypot
 import kotlin.math.PI
 import kotlin.math.atan2
@@ -40,7 +41,6 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sin
 
-/** Нативный Canvas-view: базовый план рисуется сгенерированными Kotlin Path-командами. */
 class CanvasMapView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -149,7 +149,6 @@ class CanvasMapView @JvmOverloads constructor(
         contentDescription = context.getString(R.string.map_coordinates_description)
     }
 
-    /** Обновляет данные карты. Вызывается из AndroidView.update при каждом изменении StateFlow. */
     fun submit(
         floor: FloorPlan?,
         rooms: List<Room>,
@@ -270,6 +269,7 @@ class CanvasMapView @JvmOverloads constructor(
         canvas.setDrawFilter(drawFilterFor(settings.mapRenderQuality))
         canvas.concat(mapMatrix)
         GeneratedFloorMaps.draw(canvas, currentFloor.number)
+        if (context.isEnglishLocale()) EnglishFloorMapLabels.draw(context, canvas, currentFloor.number)
         val mapScale = fitScale * zoom
         if (settings.showCoordinateGrid) drawCoordinateGrid(canvas, currentFloor)
         if (settings.showNavigationEdges) drawDebugEdges(canvas, currentFloor)
@@ -373,7 +373,6 @@ class CanvasMapView @JvmOverloads constructor(
                 val polygons = if (catalogPolygons.isNotEmpty()) {
                     catalogPolygons
                 } else {
-                    // Используем заранее сгенерированные Path-координаты для редких записей без полигонов в JSON.
                     GeneratedFloorMaps.roomPolygons(
                         floor.number,
                         (room.svgElementIds + listOfNotNull(room.svgElementId)).distinct(),
@@ -495,7 +494,6 @@ class CanvasMapView @JvmOverloads constructor(
         debugPaint.style = Paint.Style.STROKE
     }
 
-    /** Использует заранее собранные пути: на жестах не создаются списки и новые Path. */
     private fun drawRoute(canvas: Canvas, floor: FloorPlan, mapScale: Float) {
         if (routeSegments.isEmpty()) return
         val widthInSvgUnits = settings.routeLineWidthDp * resources.displayMetrics.density / max(mapScale, 0.0001f)
@@ -539,7 +537,6 @@ class CanvasMapView @JvmOverloads constructor(
         routePaint.pathEffect = null
     }
 
-    /** Подсветка выбранной комнаты отделяется от плана контрастным ореолом и акцентной рамкой. */
     private fun drawRoomHighlights(canvas: Canvas, floor: FloorPlan, mapScale: Float) {
         val destinationId = destination?.takeIf { it.floor == floor.number }?.id
         val selectedId = selectedRoom?.takeIf { it.floor == floor.number }?.id
@@ -569,7 +566,6 @@ class CanvasMapView @JvmOverloads constructor(
                 selectionFillPaint.color = fillColor
                 canvas.drawPath(path, selectionFillPaint)
 
-                // Обрезаем обводку по полигону комнаты, чтобы рамка не увеличивала её контур.
                 val highlightSaveCount = canvas.save()
                 canvas.clipPath(path)
                 selectionHaloPaint.strokeWidth = 2.4f * screenDensity
@@ -582,7 +578,6 @@ class CanvasMapView @JvmOverloads constructor(
         }
     }
 
-    /** Подсвечивает площадки события заметной, но компактной отметкой поверх плана. */
     private fun drawOpenDoorsMarkers(canvas: Canvas, mapScale: Float) {
         if (openDoorsRoomIds.isEmpty()) return
         val radius = 8.5f * resources.displayMetrics.density / max(mapScale, 0.0001f)

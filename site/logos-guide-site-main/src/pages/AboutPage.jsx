@@ -12,7 +12,6 @@ const questions = [
   { title: 'Что делать, если кабинет не найден?', answer: 'Попробуйте номер или часть названия в справочнике. Если надпись на двери отличается от схемы, ориентируйтесь на указатели и уточняйте у сотрудников.' },
 ]
 
-// To replace placeholders, add JPGs with these exact filenames in public/team/.
 const team = [
   { name: 'Давыдова Ксения', role: 'Руководитель проекта', photo: 'ksenia-davydova.jpg', initials: 'КД' },
   { name: 'Лисовой Данила', role: 'Дизайнер и разработчик сайта', photo: 'danila-lisovoy.jpg', initials: 'ДЛ' },

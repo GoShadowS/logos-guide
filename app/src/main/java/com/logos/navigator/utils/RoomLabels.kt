@@ -3,12 +3,26 @@ package com.logos.navigator.utils
 import android.content.Context
 import com.logos.navigator.R
 import com.logos.navigator.data.model.DistanceUnit
+import com.logos.navigator.data.model.FloorPlan
 import com.logos.navigator.data.model.Room
 import java.text.Normalizer
 import java.util.Locale
 import kotlin.math.ceil
 
-/** Подписи, зависящие от активной локали Android. */
+fun Context.appLocale(): Locale {
+    val locales = resources.configuration.locales
+    val locale = if (locales.isEmpty) Locale.getDefault() else locales[0]
+    return if (locale.language in SUPPORTED_APP_LANGUAGES) locale else Locale.ENGLISH
+}
+
+fun Context.isEnglishLocale(): Boolean = appLocale().language == "en"
+
+fun FloorPlan.localizedTitle(context: Context): String = if (context.isEnglishLocale()) {
+    titleEn?.takeIf(String::isNotBlank) ?: context.getString(R.string.floor_title_format, number)
+} else {
+    title
+}
+
 fun Context.categoryLabel(category: String): String = getString(
     when (category.lowercase(Locale.ROOT)) {
         "classroom" -> R.string.category_classrooms
@@ -33,21 +47,14 @@ fun Context.nodeTypeLabel(type: String): String = getString(
     },
 )
 
-fun Room.localizedName(context: Context): String {
-    val language = context.resources.configuration.locales[0]?.language
-    return if (language == "en") nameEn?.takeIf(String::isNotBlank) ?: name else name
-}
+fun Room.localizedName(context: Context): String =
+    if (context.isEnglishLocale()) nameEn?.takeIf(String::isNotBlank) ?: name else name
 
-fun Room.localizedDescription(context: Context): String? {
-    val language = context.resources.configuration.locales[0]?.language
-    return (if (language == "en") descriptionEn else description)
-        ?.takeIf(String::isNotBlank)
-}
+fun Room.localizedDescription(context: Context): String? =
+    (if (context.isEnglishLocale()) descriptionEn else description)?.takeIf(String::isNotBlank)
 
-/** Возвращает все номера кабинетов, если одна зона объединяет несколько записей справочника. */
 fun Room.numberLabels(): List<String> = number.orEmpty().split(ROOM_NUMBER_SPLITTER).filter(String::isNotBlank)
 
-/** Возвращает номер помещения, который лучше всего соответствует введённому запросу. */
 fun Room.matchingNumberLabel(query: String): String? {
     val numberQuery = query.split(SEARCH_TOKEN_SPLITTER)
         .filter { token -> token.any(Char::isDigit) }
@@ -59,7 +66,6 @@ fun Room.matchingNumberLabel(query: String): String? {
         ?.first
 }
 
-/** Возвращает варианты строки для поиска на русском и в распространённых вариантах транслитерации. */
 fun searchForms(value: String): Set<String> {
     val normalized = normalizeSearchText(value)
     if (normalized.isEmpty()) return emptySet()
@@ -89,7 +95,6 @@ fun searchForms(value: String): Set<String> {
     }.filter(String::isNotEmpty).toSet()
 }
 
-/** Возвращает релевантность результата либо null, если хотя бы одно слово запроса не совпало. */
 fun roomSearchScore(query: String, roomNumber: String?, searchableValues: Iterable<String>): Int? {
     val queryTokens = query.trim().split(SEARCH_TOKEN_SPLITTER).filter(String::isNotEmpty)
     if (queryTokens.isEmpty()) return 0
@@ -128,7 +133,6 @@ fun roomSearchScore(query: String, roomNumber: String?, searchableValues: Iterab
     return score
 }
 
-/** Нормализует регистр, ё/е, диакритику и пробелы/знаки препинания. */
 fun normalizeSearchText(value: String): String {
     val withoutDiacritics = Normalizer.normalize(value.lowercase(Locale.ROOT).replace('ё', 'е'), Normalizer.Form.NFD)
         .replace(MARKS, "")
@@ -139,7 +143,6 @@ private fun transliterateRussianToLatin(value: String): String = buildString(val
     value.forEach { character -> append(RU_TO_LATIN[character] ?: character) }
 }
 
-/** Принимает самые частые латинские сочетания, включая варианты sh/ch/zh/ya/yu. */
 private fun transliterateLatinToRussian(value: String): String {
     val result = StringBuilder(value.length)
     var index = 0
@@ -170,6 +173,7 @@ fun Context.formatDistance(meters: Double?, unit: DistanceUnit = DistanceUnit.ME
 
 private const val YO_SENTINEL = '\uE000'
 private const val SHORT_I_SENTINEL = '\uE001'
+private val SUPPORTED_APP_LANGUAGES = setOf("ru", "en")
 private val MARKS = Regex("\\p{M}+")
 private val ROOM_NUMBER_SPLITTER = Regex("[,;\\s]+")
 private val SEARCH_TOKEN_SPLITTER = Regex("[^\\p{L}\\p{N}]+")

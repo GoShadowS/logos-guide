@@ -59,12 +59,13 @@ export function isVenueRoom(roomId) {
 
 export function readOpenDayEnabled(storage = null, env = null) {
   const store = storage || (typeof localStorage !== 'undefined' ? localStorage : null)
+  let stored = null
   try {
-    const stored = store ? store.getItem(OPEN_DAY_STORAGE_KEY) : null
-    if (stored !== null) return stored === 'true'
+    stored = store ? store.getItem(OPEN_DAY_STORAGE_KEY) : null
   } catch {
-    // ignore storage errors
+    stored = null
   }
+  if (stored !== null) return stored === 'true'
   const flag = env || (typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env.VITE_OPEN_DAY : undefined)
   if (flag !== undefined && flag !== null) return flag !== 'false'
   return true
@@ -74,6 +75,6 @@ export function persistOpenDayEnabled(value) {
   try {
     localStorage.setItem(OPEN_DAY_STORAGE_KEY, String(value))
   } catch {
-    // ignore storage errors
+    return
   }
 }

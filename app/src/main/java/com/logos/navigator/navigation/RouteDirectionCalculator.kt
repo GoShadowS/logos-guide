@@ -3,7 +3,6 @@ package com.logos.navigator.navigation
 import com.logos.navigator.data.model.MapPoint
 import com.logos.navigator.data.model.NavNode
 
-/** Находит ближайшую следующую точку пути для ориентации маркера пользователя. */
 object RouteDirectionCalculator {
     fun nextTarget(route: List<NavNode>, origin: MapPoint?, position: MapPoint): MapPoint? {
         if (route.isEmpty()) return null

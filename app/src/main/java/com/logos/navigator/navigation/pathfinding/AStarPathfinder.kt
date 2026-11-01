@@ -9,12 +9,10 @@ import java.util.PriorityQueue
 import kotlin.math.abs
 import kotlin.math.hypot
 
-/** A* для сотен и тысяч узлов; рёбра по умолчанию рассматриваются как двусторонние. */
 object AStarPathfinder {
     private data class QueueEntry(val nodeId: String, val distanceFromStart: Double, val priority: Double)
     private data class Neighbour(val nodeId: String, val edge: NavEdge)
 
-    /** Возвращает кратчайший путь, включая начальный и конечный узлы, либо null. */
     fun findPath(
         graph: NavigationData,
         startId: String,
@@ -48,7 +46,6 @@ object AStarPathfinder {
         while (openQueue.isNotEmpty()) {
             val current = openQueue.poll()
             val knownDistance = bestDistance[current.nodeId] ?: continue
-            // Удаляем из очереди устаревшие записи, не выполняя лишний обход.
             if (current.distanceFromStart > knownDistance + EPSILON) continue
             if (current.nodeId == goalId) return reconstruct(cameFrom, nodesById, goalId, startId)
 
@@ -74,7 +71,6 @@ object AStarPathfinder {
         return null
     }
 
-    /** Стоимость уже найденного пути с теми же ограничениями и предпочтениями, что применяет A*. */
     fun pathCost(
         graph: NavigationData,
         path: List<NavNode>,
@@ -100,7 +96,6 @@ object AStarPathfinder {
         return totalCost
     }
 
-    /** Ближайшая точка дорожного графа на выбранном этаже к ручной/GPS-точке. */
     fun nearestNode(graph: NavigationData, floor: Int, x: Double, y: Double): NavNode? {
         if (!x.isFinite() || !y.isFinite()) return null
         return graph.nodes.asSequence()
@@ -152,11 +147,6 @@ object AStarPathfinder {
         val metersPerFloor: Double,
     )
 
-    /**
-     * Ограничиваем евклидову оценку длиной рёбер графа. Если демонстрационный вес ребра
-     * меньше длины в SVG units, масштаб уменьшается — эвристика остаётся оптимистичной.
-     * Межэтажная часть также не превышает минимальную стоимость заданного перехода.
-     */
     private fun buildAdmissibleFloorScales(
         floors: List<FloorPlan>,
         edges: List<NavEdge>,
@@ -179,7 +169,6 @@ object AStarPathfinder {
             val baseScale = floor.metersPerUnit.takeIf { it.isFinite() && it > 0.0 }
                 ?: DEFAULT_METERS_PER_UNIT
             val sameFloorScale = minOf(baseScale, ratios.minOrNull() ?: baseScale)
-            // Ограничение сохраняет оптимистичность и при обходном пути через другой этаж.
             val floorDiameter = hypot(floor.width.toDouble(), floor.height.toDouble())
             val crossFloorSafeScale = if (minimumInterfloorWeight != null && floorDiameter > EPSILON) {
                 minimumInterfloorWeight / floorDiameter
@@ -200,7 +189,6 @@ object AStarPathfinder {
 
     private fun heuristic(from: NavNode, goal: NavNode, scale: FloorHeuristicScale): Double {
         val verticalLowerBound = abs(from.floor - goal.floor) * scale.metersPerFloor
-        // Координаты разных SVG viewBox сравниваются только внутри одного этажа.
         val horizontalLowerBound = if (from.floor == goal.floor) {
             hypot(from.x - goal.x, from.y - goal.y) *
                 (scale.metersPerUnit[from.floor] ?: DEFAULT_METERS_PER_UNIT)

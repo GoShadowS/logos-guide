@@ -9,7 +9,6 @@ import com.logos.navigator.data.model.SvgPoint
 import kotlin.math.abs
 import kotlin.math.hypot
 
-/** Геометрический вариант маршрутизатора сайта: дверь комнаты → ветка коридора → дверь цели. */
 object SiteIndoorRouter {
     enum class Transition { LIFT, STAIRS }
 
@@ -46,7 +45,6 @@ object SiteIndoorRouter {
         2 to (767.0 to 561.0),
     )
 
-    // Координаты и точки доступа синхронизированы с map-geometry.js и map-routing.js сайта.
     private val roomRegions = listOf(
         rect("canteen", 1, 0.0, 0.0, 147.0, 156.0),
         rect("workshop-115", 1, 148.0, 94.0, 109.0, 62.0),
@@ -165,7 +163,6 @@ object SiteIndoorRouter {
         "biotech-lab-225" to access(86.0, 450.0, Branch.WEST),
     )
 
-    // ID Android → ID сайта; составные кабинеты 202, 225 и 230 содержат несколько зон сайта.
     private val appRoomSiteIds = mapOf(
         "room_104" to listOf("auditorium-104"),
         "room_113" to listOf("training-centre-113"),
@@ -211,7 +208,6 @@ object SiteIndoorRouter {
         "room_lift_2" to listOf("lift-2"),
     )
 
-    /** Проверяет фактическую область плана по комнатам и замкнутым коридорным контурам сайта. */
     fun isInsideCollege(floor: Int, x: Double, y: Double, rooms: List<Room> = emptyList()): Boolean {
         val size = planSizes[floor] ?: return false
         if (!x.isFinite() || !y.isFinite() || x < 0.0 || y < 0.0 || x > size.first || y > size.second) return false
@@ -224,10 +220,8 @@ object SiteIndoorRouter {
             circulation[floor].orEmpty().any { contains(point, it) }
     }
 
-    /** Возвращает ключ сайта, чтобы ручной старт использовал дверь именно того помещения. */
     fun siteRoomKeyForAppRoom(roomId: String): String? = appRoomSiteIds[roomId]?.firstOrNull()
 
-    /** Строит ортогональный путь и те же межэтажные переходы, что и маршрутизатор сайта. */
     fun plan(
         start: MapPoint,
         target: Room,
@@ -274,7 +268,6 @@ object SiteIndoorRouter {
         return makeRoutePlan(legs, transferKind, target, routeSession)
     }
 
-    /** Добавляет явную стоимость лифта/лестницы, чтобы инструкция и прогресс совпадали с линией. */
     fun graphWithRouteTransitions(graph: NavigationData, route: List<NavNode>): NavigationData {
         val transitions = route.zipWithNext().mapNotNull { (from, to) ->
             if (from.floor == to.floor) return@mapNotNull null

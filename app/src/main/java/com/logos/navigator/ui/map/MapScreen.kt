@@ -121,6 +121,7 @@ import com.logos.navigator.utils.categoryLabel
 import com.logos.navigator.utils.formatDistance
 import com.logos.navigator.utils.localizedDescription
 import com.logos.navigator.utils.localizedName
+import com.logos.navigator.utils.localizedTitle
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -396,7 +397,7 @@ fun MapScreen(
                             Box {
                                 val currentFloorTitle = state.navigation?.floors
                                     ?.firstOrNull { it.number == state.selectedFloor }
-                                    ?.title ?: stringResource(R.string.floor_title_format, state.selectedFloor)
+                                    ?.localizedTitle(context) ?: stringResource(R.string.floor_title_format, state.selectedFloor)
                                 FilterChip(
                                     selected = true,
                                     onClick = { floorMenuExpanded = true },
@@ -406,7 +407,7 @@ fun MapScreen(
                                 DropdownMenu(expanded = floorMenuExpanded, onDismissRequest = { floorMenuExpanded = false }) {
                                     state.navigation?.floors.orEmpty().sortedBy { it.number }.forEach { floorOption ->
                                         DropdownMenuItem(
-                                            text = { Text(floorOption.title) },
+                                            text = { Text(floorOption.localizedTitle(context)) },
                                             onClick = {
                                                 floorMenuExpanded = false
                                                 viewModel.selectFloor(floorOption.number)

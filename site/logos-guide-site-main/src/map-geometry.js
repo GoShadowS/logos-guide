@@ -1,5 +1,3 @@
-// Coordinates are in the viewBox of the original floor SVGs. Keep these bounds,
-// the clickable areas and the routing doorways in sync when changing the plan.
 export const planSizes = {
   1: { width: 758, height: 552 },
   2: { width: 767, height: 561 },
@@ -50,7 +48,6 @@ export const planRoomBounds = {
   'chemistry-biology-202': [86, 245, 62, 83],
   'assistant-202': [86, 328, 62, 55],
   'practical-225': [86, 383, 62, 34],
-  // Room 207 wraps around the corridor's lower end; room 225 is rectangular.
   'electrical-lab-207': [0, 417, 86, 143],
   'biotech-lab-225': [86, 417, 62, 143],
 }
@@ -67,10 +64,6 @@ export function roomOutline(id) {
   return [[x, y], [x + width, y], [x + width, y + height], [x, y + height]]
 }
 
-// Main corridor: y=168, west wing: x=73. The other two branches are the
-// first-floor entrance hall and the second-floor lobby under the library.
-// Only these surveyed circulation lines are used for routing; no straight
-// line is drawn through rooms to reach a 'nearest node'.
 export const circulation = {
   1: [
     [[0, 156], [610, 156], [610, 179], [0, 179]],
@@ -84,8 +77,6 @@ export const circulation = {
   ],
 }
 
-// The point on each wall where the room meets a real corridor. 'west' doors
-// face x=73; 'main' doors face y=168. Special branches have explicit paths.
 export const roomAccess = {
   canteen: { door: [94, 156], branch: 'main' },
   'workshop-115': { door: [230, 156], branch: 'main' },
@@ -93,8 +84,6 @@ export const roomAccess = {
   'academic-office': { door: [412, 156], branch: 'main' },
   'lift-1': { door: [537, 156], branch: 'main' },
   'stairs-north-1': { door: [579, 156], branch: 'main' },
-  // The auditorium opens off the entrance hall, not straight through its
-  // north wall at the far end of the main corridor.
   'auditorium-104': { door: [610, 205], branch: 'auditorium' },
   'class-119': { door: [62, 246], branch: 'west' },
   'class-118': { door: [62, 294], branch: 'west' },

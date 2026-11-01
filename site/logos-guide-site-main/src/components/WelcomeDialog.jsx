@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Bug, Construction, Smartphone, X } from 'lucide-react'
-import { lockBodyScroll } from '../storage.js'
+import { lockBodyScroll, storageSet } from '../storage.js'
 
 export const WELCOME_HIDDEN_KEY = 'logos-welcome-hidden'
 
@@ -31,7 +31,7 @@ export default function WelcomeDialog() {
 
   const close = () => {
     if (dontShow) {
-      try { localStorage.setItem(WELCOME_HIDDEN_KEY, '1') } catch { /* private mode: просто закрыть */ }
+      storageSet(WELCOME_HIDDEN_KEY, '1')
     }
     setOpen(false)
   }

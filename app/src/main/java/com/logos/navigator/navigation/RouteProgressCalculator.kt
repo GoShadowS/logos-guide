@@ -9,7 +9,6 @@ import kotlin.math.hypot
 
 private const val DISTANCE_EPSILON = 1e-9
 
-/** Измерения связующих отрезков и графового пути в метрах. */
 data class RouteDistanceBreakdown(
     val startConnectorMeters: Double,
     val networkMeters: Double,
@@ -19,7 +18,6 @@ data class RouteDistanceBreakdown(
         get() = startConnectorMeters + networkMeters + destinationConnectorMeters
 }
 
-/** Ближайшая проекция позиции на фактически нарисованную линию маршрута. */
 data class RouteProjection(
     val deviationMeters: Double,
     val traveledMeters: Double,
@@ -33,7 +31,6 @@ data class RouteProjection(
         }
 }
 
-/** Считает расстояние и прогресс по переданной маршрутной ломаной и её конечным коннекторам. */
 object RouteProgressCalculator {
     fun distances(
         graph: NavigationData,

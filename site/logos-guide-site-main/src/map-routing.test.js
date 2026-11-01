@@ -15,7 +15,6 @@ function checkLeg(leg, floor, allowed = []) {
     if (i === 0) continue
     const previous = leg.points[i - 1]
     assert.ok(previous[0] === point[0] || previous[1] === point[1], `diagonal segment on floor ${floor}: ${previous} -> ${point}`)
-    // Sample the open part of every segment (endpoints can lie on door frames).
     const samples = Math.ceil(length(point, previous) * 2)
     for (let j = 1; j < samples; j++) {
       const sample = [previous[0] + (point[0] - previous[0]) * j / samples, previous[1] + (point[1] - previous[1]) * j / samples]

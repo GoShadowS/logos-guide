@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-"""Проверяет assets JSON, SVG viewBox/ID, полигоны, граф и список кабинетов."""
 
 from __future__ import annotations
 
@@ -13,10 +12,7 @@ from collections import deque
 from pathlib import Path
 
 NUMBER_RE = re.compile(r"[-+]?(?:\d*\.\d+|\d+\.?\d*)(?:[eE][-+]?\d+)?")
-# Эти зоны являются открытыми проходами либо частью узла перехода, а не закрытой комнатой.
 OPEN_ROUTE_ROLES = {"hall", "entrance", "stairs", "elevator", "restroom", "restricted"}
-# На исходном плане лестничный узел 1 этажа частично совпадает с контуром кабинета 149.
-# Исключение оставлено явным и требует проверки по фактическому плану/на месте.
 KNOWN_ROOM_EDGE_OVERLAPS = {
     ("room_149", frozenset(("1_corridor_central", "1_stairs_central"))),
 }
@@ -27,13 +23,11 @@ EXPECTED_OFFICIAL_NUMBERS = {
     "228", "229", "230", "232", "233",
 }
 
-
 def inside_box(x: float, y: float, floor: dict, tolerance: float = 0.01) -> bool:
     return (
         floor["viewBoxX"] - tolerance <= x <= floor["viewBoxX"] + floor["width"] + tolerance
         and floor["viewBoxY"] - tolerance <= y <= floor["viewBoxY"] + floor["height"] + tolerance
     )
-
 
 def point_in_polygon(x: float, y: float, polygon: list[dict]) -> bool:
     inside = False
@@ -54,7 +48,6 @@ def point_in_polygon(x: float, y: float, polygon: list[dict]) -> bool:
         previous = current
     return inside
 
-
 def segment_crosses_polygon(start: dict, end: dict, polygon: list[dict]) -> bool:
     length = math.hypot(end["x"] - start["x"], end["y"] - start["y"])
     samples = max(2, math.ceil(length * 4))
@@ -66,7 +59,6 @@ def segment_crosses_polygon(start: dict, end: dict, polygon: list[dict]) -> bool
         )
         for step in range(1, samples)
     )
-
 
 def reachable(start: str, edges: list[dict], node_ids: set[str], include_accessible: bool) -> set[str]:
     adjacency: dict[str, list[str]] = {node_id: [] for node_id in node_ids}
@@ -87,13 +79,11 @@ def reachable(start: str, edges: list[dict], node_ids: set[str], include_accessi
                 queue.append(target)
     return seen
 
-
 def fail(message: str) -> None:
     raise ValueError(message)
 
-
 def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description="Проверка локальных данных этажей и навигации")
     parser.add_argument("--assets", type=Path, default=Path("app/src/main/assets"), help="Каталог Android assets")
     args = parser.parse_args()
     try:
@@ -106,6 +96,8 @@ def main() -> int:
 
         svg_ids: dict[int, set[str]] = {}
         for floor in floors:
+            if not floor.get("title") or not floor.get("titleEn"):
+                fail(f"Нет RU/EN подписи у этажа {floor.get('number')}")
             svg_path = args.assets / floor["mapAsset"]
             root = ET.parse(svg_path).getroot()
             raw_view_box = root.get("viewBox", "")
@@ -126,8 +118,8 @@ def main() -> int:
             fail("Граф пуст")
         for node in nodes:
             floor = floor_by_number.get(node["floor"])
-            if floor is None or not node.get("name") or not node.get("type"):
-                fail(f"Некорректный узел {node.get('id')}")
+            if floor is None or not node.get("name") or not node.get("nameEn") or not node.get("type"):
+                fail(f"Некорректный или непереведённый узел {node.get('id')}")
             if not inside_box(node["x"], node["y"], floor):
                 fail(f"Узел {node['id']} вне viewBox")
             if node.get("type", "").lower() == "elevator" and node.get("requiresAccessibility") is not True:
@@ -149,8 +141,8 @@ def main() -> int:
         areas = graph.get("restrictedAreas", [])
         for area in areas:
             floor = floor_by_number.get(area["floor"])
-            if floor is None or not area.get("polygons"):
-                fail(f"Некорректная закрытая область {area.get('id')}")
+            if floor is None or not area.get("reasonEn") or not area.get("polygons"):
+                fail(f"Некорректная или непереведённая закрытая область {area.get('id')}")
             for polygon in area["polygons"]:
                 if len(polygon) < 3:
                     fail(f"У области {area['id']} менее трёх точек")
@@ -263,8 +255,6 @@ def main() -> int:
                 official_numbers.update(value for value in re.findall(r"\d+", raw_number) if value in EXPECTED_OFFICIAL_NUMBERS)
             official_numbers.update(value for value in room.get("aliases_ru", []) if value in EXPECTED_OFFICIAL_NUMBERS)
 
-        # Проверяем рёбра коридора по контурам помещений: дверь — отдельный тип ребра,
-        # поэтому обычный проход не должен срезать путь через учебную или служебную комнату.
         for edge in graph["edges"]:
             if edge.get("type", "").lower() != "corridor":
                 continue
@@ -309,7 +299,6 @@ def main() -> int:
     except (OSError, ET.ParseError, KeyError, TypeError, ValueError) as error:
         print(f"ERROR: {error}", file=sys.stderr)
         return 1
-
 
 if __name__ == "__main__":
     raise SystemExit(main())

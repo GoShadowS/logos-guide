@@ -1,7 +1,4 @@
-/* Open Day feature + final visual pass. Imported after refinement.css: this
-   file is the last word on fonts, palette saturation and borders. */
 
-/* ============ 1. Day of Open Doors: toggle, band, cards, modal ============ */
 .open-day-toggle {
   min-height: 38px;
   display: inline-flex;
@@ -128,7 +125,6 @@
 .open-day-card > svg { color: var(--muted-2); }
 .open-day-card:hover > svg { color: var(--blue); }
 
-/* Venue modal */
 .venue-backdrop {
   position: fixed;
   z-index: 140;
@@ -236,7 +232,6 @@
   font-size: 11px;
 }
 
-/* Venue markers on the plan and the room card chip */
 .plan-venue-badge { pointer-events: none; }
 .plan-venue-dot {
   fill: var(--blue);
@@ -280,7 +275,6 @@
   font-weight: 750;
 }
 
-/* ============ 2. Palette: richer, more saturated colors ============ */
 :root {
   --bg: #eef2fa;
   --surface: #ffffff;
@@ -317,7 +311,6 @@
 .quick-place-yellow::before { background: #e8a72c; }
 .play-teaser-note { border-left-color: var(--yellow); }
 
-/* ============ 3. Fonts: clean grotesque, no handwritten serifs ============ */
 :root {
   --serif: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
 }
@@ -329,7 +322,6 @@ h1 em, h2 em, h3 em, blockquote em, .about-values-quote blockquote,
 }
 .about-values-quote blockquote em { font-style: normal; color: var(--yellow); }
 
-/* ============ 4. Borders: crisp frames and consistent radii ============ */
 .button { border-radius: 10px; }
 .quick-place-card, .service-card, .directory-card, .game-panel, .game-mode-tab,
 .open-day-card, .venue-dialog { border-width: 1px; }
@@ -365,7 +357,6 @@ h1 em, h2 em, h3 em, blockquote em, .about-values-quote blockquote,
   .venue-dialog-actions { flex-direction: column; align-items: stretch; }
 }
 
-/* Dark theme support for the open-day surfaces */
 html[data-theme='dark'] .open-day-band {
   border-color: var(--line);
   background: linear-gradient(180deg, #1a2c42 0%, #172538 100%);

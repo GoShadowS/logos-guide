@@ -27,13 +27,11 @@ import kotlinx.coroutines.flow.onStart
 
 private val Context.logosSettingsStore by preferencesDataStore(name = "logos_navigator_settings")
 
-/** DataStore-обёртка: весь экран настроек наблюдает один согласованный снимок через Flow. */
 class SettingsDataStore(context: Context) {
     private val store = context.applicationContext.logosSettingsStore
 
     val settingsFlow: Flow<AppSettings> = store.data
         .onStart {
-            // Удаляем сохранённые ключи прежней функции динамических подписей.
             store.edit { preferences ->
                 if (preferences[LEGACY_ROOM_LABELS] != null) preferences.remove(LEGACY_ROOM_LABELS)
                 if (preferences[LEGACY_ROOM_LABELS_DEFAULT_APPLIED] != null) {
@@ -47,7 +45,6 @@ class SettingsDataStore(context: Context) {
         }
         .map(Preferences::toAppSettings)
 
-    /** Транзакционно применяет изменение и сохраняет все значения в одном DataStore edit. */
     suspend fun update(transform: (AppSettings) -> AppSettings) {
         store.edit { preferences ->
             transform(preferences.toAppSettings()).normalized().writeTo(preferences)
@@ -124,7 +121,6 @@ class SettingsDataStore(context: Context) {
         internal val APP_LANGUAGE = stringPreferencesKey("app_language")
         private val LEGACY_ROOM_LABELS = stringPreferencesKey("room_label_mode")
         private val LEGACY_ROOM_LABELS_DEFAULT_APPLIED = booleanPreferencesKey("room_label_default_applied")
-        // Сохраняем прежний ключ, чтобы не сбросить выбор качества после обновления приложения.
         internal val MAP_RENDER_QUALITY = stringPreferencesKey("svg_render_quality")
         internal val INITIAL_FLOOR = stringPreferencesKey("initial_floor")
         internal val LAST_OPENED_FLOOR = intPreferencesKey("last_opened_floor")

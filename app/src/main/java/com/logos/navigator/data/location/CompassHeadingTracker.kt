@@ -6,7 +6,6 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 
-/** Читает heading с локального датчика Rotation Vector; данные не отправляются наружу. */
 class CompassHeadingTracker(context: Context) : SensorEventListener {
     private val sensorManager = context.applicationContext.getSystemService(Context.SENSOR_SERVICE) as SensorManager
     private val rotationSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)

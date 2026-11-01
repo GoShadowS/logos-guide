@@ -36,6 +36,7 @@ import com.logos.navigator.navigation.GeoReferencer
 import com.logos.navigator.navigation.RouteProgressCalculator
 import com.logos.navigator.navigation.RouteStepGenerator
 import com.logos.navigator.navigation.SiteIndoorRouter
+import com.logos.navigator.utils.appLocale
 import com.logos.navigator.utils.localizedName
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -53,7 +54,6 @@ import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.hypot
 
-/** ViewModel приложения: данные карт, выбор этажа, геопозиция и расчёт маршрута. */
 class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val appContext = application.applicationContext
     private val repository = IndoorRepository(application)
@@ -70,15 +70,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private var navigationData: NavigationData? = null
     private var lastGpsLocation: Location? = null
-    /** Последний этаж, подтверждённый пользователем или предыдущим позиционированием. */
     private var lastPositionFloor: Int? = null
-    /** GPS не распознаёт этаж: используем сохранённый, подтверждённый или выбранный переходом маршрута этаж. */
     private var gpsFloorNumber: Int? = null
     private var dataLoadJob: Job? = null
     private var gpsTimeoutJob: Job? = null
     private var gpsAttempt = 0
     private var arrivalRoomId: String? = null
-    /** Если ручную точку поставили внутри комнаты, маршрут начинается у её двери. */
     private var manualStartRoomId: String? = null
     private var lastRouteRecalculationAt = 0L
     private var routeSession = 0L
@@ -173,7 +170,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         if (_state.value.selectedFloor == floorNumber) return
         _state.update { it.copy(selectedFloor = floorNumber) }
         viewModelScope.launch { settingsStore.setLastOpenedFloor(floorNumber) }
-        // Ручной выбор этажа не переносит GPS-маркер: переход по активному маршруту обрабатывается отдельно.
     }
 
     fun showRoom(room: Room) {
@@ -201,7 +197,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         _state.update { it.copy(selectedRoom = null) }
     }
 
-    /** Выбор в каталоге открывает соответствующий этаж и карточку комнаты. */
     fun selectRoomFromSearch(room: Room) {
         stopRouteSpeech()
         arrivalRoomId = null
@@ -247,7 +242,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         updateManualPosition(x, y, startRoom = null)
     }
 
-    /** Устанавливает старт внутри выбранного маршрутизируемого помещения у известной двери. */
     fun setManualPositionInRoom(room: Room, x: Float, y: Float) {
         if (!room.routeAvailable || room.nodeId.isNullOrBlank()) {
             showMessage(appContext.getString(R.string.room_route_unavailable, room.localizedName(appContext)))
@@ -531,7 +525,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    /** Подтверждает этаж GPS вручную, если автоматическое сопоставление не распознало переход. */
     fun confirmGpsFloor(floorNumber: Int) {
         val location = lastGpsLocation
         if (_state.value.locationMode != LocationMode.GPS || location == null || !isFreshLocation(location)) {
@@ -592,12 +585,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             showMessage(appContext.getString(R.string.manual_start_hint))
             return
         }
-        // При начале маршрута показываем план этажа, на котором пользователь находится сейчас.
         selectFloor(position.floor)
         buildRoute(room)
     }
 
-    /** Находит ближайшую подходящую комнату по коридорному маршруту сайта. */
     fun navigateToNearest(role: String) {
         val state = _state.value
         val position = state.userPosition
@@ -644,7 +635,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         navigateTo(destination)
     }
 
-    /** Повторяет сохранённый маршрут, фиксируя сохранённое помещение-старт как ручную точку. */
     fun replaySavedRoute(fromRoomId: String?, toRoomId: String) {
         val destination = _state.value.rooms.firstOrNull { it.id == toRoomId }
         if (destination == null) {
@@ -757,7 +747,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         writeDebugLog("Site route built for destination ${room.id}; units=${route.size}; distanceMeters=${distance.toInt()}")
     }
 
-    /** Начинает пошаговое ведение только после явного подтверждения пользователя. */
     fun startNavigation() {
         val destination = _state.value.destination ?: return
         val position = _state.value.userPosition
@@ -766,7 +755,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             return
         }
         if (_state.value.isNavigationStarted) return
-        // Для GPS предпросмотр мог устареть, поэтому перед стартом строим путь от свежей точки.
         buildRoute(destination)
         val current = _state.value
         if (current.route == null) return
@@ -796,13 +784,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private fun requestedSpeechLocale(): Locale = when (_state.value.settings.speechLanguage) {
         SpeechLanguage.RUSSIAN -> Locale.forLanguageTag("ru-RU")
         SpeechLanguage.ENGLISH -> Locale.forLanguageTag("en-US")
-        SpeechLanguage.SYSTEM -> appContext.resources.configuration.locales
-            .takeIf { !it.isEmpty }
-            ?.get(0)
-            ?: Locale.getDefault()
+        SpeechLanguage.SYSTEM -> appContext.appLocale()
     }
 
-    /** Текст шага формируется из локализуемых ресурсов, а не хранится в данных графа. */
     private fun routeStepText(instruction: RouteInstruction?): String {
         if (instruction == null) return appContext.getString(R.string.route_no_steps)
         val floor = instruction.targetFloor ?: _state.value.destination?.floor ?: _state.value.selectedFloor
@@ -831,7 +815,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         ensureTextToSpeech()
     }
 
-    /** В ручном режиме пользователь сам отмечает выполнение текущей подсказки. */
     fun advanceRouteStep() {
         val current = _state.value
         if (!current.isNavigationStarted || current.locationMode != LocationMode.MANUAL || current.routeSteps.isEmpty()) return
@@ -842,7 +825,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         announceCurrentRouteStep()
     }
 
-    /** Возвращает ручное пошаговое ведение к предыдущей подсказке. */
     fun previousRouteStep() {
         val current = _state.value
         if (!current.isNavigationStarted || current.locationMode != LocationMode.MANUAL || current.routeSteps.isEmpty()) return
@@ -872,7 +854,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    /** Сопоставляет GPS-точку с ближайшим отрезком связанной линии маршрута. */
     private fun updateRouteProgress(point: MapPoint) {
         val current = _state.value
         if (!current.isNavigationStarted) return
@@ -910,7 +891,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         if (changedStep && nextIndex > 0) announceCurrentRouteStep()
     }
 
-    /** Меняет этаж только у перехода, если свежая GPS-точка проецируется на продолжение маршрута. */
     private fun maybeSwitchGpsFloorAtRouteTransition(
         point: MapPoint,
         current: IndoorUiState,
@@ -1080,13 +1060,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    /** Сайт не проводит линию от двери до центра кабинета: конечной точкой остаётся дверь. */
     private fun routeDestinationAtDoor(room: Room, route: List<NavNode>): Room {
         val door = route.lastOrNull()?.takeIf { it.floor == room.floor } ?: return room
         return room.copy(x = door.x, y = door.y)
     }
 
-    /** Лифт доступен только при явном включении, как и в старом графе; иначе выбирается кратчайшая лестница. */
     private fun routeTransition(settings: AppSettings): SiteIndoorRouter.Transition =
         if (settings.useElevator) SiteIndoorRouter.Transition.LIFT else SiteIndoorRouter.Transition.STAIRS
 
@@ -1096,7 +1074,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         polygons.any { polygon -> pointInPolygonOrBoundary(point.x.toDouble(), point.y.toDouble(), polygon) }
     }
 
-    /** Запрещает начинать маршрут из наблюдательной и прочих закрытых серых областей. */
     private fun isInsideRestrictedArea(graph: NavigationData, floor: Int, x: Double, y: Double): Boolean =
         graph.restrictedAreas.asSequence()
             .filter { it.floor == floor }
@@ -1160,7 +1137,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 }
             }
         } catch (_: SecurityException) {
-            // Вибрация — необязательная функция; отсутствие доступа не прерывает навигацию.
         }
     }
 
@@ -1238,7 +1214,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         )
     }
 
-    /** Диагностический журнал хранится только во внутреннем каталоге приложения и не содержит координат. */
     private fun writeDebugLog(event: String) {
         if (!_state.value.settings.fileLoggingEnabled) return
         val safeEvent = event.replace('\n', ' ').take(240)
@@ -1253,7 +1228,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    /** Изменения настроек отображаются сразу, а DataStore сохраняет их транзакционно. */
     fun updateSettings(transform: (AppSettings) -> AppSettings) {
         val previous = _state.value.settings
         val updated = transform(previous)
@@ -1275,7 +1249,6 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    /** Обновляет текущую GPS-сессию, маршрут и озвучивание после изменения настроек. */
     private fun applySettingsToRuntime(previous: AppSettings, updated: AppSettings) {
         if ((previous.locationAccuracyMode != updated.locationAccuracyMode ||
                 previous.locationUpdateIntervalSeconds != updated.locationUpdateIntervalSeconds) &&

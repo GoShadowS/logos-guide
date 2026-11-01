@@ -1,11 +1,4 @@
 #!/usr/bin/env python3
-"""Извлекает координаты room_*, door_* и restricted_* из SVG в системе viewBox.
-
-Скрипт использует только стандартную библиотеку Python. Координаты элементов, вложенные
-transform и популярные команды path преобразуются в абсолютные точки. Кривые Безье
-аппроксимируются отрезками, поэтому для итоговой навигации точные проверенные полигоны
-следует хранить в rooms.json / navigation_graph.json.
-"""
 
 from __future__ import annotations
 
@@ -26,7 +19,6 @@ NUMBER_RE = re.compile(r"[-+]?(?:\d*\.\d+|\d+\.?\d*)(?:[eE][-+]?\d+)?")
 PATH_TOKEN_RE = re.compile(r"[A-Za-z]|[-+]?(?:\d*\.\d+|\d+\.?\d*)(?:[eE][-+]?\d+)?")
 TRANSFORM_RE = re.compile(r"([A-Za-z]+)\s*\(([^)]*)\)")
 
-
 @dataclass(frozen=True)
 class Shape:
     element_id: str
@@ -34,9 +26,7 @@ class Shape:
     points: list[tuple[float, float]]
     closed: bool
 
-
 def multiply(left: Matrix, right: Matrix) -> Matrix:
-    """Складывает SVG affine-матрицы в порядке left * right."""
     a, b, c, d, e, f = left
     g, h, i, j, k, l = right
     return (
@@ -48,7 +38,6 @@ def multiply(left: Matrix, right: Matrix) -> Matrix:
         b * k + d * l + f,
     )
 
-
 def parse_transform(value: str | None) -> Matrix:
     matrix = IDENTITY
     if not value:
@@ -57,7 +46,7 @@ def parse_transform(value: str | None) -> Matrix:
         args = [float(number) for number in NUMBER_RE.findall(raw_arguments)]
         name = operation.lower()
         if name == "matrix" and len(args) == 6:
-            local = tuple(args)  # type: ignore[assignment]
+            local = tuple(args)
         elif name == "translate" and len(args) in (1, 2):
             local = (1.0, 0.0, 0.0, 1.0, args[0], args[1] if len(args) == 2 else 0.0)
         elif name == "scale" and len(args) in (1, 2):
@@ -81,19 +70,16 @@ def parse_transform(value: str | None) -> Matrix:
         matrix = multiply(matrix, local)
     return matrix
 
-
 def apply_matrix(matrix: Matrix, point: tuple[float, float]) -> tuple[float, float]:
     a, b, c, d, e, f = matrix
     x, y = point
     return a * x + c * y + e, b * x + d * y + f
-
 
 def parse_points(value: str) -> list[tuple[float, float]]:
     values = [float(number) for number in NUMBER_RE.findall(value)]
     if len(values) % 2:
         raise ValueError("У polygon должно быть чётное количество координат")
     return list(zip(values[::2], values[1::2]))
-
 
 def _cubic(p0: tuple[float, float], p1: tuple[float, float], p2: tuple[float, float],
            p3: tuple[float, float], steps: int) -> list[tuple[float, float]]:
@@ -107,7 +93,6 @@ def _cubic(p0: tuple[float, float], p1: tuple[float, float], p2: tuple[float, fl
         ))
     return result
 
-
 def _quadratic(p0: tuple[float, float], p1: tuple[float, float], p2: tuple[float, float],
                steps: int) -> list[tuple[float, float]]:
     result = []
@@ -118,9 +103,7 @@ def _quadratic(p0: tuple[float, float], p1: tuple[float, float], p2: tuple[float
                        u * u * p0[1] + 2 * u * t * p1[1] + t * t * p2[1]))
     return result
 
-
 def parse_path(value: str, curve_steps: int = 8) -> tuple[list[tuple[float, float]], bool]:
-    """Разбирает команды M/L/H/V/C/S/Q/T/Z; дуги A аппроксимирует хордой."""
     tokens = PATH_TOKEN_RE.findall(value)
     points: list[tuple[float, float]] = []
     current = (0.0, 0.0)
@@ -208,7 +191,6 @@ def parse_path(value: str, curve_steps: int = 8) -> tuple[list[tuple[float, floa
             points.extend(_quadratic(p0, control, endpoint, curve_steps))
             current, previous_control = endpoint, control
         elif opcode == "A":
-            # Дуга потребует отдельной эллиптической аппроксимации; её конец остаётся точным.
             if index + 7 > len(tokens):
                 raise ValueError("В SVG-команде A недостаточно параметров")
             index += 5
@@ -219,7 +201,6 @@ def parse_path(value: str, curve_steps: int = 8) -> tuple[list[tuple[float, floa
             raise ValueError(f"Неподдерживаемая команда SVG path: {command}")
         previous_command = command
     return points, closed
-
 
 def element_points(element: ET.Element) -> tuple[list[tuple[float, float]], bool]:
     tag = element.tag.rsplit("}", 1)[-1]
@@ -232,7 +213,6 @@ def element_points(element: ET.Element) -> tuple[list[tuple[float, float]], bool
     if tag == "path":
         return parse_path(element.get("d", ""))
     return [], False
-
 
 def walk_shapes(root: ET.Element) -> tuple[list[Shape], list[str]]:
     shapes: list[Shape] = []
@@ -258,14 +238,12 @@ def walk_shapes(root: ET.Element) -> tuple[list[Shape], list[str]]:
     visit(root, IDENTITY)
     return shapes, errors
 
-
 def view_box(root: ET.Element) -> tuple[float, float, float, float] | None:
     raw = root.get("viewBox")
     if not raw:
         return None
     numbers = [float(item) for item in NUMBER_RE.findall(raw)]
-    return tuple(numbers) if len(numbers) == 4 else None  # type: ignore[return-value]
-
+    return tuple(numbers) if len(numbers) == 4 else None
 
 def format_shape(shape: Shape) -> dict[str, object]:
     xs, ys = [point[0] for point in shape.points], [point[1] for point in shape.points]
@@ -277,9 +255,8 @@ def format_shape(shape: Shape) -> dict[str, object]:
         "points": [{"x": x, "y": y} for x, y in shape.points],
     }
 
-
 def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description="Извлечение геометрии SVG в координатах viewBox")
     parser.add_argument("svg", type=Path, help="SVG-карта этажа")
     parser.add_argument("--prefix", action="append", default=None,
                         help="ID-префикс, который нужно выгрузить; можно указать несколько раз")
@@ -314,7 +291,6 @@ def main() -> int:
     if errors or (args.strict and out_of_box):
         return 1
     return 0
-
 
 if __name__ == "__main__":
     raise SystemExit(main())

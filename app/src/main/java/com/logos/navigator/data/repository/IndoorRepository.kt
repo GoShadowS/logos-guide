@@ -13,7 +13,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.IOException
 
-/** Загружает навигационные JSON; планы отрисовываются из сгенерированных Kotlin Canvas/Path-команд. */
 class IndoorRepository(context: Context) {
     private val appContext = context.applicationContext
     private val gson = com.google.gson.Gson()
@@ -134,7 +133,6 @@ class IndoorRepository(context: Context) {
         }) { appContext.getString(R.string.data_validation_room_fields) }
     }
 
-    /** Проверка точки по polygon сохраняет серые и выделенные зоны вне навигационного графа. */
     private fun contains(point: SvgPoint, polygon: List<SvgPoint>): Boolean {
         if (polygon.size < 3) return false
         var inside = false
