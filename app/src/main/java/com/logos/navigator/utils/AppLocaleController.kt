@@ -1,5 +1,9 @@
 package com.logos.navigator.utils
 
+import android.content.Context
+import android.content.res.Configuration
+import android.os.Build
+import android.os.LocaleList
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import com.logos.navigator.data.model.AppLanguage
@@ -31,4 +35,25 @@ object AppLocaleController {
     }
 
     private val SUPPORTED_LANGUAGES = setOf("ru", "en")
+}
+
+private var cachedLocalizedContext: Pair<String, Context>? = null
+
+/**
+ * Application resources are not updated by [AppCompatDelegate.setApplicationLocales] before Android 13,
+ * so strings produced by ViewModels would stay in the previous language. This returns a context whose
+ * configuration follows the per-app language on every API level.
+ */
+fun Context.localizedContext(): Context {
+    val base = applicationContext ?: this
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) return base
+    val locales = AppCompatDelegate.getApplicationLocales()
+    if (locales.isEmpty) return base
+    val tags = locales.toLanguageTags()
+    cachedLocalizedContext?.let { (cachedTags, context) -> if (cachedTags == tags) return context }
+    val configuration = Configuration(base.resources.configuration)
+    configuration.setLocales(LocaleList.forLanguageTags(tags))
+    val localized = base.createConfigurationContext(configuration)
+    cachedLocalizedContext = tags to localized
+    return localized
 }

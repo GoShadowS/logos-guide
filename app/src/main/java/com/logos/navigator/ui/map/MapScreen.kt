@@ -149,6 +149,9 @@ fun MapScreen(
     }
     val navigationNodes = remember(state.navigation) { state.navigation?.nodes.orEmpty() }
     val navigationEdges = remember(state.navigation) { state.navigation?.edges.orEmpty() }
+    val floorScales = remember(state.navigation) {
+        state.navigation?.floors.orEmpty().associate { it.number to it.metersPerUnit }
+    }
     val openDoorsPlaces = remember(state.rooms) {
         if (BuildConfig.OPEN_DOORS) OpenDoorsCatalog.roomsFor(state.rooms) else emptyList()
     }
@@ -342,6 +345,11 @@ fun MapScreen(
                                     isPlacingManualPosition = false
                                     if (state.destination != null) isRouteSheetVisible = true
                                 },
+                                hasCompassHeading = state.hasCompassHeading,
+                                mapOrientation = state.mapOrientations[state.selectedFloor],
+                                floorScales = floorScales,
+                                routeProgress = state.routeProgress,
+                                isNavigationStarted = state.isNavigationStarted,
                             )
                         },
                     )
@@ -549,6 +557,17 @@ fun MapScreen(
                                 style = MaterialTheme.typography.labelMedium,
                             )
                         }
+                        // GPS cannot tell floors apart, so let the user say which floor they are on
+                        // without having to build a route first.
+                        if (state.locationMode == LocationMode.GPS && state.gpsCoordinates != null &&
+                            state.userPosition?.floor != state.selectedFloor && state.destination == null
+                        ) {
+                            AssistChip(
+                                onClick = { viewModel.confirmGpsFloor(state.selectedFloor) },
+                                leadingIcon = { Icon(Icons.Default.LocationOn, contentDescription = null) },
+                                label = { Text(stringResource(R.string.gps_i_am_on_this_floor, state.selectedFloor)) },
+                            )
+                        }
                     }
 
                     val transitionHint = viewModel.transitionHint(state.selectedFloor)
@@ -604,7 +623,7 @@ fun MapScreen(
                             },
                             expanded = !(state.destination != null && isRouteSheetVisible && state.selectedRoom == null) ||
                                 isPlacingManualPosition,
-                            shape = RoundedCornerShape(14.dp),
+                            shape = RoundedCornerShape(18.dp),
                             containerColor = if (isPlacingManualPosition) {
                                 MaterialTheme.colorScheme.secondaryContainer
                             } else {
@@ -723,7 +742,7 @@ private fun ModeSwitch(
     onSelectManual: () -> Unit,
 ) {
     Surface(
-        shape = RoundedCornerShape(14.dp),
+        shape = RoundedCornerShape(18.dp),
         color = MaterialTheme.colorScheme.surface,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         shadowElevation = 3.dp,
@@ -854,7 +873,7 @@ private fun RoutePanel(
 
     Surface(
         modifier = modifier,
-        shape = RoundedCornerShape(14.dp),
+        shape = RoundedCornerShape(18.dp),
         color = MaterialTheme.colorScheme.surface,
         contentColor = MaterialTheme.colorScheme.onSurface,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
@@ -958,8 +977,14 @@ private fun RoutePanel(
                         fontWeight = FontWeight.Bold,
                     )
                     if (state.isNavigationStarted && remainingMeters != null) {
+                        val speedMetersPerMinute = state.settings.walkingSpeedKmh * 1_000.0 / 60.0
+                        val remainingMinutes = kotlin.math.ceil(remainingMeters / speedMetersPerMinute).toInt().coerceAtLeast(0)
                         Text(
-                            stringResource(R.string.route_remaining, context.formatDistance(remainingMeters, distanceUnit)),
+                            stringResource(
+                                R.string.route_remaining_with_time,
+                                context.formatDistance(remainingMeters, distanceUnit),
+                                remainingMinutes,
+                            ),
                             modifier = Modifier.weight(1f),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -1074,7 +1099,7 @@ private fun RoutePanel(
                         state.route == null -> Button(
                             onClick = onSelectStartLocation,
                             modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(12.dp),
+                            shape = CircleShape,
                         ) {
                             Icon(Icons.Default.MyLocation, contentDescription = null)
                             Spacer(Modifier.width(6.dp))
@@ -1083,7 +1108,7 @@ private fun RoutePanel(
                         !state.isNavigationStarted -> Button(
                             onClick = onStartNavigation,
                             modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(12.dp),
+                            shape = CircleShape,
                         ) {
                             Icon(Icons.Default.PlayArrow, contentDescription = null)
                             Spacer(Modifier.width(6.dp))
@@ -1094,7 +1119,7 @@ private fun RoutePanel(
                                 onClick = onPreviousStep,
                                 enabled = state.currentRouteStepIndex > 0,
                                 modifier = Modifier.weight(1f),
-                                shape = RoundedCornerShape(12.dp),
+                                shape = CircleShape,
                             ) {
                                 Icon(Icons.Default.KeyboardArrowLeft, contentDescription = null)
                                 Text(stringResource(R.string.previous_step), maxLines = 1)
@@ -1103,7 +1128,7 @@ private fun RoutePanel(
                                 onClick = onNextStep,
                                 enabled = state.currentRouteStepIndex < state.routeSteps.lastIndex,
                                 modifier = Modifier.weight(1f),
-                                shape = RoundedCornerShape(12.dp),
+                                shape = CircleShape,
                             ) {
                                 Text(stringResource(R.string.next_step), maxLines = 1)
                                 Icon(Icons.Default.KeyboardArrowRight, contentDescription = null)
@@ -1113,7 +1138,7 @@ private fun RoutePanel(
                     }
                     OutlinedButton(
                         onClick = onCancelRoute,
-                        shape = RoundedCornerShape(12.dp),
+                        shape = CircleShape,
                         contentPadding = PaddingValues(horizontal = 12.dp),
                     ) {
                         Icon(Icons.Default.Close, contentDescription = stringResource(R.string.cancel_route))

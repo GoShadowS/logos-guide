@@ -53,8 +53,8 @@ data class AppSettings(
     val fileLoggingEnabled: Boolean = false,
 ) {
     companion object {
-        const val BRAND_BLUE: Int = 0xFF2158E0.toInt()
-        val LEGACY_BRAND_BLUES: Set<Int> = setOf(0xFF245CE5.toInt(), 0xFF2538F5.toInt())
+        const val BRAND_BLUE: Int = 0xFF2F5FE8.toInt()
+        val LEGACY_BRAND_BLUES: Set<Int> = setOf(0xFF245CE5.toInt(), 0xFF2538F5.toInt(), 0xFF2158E0.toInt())
         val BRAND_BLUES: Set<Int> = LEGACY_BRAND_BLUES + BRAND_BLUE
     }
 }

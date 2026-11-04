@@ -6,8 +6,8 @@ Android-карта основана на двух SVG-планах здания.
 
 | Этаж | SVG-ресурс | `viewBox` | Runtime-представление |
 |---|---|---|---|
-| 1 | `app/src/main/assets/floors/floor_1.svg` | `0 0 758 552` | Слои `GeneratedFloorMaps.kt` |
-| 2 | `app/src/main/assets/floors/floor_2.svg` | `0 0 767 561` | Слои `GeneratedFloorMaps.kt` |
+| 1 | `maps_and_design/floors/floor_1.svg` | `0 0 758 552` | Слои `GeneratedFloorMaps.kt` |
+| 2 | `maps_and_design/floors/floor_2.svg` | `0 0 767 561` | Слои `GeneratedFloorMaps.kt` |
 
 Значения `x/y`, контуры, GPS-якоря и узлы графа используют координаты `viewBox`. Отрисовка сопоставляет их с экранной системой координат через матрицу карты. Масштабы `metersPerUnit` хранятся отдельно и остаются предварительными.
 

@@ -24,8 +24,8 @@ INHERITED_PAINT_ATTRIBUTES = {
 URL_REFERENCE = re.compile(r"^url\(#([^)]+)\)$")
 
 FLOORS = (
-    (1, REPO_ROOT / "app/src/main/assets/floors/floor_1.svg"),
-    (2, REPO_ROOT / "app/src/main/assets/floors/floor_2.svg"),
+    (1, REPO_ROOT / "maps_and_design/floors/floor_1.svg"),
+    (2, REPO_ROOT / "maps_and_design/floors/floor_2.svg"),
 )
 OUTPUT = REPO_ROOT / "app/src/main/java/com/logos/navigator/ui/map/GeneratedFloorMaps.kt"
 REFERENCE_SVGS = {
@@ -494,6 +494,9 @@ def generate_source() -> tuple[str, list[dict[str, object]]]:
 
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.ColorFilter
+import android.graphics.ColorMatrix
+import android.graphics.ColorMatrixColorFilter
 import android.graphics.LinearGradient
 import android.graphics.Matrix
 import android.graphics.Paint
@@ -571,7 +574,25 @@ internal object GeneratedFloorMaps {
         this.shader = shader
     }
 
-    private fun drawOperations(canvas: Canvas, operations: List<MapDrawOp>) {
+    /**
+     * Dark map palette: inverts lightness while keeping hue, so pale-blue rooms become deep indigo,
+     * white corridors become graphite and dark labels become light (matches the site's dark map).
+     */
+    val darkMapFilter: ColorFilter = ColorMatrixColorFilter(
+        ColorMatrix(
+            floatArrayOf(
+                0.6082f, -1.3181f, -0.1331f, 0f, 243f,
+                -0.3918f, -0.3181f, -0.1331f, 0f, 246f,
+                -0.3918f, -1.3181f, 0.8669f, 0f, 255f,
+                0f, 0f, 0f, 1f, 0f,
+            ),
+        ),
+    )
+
+    private fun Paint.filtered(filter: ColorFilter?): Paint =
+        if (filter == null) this else Paint(this).also { it.colorFilter = filter }
+
+    private fun drawOperations(canvas: Canvas, operations: List<MapDrawOp>, colorFilter: ColorFilter? = null) {
         operations.forEach { operation ->
             val saveCount = canvas.save()
             operation.clipGroups.forEach { group ->
@@ -580,8 +601,8 @@ internal object GeneratedFloorMaps {
                 canvas.clipPath(union)
             }
             operation.maskPaths.forEach { canvas.clipPath(it) }
-            operation.fillPaint?.let { canvas.drawPath(operation.path, it) }
-            operation.strokePaint?.let { canvas.drawPath(operation.path, it) }
+            operation.fillPaint?.let { canvas.drawPath(operation.path, it.filtered(colorFilter)) }
+            operation.strokePaint?.let { canvas.drawPath(operation.path, it.filtered(colorFilter)) }
             canvas.restoreToCount(saveCount)
         }
     }
@@ -596,19 +617,30 @@ internal object GeneratedFloorMaps {
     private val floor2Picture by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
         recordPicture(F2_WIDTH, F2_HEIGHT, f2Operations)
     }
+    private val floor1DarkPicture by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+        recordPicture(F1_WIDTH, F1_HEIGHT, f1Operations, darkMapFilter)
+    }
+    private val floor2DarkPicture by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+        recordPicture(F2_WIDTH, F2_HEIGHT, f2Operations, darkMapFilter)
+    }
 
-    private fun recordPicture(width: Float, height: Float, operations: List<MapDrawOp>): android.graphics.Picture {
+    private fun recordPicture(
+        width: Float,
+        height: Float,
+        operations: List<MapDrawOp>,
+        colorFilter: ColorFilter? = null,
+    ): android.graphics.Picture {
         val picture = android.graphics.Picture()
         val recordingCanvas = picture.beginRecording(width.toInt(), height.toInt())
-        drawOperations(recordingCanvas, operations)
+        drawOperations(recordingCanvas, operations, colorFilter)
         picture.endRecording()
         return picture
     }
 
-    fun draw(canvas: Canvas, floorNumber: Int) {
+    fun draw(canvas: Canvas, floorNumber: Int, dark: Boolean = false) {
         when (floorNumber) {
-            1 -> floor1Picture.draw(canvas)
-            2 -> floor2Picture.draw(canvas)
+            1 -> (if (dark) floor1DarkPicture else floor1Picture).draw(canvas)
+            2 -> (if (dark) floor2DarkPicture else floor2Picture).draw(canvas)
         }
     }
 

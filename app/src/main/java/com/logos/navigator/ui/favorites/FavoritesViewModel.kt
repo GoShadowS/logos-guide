@@ -1,5 +1,7 @@
 package com.logos.navigator.ui.favorites
 
+import com.logos.navigator.utils.localizedContext
+
 import android.app.Application
 import android.net.Uri
 import androidx.annotation.StringRes
@@ -42,7 +44,8 @@ data class FavoritesUiState(
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class FavoritesViewModel(application: Application) : AndroidViewModel(application) {
-    private val appContext = application.applicationContext
+    private val appContext: android.content.Context
+        get() = getApplication<Application>().localizedContext()
     private val database = AppDatabase.getInstance(application)
     private val repository = FavoritesRepository(application, database)
     private val indoorRepository = IndoorRepository(application)
@@ -132,7 +135,7 @@ class FavoritesViewModel(application: Application) : AndroidViewModel(applicatio
         repository.moveFavorite(roomId, direction)
     }
 
-    fun createCategory(name: String, colorArgb: Int = 0xFF2158E0.toInt()) = launchOperation(R.string.category_created) {
+    fun createCategory(name: String, colorArgb: Int = 0xFF2F5FE8.toInt()) = launchOperation(R.string.category_created) {
         repository.createCategory(name, "folder", colorArgb)
     }
 

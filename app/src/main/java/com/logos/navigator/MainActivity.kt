@@ -19,4 +19,15 @@ class MainActivity : AppCompatActivity() {
             NavigatorApp(viewModel = viewModel)
         }
     }
+
+    override fun onStart() {
+        super.onStart()
+        viewModel.onAppForeground()
+    }
+
+    override fun onStop() {
+        // A rotation or language switch recreates the activity; keep GPS running through it.
+        if (!isChangingConfigurations) viewModel.onAppBackground()
+        super.onStop()
+    }
 }

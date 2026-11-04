@@ -28,6 +28,7 @@ import com.logos.navigator.data.model.Room
 import com.logos.navigator.data.model.RouteLineStyle
 import com.logos.navigator.data.model.MapRenderQuality
 import com.logos.navigator.data.model.ThemeMode
+import com.logos.navigator.navigation.MapOrientation
 import com.logos.navigator.navigation.RouteDirectionCalculator
 import com.logos.navigator.svg.SvgCoordinateConverter
 import com.logos.navigator.svg.isPointInPolygon
@@ -65,6 +66,12 @@ class CanvasMapView @JvmOverloads constructor(
     private var destination: Room? = null
     private var settings: AppSettings = AppSettings()
     private var compassHeadingDegrees: Float = 0f
+    private var hasCompassHeading: Boolean = false
+    private var mapOrientation: MapOrientation? = null
+    private var floorScales: Map<Int, Double> = emptyMap()
+    private var routeProgress: Float = 0f
+    private var isNavigationStarted: Boolean = false
+    private var routeTotalMeters: Double = 0.0
     private var tapCoordinates: PointF? = null
 
     private var zoom = 1f
@@ -83,6 +90,8 @@ class CanvasMapView @JvmOverloads constructor(
     private var animatedDashIntervals = FloatArray(2)
     private var lastFrameTime = 0L
     private var pendingCenter: MapPoint? = null
+    private var labelTextColor = 0xFF16233B.toInt()
+    private var labelBackgroundColor = 0xEEFFFFFF.toInt()
     private var dragPreview: PointF? = null
 
     var onManualPosition: ((Float, Float) -> Unit)? = null
@@ -106,6 +115,14 @@ class CanvasMapView @JvmOverloads constructor(
         style = Paint.Style.FILL
     }
     private val routeDirectionPath = Path()
+    private val passedRoutePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.STROKE
+        strokeCap = Paint.Cap.ROUND
+        strokeJoin = Paint.Join.ROUND
+    }
+    private val passedRoutePath = Path()
+    private val headingPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL }
+    private val headingPath = Path()
     private val haloPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.WHITE; style = Paint.Style.FILL }
     private val roomPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL }
     private val routeDestinationPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -172,6 +189,11 @@ class CanvasMapView @JvmOverloads constructor(
         manualPositionSelectionMode: Boolean = false,
         openDoorsRoomIds: Set<String> = emptySet(),
         onManualPositionInRoom: (Room, Float, Float) -> Unit = { _, x, y -> onManualPosition(x, y) },
+        hasCompassHeading: Boolean = false,
+        mapOrientation: MapOrientation? = null,
+        floorScales: Map<Int, Double> = emptyMap(),
+        routeProgress: Float = 0f,
+        isNavigationStarted: Boolean = false,
     ) {
         val floorChanged = this.floor != floor
         val geometryChanged = floorChanged || this.rooms !== rooms
@@ -185,7 +207,12 @@ class CanvasMapView @JvmOverloads constructor(
         val openDoorsChanged = this.openDoorsRoomIds != openDoorsRoomIds
         val nodesChanged = this.nodes != nodes
         val edgesChanged = this.edges != edges
-        val compassChanged = settings.compassRotationEnabled && this.compassHeadingDegrees != compassHeadingDegrees
+        val headingChanged = this.compassHeadingDegrees != compassHeadingDegrees ||
+            this.hasCompassHeading != hasCompassHeading
+        val compassChanged = settings.compassRotationEnabled && headingChanged
+        val orientationChanged = this.mapOrientation != mapOrientation
+        val progressChanged = this.routeProgress != routeProgress || this.isNavigationStarted != isNavigationStarted
+        val scalesChanged = this.floorScales != floorScales
         val compassModeChanged = this.settings.compassRotationEnabled != settings.compassRotationEnabled
         val settingsChanged = this.settings != settings
         val oldZoom = zoom
@@ -202,7 +229,12 @@ class CanvasMapView @JvmOverloads constructor(
         this.accuracyMeters = accuracyMeters
         this.locationMode = locationMode
         this.manualPositionSelectionMode = manualPositionSelectionMode
-        if (routeChanged) routeSegments = buildRouteSegments(nextRoute)
+        this.floorScales = floorScales
+        this.hasCompassHeading = hasCompassHeading
+        this.mapOrientation = mapOrientation
+        this.routeProgress = routeProgress
+        this.isNavigationStarted = isNavigationStarted
+        if (routeChanged || scalesChanged) routeSegments = buildRouteSegments(nextRoute)
         this.route = nextRoute
         this.routeOriginPosition = routeOriginPosition
         if (routeChanged || routeOriginChanged || positionChanged) {
@@ -226,11 +258,14 @@ class CanvasMapView @JvmOverloads constructor(
             panY = 0f
         }
         val zoomChanged = zoom != oldZoom
-        if (floorChanged || zoomChanged || compassModeChanged || compassChanged) updateMatrix()
+        if (floorChanged || zoomChanged || compassModeChanged || compassChanged ||
+            (settings.compassRotationEnabled && orientationChanged)
+        ) updateMatrix()
 
         val visualsChanged = floorChanged || geometryChanged || routeChanged || routeOriginChanged || positionChanged ||
             accuracyChanged || locationModeChanged || selectionChanged || nodesChanged || edgesChanged ||
-            settingsChanged || compassChanged || compassModeChanged || openDoorsChanged
+            settingsChanged || compassChanged || compassModeChanged || openDoorsChanged ||
+            (headingChanged && userPosition != null) || orientationChanged || progressChanged
         if (visualsChanged) invalidate()
     }
 
@@ -257,14 +292,16 @@ class CanvasMapView @JvmOverloads constructor(
         val systemDark = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
         val darkTheme = settings.themeMode == ThemeMode.DARK || (settings.themeMode == ThemeMode.SYSTEM && systemDark)
         canvas.drawColor(if (darkTheme) MAP_BACKGROUND_DARK else MAP_BACKGROUND_LIGHT)
+        labelTextColor = if (darkTheme) 0xFFE9EBF4.toInt() else 0xFF16233B.toInt()
+        labelBackgroundColor = if (darkTheme) 0xE6191C27.toInt() else 0xEEFFFFFF.toInt()
         val currentFloor = floor
         if (currentFloor == null || width <= 0 || height <= 0) return
 
         val saveCount = canvas.save()
         canvas.setDrawFilter(drawFilterFor(settings.mapRenderQuality))
         canvas.concat(mapMatrix)
-        GeneratedFloorMaps.draw(canvas, currentFloor.number)
-        if (context.isEnglishLocale()) EnglishFloorMapLabels.draw(context, canvas, currentFloor.number)
+        GeneratedFloorMaps.draw(canvas, currentFloor.number, dark = darkTheme)
+        if (context.isEnglishLocale()) EnglishFloorMapLabels.draw(context, canvas, currentFloor.number, dark = darkTheme)
         val mapScale = fitScale * zoom
         if (settings.showCoordinateGrid) drawCoordinateGrid(canvas, currentFloor)
         if (settings.showNavigationEdges) drawDebugEdges(canvas, currentFloor)
@@ -272,7 +309,7 @@ class CanvasMapView @JvmOverloads constructor(
         drawRoomHighlights(canvas, currentFloor, mapScale)
         drawRoute(canvas, currentFloor, mapScale)
         drawOpenDoorsMarkers(canvas, mapScale)
-        drawUserMarker(canvas, currentFloor, mapScale)
+        drawUserMarker(canvas, currentFloor, mapScale, darkTheme)
         canvas.restoreToCount(saveCount)
         drawTapCoordinateOverlay(canvas)
 
@@ -331,7 +368,14 @@ class CanvasMapView @JvmOverloads constructor(
         clampPan(mapLeft, mapTop, currentFloor.width * scaled, currentFloor.height * scaled)
         val rawTx = mapLeft - currentFloor.viewBoxX.toFloat() * scaled
         val rawTy = mapTop - currentFloor.viewBoxY.toFloat() * scaled
-        val rotation = if (settings.compassRotationEnabled) -compassHeadingDegrees else 0f
+        // Rotate so that the user's facing direction points up. The plan itself is not north-up:
+        // its "up" bearing comes from the GPS anchors, so it has to be subtracted from the heading.
+        val mapUpBearing = mapOrientation?.mapUpBearingDegrees?.toFloat() ?: 0f
+        val rotation = if (settings.compassRotationEnabled && hasCompassHeading) {
+            -(compassHeadingDegrees - mapUpBearing)
+        } else {
+            0f
+        }
         val cosine: Float
         val sine: Float
         if (rotation == 0f) {
@@ -432,13 +476,57 @@ class CanvasMapView @JvmOverloads constructor(
             }
             activeNodes?.add(node)
         }
-        return groups.map { segmentNodes ->
+        var metersSoFar = 0.0
+        var previousNode: NavNode? = null
+        val segments = groups.map { segmentNodes ->
             val path = Path().apply {
                 moveTo(segmentNodes.first().x.toFloat(), segmentNodes.first().y.toFloat())
                 segmentNodes.drop(1).forEach { lineTo(it.x.toFloat(), it.y.toFloat()) }
             }
-            RouteFloorSegment(segmentNodes.first().floor, segmentNodes, path)
+            val scale = floorScales[segmentNodes.first().floor]?.takeIf { it.isFinite() && it > 0.0 } ?: DEFAULT_METERS_PER_UNIT
+            val cumulative = DoubleArray(segmentNodes.size)
+            segmentNodes.forEachIndexed { index, node ->
+                val previous = previousNode
+                if (previous != null) {
+                    metersSoFar += if (previous.floor == node.floor) {
+                        hypot(node.x - previous.x, node.y - previous.y) * scale
+                    } else {
+                        FLOOR_TRANSITION_METERS
+                    }
+                }
+                cumulative[index] = metersSoFar
+                previousNode = node
+            }
+            RouteFloorSegment(segmentNodes.first().floor, segmentNodes, path, cumulative)
         }
+        routeTotalMeters = metersSoFar
+        return segments
+    }
+
+    /** Path of the part of [segment] that is already behind the user, or null if nothing is passed. */
+    private fun passedPathFor(segment: RouteFloorSegment): Path? {
+        if (!isNavigationStarted || routeTotalMeters <= 0.0 || segment.nodes.size < 2) return null
+        val passedMeters = routeProgress.coerceIn(0f, 1f) * routeTotalMeters
+        if (passedMeters <= segment.cumulativeMeters.first()) return null
+        passedRoutePath.reset()
+        passedRoutePath.moveTo(segment.nodes.first().x.toFloat(), segment.nodes.first().y.toFloat())
+        for (index in 1 until segment.nodes.size) {
+            val node = segment.nodes[index]
+            val startMeters = segment.cumulativeMeters[index - 1]
+            val endMeters = segment.cumulativeMeters[index]
+            if (passedMeters >= endMeters) {
+                passedRoutePath.lineTo(node.x.toFloat(), node.y.toFloat())
+                continue
+            }
+            val previous = segment.nodes[index - 1]
+            val ratio = if (endMeters > startMeters) ((passedMeters - startMeters) / (endMeters - startMeters)).coerceIn(0.0, 1.0) else 0.0
+            passedRoutePath.lineTo(
+                (previous.x + (node.x - previous.x) * ratio).toFloat(),
+                (previous.y + (node.y - previous.y) * ratio).toFloat(),
+            )
+            break
+        }
+        return passedRoutePath
     }
 
     private fun roomAt(point: PointF): Room? = roomGeometries.asSequence()
@@ -541,6 +629,11 @@ class CanvasMapView @JvmOverloads constructor(
             val firstNode = segment.nodes.firstOrNull() ?: return@forEach
             val lastNode = segment.nodes.lastOrNull() ?: return@forEach
             canvas.drawPath(segment.path, routePaint)
+            passedPathFor(segment)?.let { passed ->
+                passedRoutePaint.strokeWidth = widthInSvgUnits * 1.06f
+                passedRoutePaint.color = PASSED_ROUTE_COLOR
+                canvas.drawPath(passed, passedRoutePaint)
+            }
             if (segment.nodes.size > 1 && firstNode.id == firstRouteNode?.id) {
                 canvas.drawCircle(firstNode.x.toFloat(), firstNode.y.toFloat(), widthInSvgUnits * 1.35f, haloPaint)
                 roomPaint.color = settings.routeColorArgb
@@ -618,7 +711,7 @@ class CanvasMapView @JvmOverloads constructor(
         }
     }
 
-    private fun drawUserMarker(canvas: Canvas, floor: FloorPlan, mapScale: Float) {
+    private fun drawUserMarker(canvas: Canvas, floor: FloorPlan, mapScale: Float, darkTheme: Boolean) {
         val preview = dragPreview
         val point = if (preview != null && floor.number == userPosition?.floor) {
             MapPoint(floor.number, preview.x, preview.y)
@@ -638,6 +731,10 @@ class CanvasMapView @JvmOverloads constructor(
             }
         }
         val radius = 11f * resources.displayMetrics.density / max(mapScale, 0.0001f)
+        val orientation = mapOrientation
+        if (hasCompassHeading && orientation != null && preview == null) {
+            drawHeadingCone(canvas, point, radius, orientation.svgAngleForBearing(compassHeadingDegrees.toDouble()), darkTheme)
+        }
         haloPaint.color = Color.WHITE
         canvas.drawCircle(point.x, point.y, radius * 1.28f, haloPaint)
         roomPaint.color = when {
@@ -657,6 +754,30 @@ class CanvasMapView @JvmOverloads constructor(
             y = point.y - radius * 1.4f,
             mapScale = mapScale,
         )
+    }
+
+    private fun drawHeadingCone(canvas: Canvas, point: MapPoint, radius: Float, angle: Double, darkTheme: Boolean) {
+        val length = radius * 3.4f
+        val halfWidth = Math.toRadians(HEADING_CONE_HALF_ANGLE_DEGREES)
+        val gradient = android.graphics.RadialGradient(
+            point.x,
+            point.y,
+            length,
+            intArrayOf(if (darkTheme) 0x998AA8FF.toInt() else 0x882F5FE8.toInt(), 0x002F5FE8),
+            floatArrayOf(0.25f, 1f),
+            android.graphics.Shader.TileMode.CLAMP,
+        )
+        headingPaint.shader = gradient
+        headingPath.reset()
+        headingPath.moveTo(point.x, point.y)
+        headingPath.arcTo(
+            RectF(point.x - length, point.y - length, point.x + length, point.y + length),
+            Math.toDegrees(angle - halfWidth).toFloat(),
+            Math.toDegrees(halfWidth * 2).toFloat(),
+        )
+        headingPath.close()
+        canvas.drawPath(headingPath, headingPaint)
+        headingPaint.shader = null
     }
 
     private fun drawRouteDirectionArrow(canvas: Canvas, point: MapPoint, target: PointF, radius: Float): Boolean {
@@ -683,7 +804,7 @@ class CanvasMapView @JvmOverloads constructor(
         val density = resources.displayMetrics.density
         val desiredScreenSize = (11f * resources.displayMetrics.scaledDensity * zoom).coerceIn(8f * density, 22f * density)
         textPaint.textSize = desiredScreenSize / max(mapScale, 0.0001f)
-        textPaint.color = 0xFF16233C.toInt()
+        textPaint.color = labelTextColor
         val padding = 3f * density / max(mapScale, 0.0001f)
         val textWidth = textPaint.measureText(text)
         val ascent = textPaint.ascent()
@@ -691,7 +812,7 @@ class CanvasMapView @JvmOverloads constructor(
         val left = x - textWidth / 2f - padding
         val top = y - (descent - ascent) / 2f - padding
         val bounds = RectF(left, top, left + textWidth + 2 * padding, top + descent - ascent + 2 * padding)
-        labelPaint.color = 0xDDF9FAFF.toInt()
+        labelPaint.color = labelBackgroundColor
         canvas.drawRoundRect(bounds, padding * 1.4f, padding * 1.4f, labelPaint)
         canvas.drawText(text, x - textWidth / 2f, y - (ascent + descent) / 2f, textPaint)
     }
@@ -801,21 +922,26 @@ class CanvasMapView @JvmOverloads constructor(
         val area: Float,
     )
 
-    private data class RouteFloorSegment(
+    private class RouteFloorSegment(
         val floor: Int,
         val nodes: List<NavNode>,
         val path: Path,
+        val cumulativeMeters: DoubleArray,
     )
 
     private companion object {
         const val MARKER_DRAG_RADIUS_DP = 34f
-        const val MAP_BACKGROUND_LIGHT = 0xFFEEF2FA.toInt()
-        const val MAP_BACKGROUND_DARK = 0xFF040B1D.toInt()
-        const val GPS_MARKER_COLOR = 0xFF2158E0.toInt()
+        const val MAP_BACKGROUND_LIGHT = 0xFFF3F6FB.toInt()
+        const val MAP_BACKGROUND_DARK = 0xFF11131B.toInt()
+        const val GPS_MARKER_COLOR = 0xFF2F5FE8.toInt()
+        const val PASSED_ROUTE_COLOR = 0xFF9AA6BC.toInt()
+        const val DEFAULT_METERS_PER_UNIT = 0.083333
+        const val FLOOR_TRANSITION_METERS = 4.0
+        const val HEADING_CONE_HALF_ANGLE_DEGREES = 28.0
         const val APPROXIMATE_MARKER_COLOR = 0xFF7C8CA6.toInt()
         const val MANUAL_MARKER_COLOR = 0xFF12A76A.toInt()
-        const val ACCURACY_FILL = 0x2A2158E0
-        const val ACCURACY_STROKE = 0x772158E0
+        const val ACCURACY_FILL = 0x262F5FE8
+        const val ACCURACY_STROKE = 0x772F5FE8
         const val ROUTE_DIRECTION_EPSILON_SQUARED = 0.0001f
         val LOW_QUALITY_DRAW_FILTER = PaintFlagsDrawFilter(Paint.ANTI_ALIAS_FLAG, 0)
         val MEDIUM_QUALITY_DRAW_FILTER = PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG)

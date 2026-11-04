@@ -1,5 +1,7 @@
 package com.logos.navigator.update
 
+import com.logos.navigator.utils.localizedContext
+
 import android.app.Application
 import android.content.Context
 import androidx.lifecycle.AndroidViewModel
@@ -29,7 +31,10 @@ internal class AppUpdateViewModel(application: Application) : AndroidViewModel(a
     val state = mutableState.asStateFlow()
 
     init {
-        checkForUpdates(force = false)
+        viewModelScope.launch {
+            runCatching { repository.deleteStaleDownloads() }
+            checkForUpdates(force = false)
+        }
     }
 
     fun checkForUpdates(force: Boolean = true) {
@@ -52,7 +57,7 @@ internal class AppUpdateViewModel(application: Application) : AndroidViewModel(a
                         availableUpdate = update,
                         isChecking = false,
                         downloadedApk = downloadedApk,
-                        message = if (update == null) getApplication<Application>().getString(R.string.update_up_to_date) else null,
+                        message = if (update == null) getApplication<Application>().localizedContext().getString(R.string.update_up_to_date) else null,
                         showPrompt = update != null && (update.versionName != dismissedVersion || downloadedApk != null),
                     )
                 }
@@ -63,7 +68,7 @@ internal class AppUpdateViewModel(application: Application) : AndroidViewModel(a
                 mutableState.update {
                     it.copy(
                         isChecking = false,
-                        message = getApplication<Application>().getString(R.string.update_check_failed),
+                        message = getApplication<Application>().localizedContext().getString(R.string.update_check_failed),
                     )
                 }
             }
@@ -92,7 +97,7 @@ internal class AppUpdateViewModel(application: Application) : AndroidViewModel(a
                         isDownloading = false,
                         downloadProgress = 100,
                         downloadedApk = apkFile,
-                        message = getApplication<Application>().getString(R.string.update_downloaded),
+                        message = getApplication<Application>().localizedContext().getString(R.string.update_downloaded),
                     )
                 }
                 installUpdate()
@@ -102,7 +107,7 @@ internal class AppUpdateViewModel(application: Application) : AndroidViewModel(a
                 mutableState.update {
                     it.copy(
                         isDownloading = false,
-                        message = getApplication<Application>().getString(R.string.update_download_failed),
+                        message = getApplication<Application>().localizedContext().getString(R.string.update_download_failed),
                     )
                 }
             }
@@ -116,7 +121,7 @@ internal class AppUpdateViewModel(application: Application) : AndroidViewModel(a
             mutableState.update {
                 it.copy(
                     showPrompt = if (installerOpened) false else it.showPrompt,
-                    message = getApplication<Application>().getString(
+                    message = getApplication<Application>().localizedContext().getString(
                         if (installerOpened) R.string.update_installer_opened else R.string.update_install_permission,
                     ),
                 )
@@ -124,7 +129,7 @@ internal class AppUpdateViewModel(application: Application) : AndroidViewModel(a
         } catch (_: Exception) {
             mutableState.update {
                 it.copy(
-                    message = getApplication<Application>().getString(R.string.update_installer_failed),
+                    message = getApplication<Application>().localizedContext().getString(R.string.update_installer_failed),
                     showPrompt = true,
                 )
             }
