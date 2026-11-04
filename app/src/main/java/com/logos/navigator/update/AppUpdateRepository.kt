@@ -69,6 +69,15 @@ internal class AppUpdateRepository(context: Context) {
         }
     }
 
+    /**
+     * Downloaded APKs are only referenced from in-memory state, so after a restart (or a completed
+     * update) they are orphaned and would keep occupying the cache. Remove them on startup.
+     */
+    suspend fun deleteStaleDownloads() = withContext(Dispatchers.IO) {
+        File(appContext.cacheDir, UPDATE_DIRECTORY).listFiles()?.forEach { file -> runCatching { file.delete() } }
+        Unit
+    }
+
     suspend fun downloadUpdate(update: AvailableUpdate, onProgress: (Int) -> Unit): File = withContext(Dispatchers.IO) {
         val updateDirectory = File(appContext.cacheDir, UPDATE_DIRECTORY)
         if (!updateDirectory.exists() && !updateDirectory.mkdirs()) {

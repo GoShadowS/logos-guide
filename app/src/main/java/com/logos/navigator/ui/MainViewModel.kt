@@ -39,6 +39,7 @@ import com.logos.navigator.navigation.RouteProgressCalculator
 import com.logos.navigator.navigation.RouteStepGenerator
 import com.logos.navigator.navigation.SiteIndoorRouter
 import com.logos.navigator.utils.appLocale
+import com.logos.navigator.utils.localizedContext
 import com.logos.navigator.utils.localizedName
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -57,14 +58,20 @@ import kotlin.math.ceil
 import kotlin.math.hypot
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
-    private val appContext = application.applicationContext
+    /** Context whose resources follow the in-app language, including on Android < 13. */
+    private val appContext: Context
+        get() = getApplication<Application>().localizedContext()
     private val repository = IndoorRepository(application)
     private val locationTracker = FusedLocationTracker(application)
     private val compassTracker = CompassHeadingTracker(application)
     private val settingsStore = SettingsDataStore(application)
     private val debugLogFile = File(application.filesDir, "debug/navigator.log")
     private val debugLogLock = Any()
-    private var compassTrackingEnabled = false
+    private var compassTrackingActive = false
+    private var compassUnavailableReported = false
+    private var isInForeground = true
+    private var gpsPausedInBackground = false
+    private var startupLocationHandled = false
     private val favoritesRepository = FavoritesRepository(application, AppDatabase.getInstance(application))
 
     private val _state = MutableStateFlow(IndoorUiState())
@@ -93,21 +100,68 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             settingsStore.settingsFlow.collect { settings ->
                 _state.update { it.copy(settings = settings) }
-                if (settings.compassRotationEnabled != compassTrackingEnabled) {
-                    compassTrackingEnabled = settings.compassRotationEnabled
-                    if (compassTrackingEnabled) {
-                        val started = compassTracker.start { heading ->
-                            _state.update { it.copy(compassHeadingDegrees = heading) }
-                        }
-                        if (!started) showMessage(appContext.getString(R.string.compass_unavailable))
-                    } else {
-                        compassTracker.stop()
-                        _state.update { it.copy(compassHeadingDegrees = 0f) }
-                    }
-                }
+                updateCompassTracking()
             }
         }
         loadData()
+    }
+
+    /**
+     * The compass runs while the map is rotated by heading or while GPS is used (for the heading cone),
+     * and only while the app is visible, so sensors do not drain the battery in the background.
+     */
+    private fun updateCompassTracking() {
+        val current = _state.value
+        val shouldTrack = isInForeground &&
+            (current.settings.compassRotationEnabled || current.locationMode == LocationMode.GPS)
+        if (shouldTrack == compassTrackingActive) return
+        if (shouldTrack) {
+            val started = compassTracker.start { heading ->
+                _state.update { it.copy(compassHeadingDegrees = heading, hasCompassHeading = true) }
+            }
+            compassTrackingActive = started
+            if (!started && current.settings.compassRotationEnabled && !compassUnavailableReported) {
+                compassUnavailableReported = true
+                showMessage(appContext.getString(R.string.compass_unavailable))
+            }
+        } else {
+            compassTracker.stop()
+            compassTrackingActive = false
+            _state.update { it.copy(compassHeadingDegrees = 0f, hasCompassHeading = false) }
+        }
+    }
+
+    /** Returns true only for the first call per ViewModel, so configuration changes do not restart GPS. */
+    fun consumeStartupLocationRequest(): Boolean {
+        if (startupLocationHandled) return false
+        startupLocationHandled = true
+        return true
+    }
+
+    fun onAppForeground() {
+        if (isInForeground) return
+        isInForeground = true
+        if (gpsPausedInBackground && _state.value.locationMode == LocationMode.GPS) {
+            gpsPausedInBackground = false
+            positionSmoother.reset()
+            _state.update { it.copy(isGpsActive = true) }
+            armGpsFirstFixTimeout(gpsAttempt)
+            startGpsTracking()
+        }
+        gpsPausedInBackground = false
+        updateCompassTracking()
+    }
+
+    fun onAppBackground() {
+        if (!isInForeground) return
+        isInForeground = false
+        if (_state.value.locationMode == LocationMode.GPS) {
+            gpsPausedInBackground = true
+            gpsTimeoutJob?.cancel()
+            gpsTimeoutJob = null
+            locationTracker.stop()
+        }
+        updateCompassTracking()
     }
 
     private fun loadData() {
@@ -127,9 +181,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 }
                 val firstFloor = loaded.navigation.floors.firstOrNull { it.number == requestedFloor } ?: fallbackFloor
                 lastPositionFloor = firstFloor.number
+                val orientations = loaded.navigation.floors.mapNotNull { floor ->
+                    GeoReferencer.orientation(loaded.navigation.gpsAnchors.filter { it.floor == floor.number })
+                        ?.let { floor.number to it }
+                }.toMap()
                 _state.update {
                     it.copy(
                         isLoading = false,
+                        mapOrientations = orientations,
                         settings = settings,
                         navigation = loaded.navigation,
                         rooms = loaded.rooms,
@@ -311,6 +370,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     gpsWarning = null,
                 )
             }
+            updateCompassTracking()
             return
         }
 
@@ -343,10 +403,22 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 gpsWarning = appContext.getString(R.string.gps_determining),
             )
         }
+        updateCompassTracking()
+        if (!isInForeground) {
+            gpsPausedInBackground = true
+            return
+        }
+        armGpsFirstFixTimeout(attempt)
+        startGpsTracking()
+    }
+
+    private fun armGpsFirstFixTimeout(attempt: Int) {
+        gpsTimeoutJob?.cancel()
         gpsTimeoutJob = viewModelScope.launch {
             delay(GPS_FIRST_FIX_TIMEOUT_MS)
             val current = _state.value
-            if (attempt == gpsAttempt && current.locationMode == LocationMode.GPS && lastGpsLocation == null) {
+            val hasFreshFix = lastGpsLocation?.let(::isFreshLocation) == true
+            if (attempt == gpsAttempt && current.locationMode == LocationMode.GPS && !hasFreshFix) {
                 _state.update {
                     it.copy(
                         isGpsActive = false,
@@ -355,11 +427,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 }
             }
         }
-        startGpsTracking()
     }
 
     private fun startGpsTracking() {
-        if (_state.value.locationMode != LocationMode.GPS) return
+        if (_state.value.locationMode != LocationMode.GPS || !isInForeground) return
         locationTracker.start(
             accuracyMode = _state.value.settings.locationAccuracyMode,
             updateIntervalSeconds = _state.value.settings.locationUpdateIntervalSeconds,

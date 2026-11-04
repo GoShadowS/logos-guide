@@ -105,7 +105,7 @@ internal fun AboutScreen(
         ) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(14.dp),
+                shape = RoundedCornerShape(18.dp),
                 colors = CardDefaults.cardColors(containerColor = LogosColors.BlueNight),
             ) {
                 Row(
@@ -116,7 +116,7 @@ internal fun AboutScreen(
                     Image(
                         painter = painterResource(R.drawable.logo),
                         contentDescription = stringResource(R.string.splash_description),
-                        modifier = Modifier.size(72.dp).clip(RoundedCornerShape(14.dp)),
+                        modifier = Modifier.size(72.dp).clip(RoundedCornerShape(18.dp)),
                     )
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Text(
@@ -148,7 +148,7 @@ internal fun AboutScreen(
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(14.dp),
+                shape = RoundedCornerShape(18.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             ) {
                 Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
@@ -173,7 +173,7 @@ internal fun AboutScreen(
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(14.dp),
+                shape = RoundedCornerShape(18.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             ) {
                 Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -206,7 +206,7 @@ internal fun AboutScreen(
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(14.dp),
+                shape = RoundedCornerShape(18.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             ) {
                 Row(
@@ -218,7 +218,7 @@ internal fun AboutScreen(
                     horizontalArrangement = Arrangement.spacedBy(14.dp),
                 ) {
                     Surface(
-                        shape = RoundedCornerShape(14.dp),
+                        shape = RoundedCornerShape(18.dp),
                         color = MaterialTheme.colorScheme.primaryContainer,
                     ) {
                         Icon(

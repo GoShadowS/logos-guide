@@ -18,7 +18,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import com.logos.navigator.R
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
@@ -45,11 +47,11 @@ fun LogosTheme(
     val typography = remember { logosTypography() }
     val shapes = remember {
         Shapes(
-            extraSmall = RoundedCornerShape(6.dp),
-            small = RoundedCornerShape(8.dp),
-            medium = RoundedCornerShape(12.dp),
-            large = RoundedCornerShape(16.dp),
-            extraLarge = RoundedCornerShape(14.dp),
+            extraSmall = RoundedCornerShape(8.dp),
+            small = RoundedCornerShape(10.dp),
+            medium = RoundedCornerShape(16.dp),
+            large = RoundedCornerShape(20.dp),
+            extraLarge = RoundedCornerShape(24.dp),
         )
     }
     val view = LocalView.current
@@ -85,99 +87,110 @@ private fun logosLightColors(accentArgb: Int) = lightColorScheme(
     primary = Color(accentArgb),
     onPrimary = Color.White,
     primaryContainer = LogosColors.BluePale,
-    onPrimaryContainer = LogosColors.BlueDeep,
-    inversePrimary = LogosColors.BlueNight,
+    onPrimaryContainer = LogosColors.BlueNight,
+    inversePrimary = LogosColors.NightBlue,
     secondary = LogosColors.Muted,
     onSecondary = Color.White,
     secondaryContainer = LogosColors.BlueSoft,
-    onSecondaryContainer = LogosColors.BlueDeep,
-    tertiary = Color(0xFF9A6A00),
+    onSecondaryContainer = LogosColors.BlueNight,
+    tertiary = Color(0xFF8A6100),
     onTertiary = Color.White,
-    tertiaryContainer = Color(0xFFFFEFC2),
+    tertiaryContainer = Color(0xFFFFF1CC),
     onTertiaryContainer = Color(0xFF3D2C00),
     background = LogosColors.Background,
     onBackground = LogosColors.Ink,
-    surface = Color.White,
+    surface = LogosColors.Surface,
     onSurface = LogosColors.Ink,
     surfaceVariant = LogosColors.SurfaceSoft,
     onSurfaceVariant = LogosColors.Muted,
     surfaceTint = Color(accentArgb),
-    inverseSurface = LogosColors.BlueDeep,
-    inverseOnSurface = Color(0xFFF2F7FF),
+    inverseSurface = LogosColors.Ink,
+    inverseOnSurface = Color(0xFFF3F6FB),
     outline = LogosColors.Line,
-    outlineVariant = Color(0xFFDCE4F1),
+    outlineVariant = LogosColors.LineSoft,
     error = Color(0xFFC0313F),
     errorContainer = Color(0xFFFFE3E5),
     onErrorContainer = Color(0xFF5C0A13),
     surfaceBright = Color.White,
-    surfaceDim = Color(0xFFDCE3F0),
+    surfaceDim = Color(0xFFDDE3EE),
     surfaceContainerLowest = Color.White,
-    surfaceContainerLow = Color(0xFFF7F9FD),
-    surfaceContainer = Color(0xFFF4F7FC),
-    surfaceContainerHigh = Color(0xFFEEF2FA),
-    surfaceContainerHighest = LogosColors.SurfaceSoft,
+    surfaceContainerLow = Color(0xFFF8FAFD),
+    surfaceContainer = Color(0xFFF3F6FB),
+    surfaceContainerHigh = LogosColors.SurfaceSoft,
+    surfaceContainerHighest = Color(0xFFE6EBF4),
 )
 
 private fun logosDarkColors(accentArgb: Int): androidx.compose.material3.ColorScheme {
-    val primary = if (accentArgb in AppSettings.BRAND_BLUES) LogosColors.BlueNightAccent else Color(accentArgb).lighten(0.42f)
+    val primary = if (accentArgb in AppSettings.BRAND_BLUES) LogosColors.NightBlue else Color(accentArgb).lighten(0.42f)
     return darkColorScheme(
         primary = primary,
-        onPrimary = Color(0xFF04122E),
-        primaryContainer = Color(0xFF17479E),
-        onPrimaryContainer = Color(0xFFE5EDFF),
+        onPrimary = Color(0xFF0B1433),
+        primaryContainer = LogosColors.NightBluePale,
+        onPrimaryContainer = Color(0xFFE2E8FF),
         inversePrimary = LogosColors.Blue,
-        secondary = Color(0xFFB3C8EE),
-        onSecondary = Color(0xFF0A1C3F),
-        secondaryContainer = Color(0xFF16305E),
-        onSecondaryContainer = Color(0xFFDCE8FA),
-        tertiary = Color(0xFFFFD267),
+        secondary = LogosColors.NightMuted,
+        onSecondary = LogosColors.NightBackground,
+        secondaryContainer = LogosColors.NightBlueSoft,
+        onSecondaryContainer = Color(0xFFDCE3F7),
+        tertiary = LogosColors.Yellow,
         onTertiary = Color(0xFF2A210A),
-        tertiaryContainer = Color(0xFF4A3A10),
+        tertiaryContainer = Color(0xFF3F3417),
         onTertiaryContainer = Color(0xFFFFEFC2),
-        background = Color(0xFF040B1D),
-        onBackground = Color(0xFFF2F7FF),
-        surface = Color(0xFF0A1C3F),
-        onSurface = Color(0xFFF2F7FF),
-        surfaceVariant = Color(0xFF122A5C),
-        onSurfaceVariant = Color(0xFFB3C8EE),
+        background = LogosColors.NightBackground,
+        onBackground = LogosColors.NightInk,
+        surface = LogosColors.NightSurface,
+        onSurface = LogosColors.NightInk,
+        surfaceVariant = LogosColors.NightSurfaceSoft,
+        onSurfaceVariant = LogosColors.NightMuted,
         surfaceTint = primary,
-        inverseSurface = Color(0xFFE5EDFB),
-        inverseOnSurface = Color(0xFF0A1C3F),
-        outline = Color(0xFF2C4D85),
-        outlineVariant = Color(0xFF1C3766),
+        inverseSurface = LogosColors.NightInk,
+        inverseOnSurface = LogosColors.NightSurface,
+        outline = LogosColors.NightLine,
+        outlineVariant = LogosColors.NightLineSoft,
         error = Color(0xFFFF8A94),
-        errorContainer = Color(0xFF5C1520),
+        errorContainer = Color(0xFF4E1820),
         onErrorContainer = Color(0xFFFFDADD),
-        surfaceBright = Color(0xFF16305E),
-        surfaceDim = Color(0xFF040B1D),
-        surfaceContainerLowest = Color(0xFF030818),
-        surfaceContainerLow = Color(0xFF071530),
-        surfaceContainer = Color(0xFF0A1C3F),
-        surfaceContainerHigh = Color(0xFF0E244D),
-        surfaceContainerHighest = Color(0xFF122A5C),
+        surfaceBright = LogosColors.NightSurfaceRaised,
+        surfaceDim = LogosColors.NightBackground,
+        surfaceContainerLowest = Color(0xFF0C0E14),
+        surfaceContainerLow = Color(0xFF151822),
+        surfaceContainer = LogosColors.NightSurface,
+        surfaceContainerHigh = LogosColors.NightSurfaceSoft,
+        surfaceContainerHighest = LogosColors.NightSurfaceRaised,
     )
 }
 
+/** Onest — the typeface of logos-guide.ru; static instances so weights also work before Android 8. */
+private val Onest = FontFamily(
+    Font(R.font.onest_regular, FontWeight.Normal),
+    Font(R.font.onest_medium, FontWeight.Medium),
+    Font(R.font.onest_semibold, FontWeight.SemiBold),
+    Font(R.font.onest_bold, FontWeight.Bold),
+)
+
 private fun logosTypography(): Typography {
     val defaults = Typography()
-    val sans = FontFamily.SansSerif
-    fun androidx.compose.ui.text.TextStyle.heading(weight: FontWeight, spacing: Float) =
-        copy(fontFamily = sans, fontWeight = weight, letterSpacing = spacing.sp)
+    fun androidx.compose.ui.text.TextStyle.onest(weight: FontWeight? = null, spacing: Float? = null) = copy(
+        fontFamily = Onest,
+        fontWeight = weight ?: fontWeight,
+        letterSpacing = spacing?.sp ?: letterSpacing,
+    )
     return defaults.copy(
-        displayLarge = defaults.displayLarge.heading(FontWeight.Bold, -0.5f),
-        displayMedium = defaults.displayMedium.heading(FontWeight.Bold, -0.4f),
-        displaySmall = defaults.displaySmall.heading(FontWeight.Bold, -0.3f),
-        headlineLarge = defaults.headlineLarge.heading(FontWeight.Bold, -0.3f),
-        headlineMedium = defaults.headlineMedium.heading(FontWeight.Bold, -0.2f),
-        headlineSmall = defaults.headlineSmall.heading(FontWeight.SemiBold, -0.1f),
-        titleLarge = defaults.titleLarge.heading(FontWeight.SemiBold, -0.1f),
-        titleMedium = defaults.titleMedium.heading(FontWeight.SemiBold, 0f),
-        titleSmall = defaults.titleSmall.heading(FontWeight.SemiBold, 0f),
-        labelLarge = defaults.labelLarge.heading(FontWeight.SemiBold, 0.1f),
-        labelMedium = defaults.labelMedium.heading(FontWeight.Medium, 0.2f),
-        bodyLarge = defaults.bodyLarge.copy(fontFamily = sans),
-        bodyMedium = defaults.bodyMedium.copy(fontFamily = sans),
-        bodySmall = defaults.bodySmall.copy(fontFamily = sans),
+        displayLarge = defaults.displayLarge.onest(FontWeight.Bold, -1.2f),
+        displayMedium = defaults.displayMedium.onest(FontWeight.Bold, -0.9f),
+        displaySmall = defaults.displaySmall.onest(FontWeight.Bold, -0.7f),
+        headlineLarge = defaults.headlineLarge.onest(FontWeight.Bold, -0.6f),
+        headlineMedium = defaults.headlineMedium.onest(FontWeight.Bold, -0.5f),
+        headlineSmall = defaults.headlineSmall.onest(FontWeight.SemiBold, -0.3f),
+        titleLarge = defaults.titleLarge.onest(FontWeight.SemiBold, -0.3f),
+        titleMedium = defaults.titleMedium.onest(FontWeight.SemiBold, -0.1f),
+        titleSmall = defaults.titleSmall.onest(FontWeight.SemiBold, 0f),
+        labelLarge = defaults.labelLarge.onest(FontWeight.SemiBold, 0f),
+        labelMedium = defaults.labelMedium.onest(FontWeight.Medium, 0f),
+        labelSmall = defaults.labelSmall.onest(FontWeight.Medium, 0f),
+        bodyLarge = defaults.bodyLarge.onest(spacing = 0f),
+        bodyMedium = defaults.bodyMedium.onest(spacing = 0f),
+        bodySmall = defaults.bodySmall.onest(spacing = 0.1f),
     )
 }
 

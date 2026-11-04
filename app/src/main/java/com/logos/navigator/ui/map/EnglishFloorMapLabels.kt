@@ -16,7 +16,10 @@ internal object EnglishFloorMapLabels {
         textAlign = Paint.Align.CENTER
     }
 
-    fun draw(context: Context, canvas: Canvas, floor: Int) {
+    fun draw(context: Context, canvas: Canvas, floor: Int, dark: Boolean = false) {
+        val filter = if (dark) GeneratedFloorMaps.darkMapFilter else null
+        patchPaint.colorFilter = filter
+        textPaint.colorFilter = filter
         when (floor) {
             1 -> drawFirstFloor(context, canvas)
             2 -> drawSecondFloor(context, canvas)

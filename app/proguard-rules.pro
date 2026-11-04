@@ -8,3 +8,8 @@
 -dontwarn com.google.errorprone.annotations.**
 -dontwarn javax.annotation.**
 -dontwarn org.jetbrains.annotations.**
+
+# Gson reads these through reflection; keep generic signatures of their fields.
+-keepclassmembers,allowobfuscation class * {
+    @com.google.gson.annotations.SerializedName <fields>;
+}

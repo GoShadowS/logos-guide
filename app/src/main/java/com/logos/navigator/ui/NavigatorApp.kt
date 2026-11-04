@@ -240,7 +240,6 @@ private fun MainNavigation(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    var startupLocationHandled by remember { mutableStateOf(false) }
     val startupLocationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
     ) { permissions ->
@@ -255,9 +254,8 @@ private fun MainNavigation(
             viewModel.showMessage(context.getString(R.string.gps_permission_denied))
         }
     }
-    LaunchedEffect(state.navigation, startupLocationHandled) {
-        if (state.navigation == null || startupLocationHandled) return@LaunchedEffect
-        startupLocationHandled = true
+    LaunchedEffect(state.navigation) {
+        if (state.navigation == null || !viewModel.consumeStartupLocationRequest()) return@LaunchedEffect
         val settings = state.settings
         val shouldStartGps = when (settings.startupLocationMode) {
             StartupLocationMode.GPS -> true
