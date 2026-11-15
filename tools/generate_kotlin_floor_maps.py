@@ -574,10 +574,7 @@ internal object GeneratedFloorMaps {
         this.shader = shader
     }
 
-    /**
-     * Dark map palette: inverts lightness while keeping hue, so pale-blue rooms become deep indigo,
-     * white corridors become graphite and dark labels become light (matches the site's dark map).
-     */
+    /** Applies the app's dark-mode palette to generated map paint without changing SVG geometry. */
     val darkMapFilter: ColorFilter = ColorMatrixColorFilter(
         ColorMatrix(
             floatArrayOf(

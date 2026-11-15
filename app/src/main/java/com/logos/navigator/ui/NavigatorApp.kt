@@ -13,12 +13,16 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
@@ -46,6 +50,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -104,9 +109,11 @@ fun NavigatorApp(viewModel: MainViewModel) {
     val favoriteIds = remember(favoritesState.favoriteRooms) {
         favoritesState.favoriteRooms.mapTo(mutableSetOf()) { it.roomId }
     }
-    val quickFavorites = remember(favoritesState.favoriteRooms, state.rooms) {
+    val savedFavoriteRooms = remember(favoritesState.favoriteRooms, state.rooms) {
         favoritesState.favoriteRooms.mapNotNull { favorite -> state.rooms.firstOrNull { it.id == favorite.roomId } }
-            .filter { it.routeAvailable && !it.nodeId.isNullOrBlank() }
+    }
+    val quickFavorites = remember(savedFavoriteRooms) {
+        savedFavoriteRooms.filter { it.routeAvailable && !it.nodeId.isNullOrBlank() }
     }
     LaunchedEffect(favoritesState.message, favoritesState.error, currentRoute) {
         val feedback = favoritesState.error ?: favoritesState.message ?: return@LaunchedEffect
@@ -168,6 +175,7 @@ fun NavigatorApp(viewModel: MainViewModel) {
                 updateViewModel = appUpdateViewModel,
                 updateState = appUpdateState,
                 favoriteIds = favoriteIds,
+                savedFavoriteRooms = savedFavoriteRooms,
                 quickFavorites = quickFavorites,
                 navController = navController,
                 currentRoute = currentRoute,
@@ -232,6 +240,7 @@ private fun MainNavigation(
     updateViewModel: AppUpdateViewModel,
     updateState: AppUpdateUiState,
     favoriteIds: Set<String>,
+    savedFavoriteRooms: List<com.logos.navigator.data.model.Room>,
     quickFavorites: List<com.logos.navigator.data.model.Room>,
     navController: NavHostController,
     currentRoute: String?,
@@ -240,6 +249,8 @@ private fun MainNavigation(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val density = LocalDensity.current
+    val imeVisible = WindowInsets.ime.getBottom(density) > 0
     val startupLocationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
     ) { permissions ->
@@ -290,7 +301,7 @@ private fun MainNavigation(
     Scaffold(
         snackbarHost = { SnackbarHost(rootSnackbarHostState) },
         bottomBar = {
-            if (!isTablet && currentRoute != ROUTE_ABOUT) {
+            if (!isTablet && currentRoute != ROUTE_ABOUT && !imeVisible) {
                 NavigationBar {
                     MainTab.entries.forEach { tab ->
                         NavigationBarItem(
@@ -307,7 +318,13 @@ private fun MainNavigation(
             }
         },
     ) { innerPadding ->
-        Row(Modifier.fillMaxSize().padding(navPadding(innerPadding, currentRoute))) {
+        val contentPadding = navPadding(innerPadding, currentRoute)
+        Row(
+            Modifier
+                .fillMaxSize()
+                .padding(contentPadding)
+                .consumeWindowInsets(contentPadding),
+        ) {
             if (isTablet && currentRoute != ROUTE_ABOUT) {
                 NavigationRail {
                     MainTab.entries.forEach { tab ->
@@ -326,11 +343,24 @@ private fun MainNavigation(
             }
             NavHost(
                 navController = navController,
-                startDestination = ROUTE_MAP,
+                startDestination = ROUTE_HOME,
                 modifier = Modifier.weight(1f).fillMaxHeight(),
             ) {
-                composable(LEGACY_HOME_ROUTE) {
-                    LaunchedEffect(Unit) { navigateToTab(navController, ROUTE_MAP) }
+                composable(ROUTE_HOME) {
+                    HomeScreen(
+                        favoriteRooms = savedFavoriteRooms,
+                        onSearch = { query -> openSearch(query) },
+                        onOpenMap = { navigateToTab(navController, ROUTE_MAP) },
+                        onOpenFavorites = { navigateToTab(navController, ROUTE_FAVORITES) },
+                        onOpenRoom = { room ->
+                            viewModel.selectRoomFromSearch(room)
+                            navigateToTab(navController, ROUTE_MAP)
+                        },
+                        onBuildRoute = { room ->
+                            viewModel.navigateTo(room)
+                            navigateToTab(navController, ROUTE_MAP)
+                        },
+                    )
                 }
                 composable(ROUTE_MAP) {
                     MapScreen(
@@ -497,6 +527,7 @@ private fun saveRoute(
 }
 
 private enum class MainTab(val route: String, val labelRes: Int, val icon: androidx.compose.ui.graphics.vector.ImageVector) {
+    HOME(ROUTE_HOME, R.string.nav_home, Icons.Default.Home),
     MAP(ROUTE_MAP, R.string.nav_map, Icons.Default.Map),
     FAVORITES(ROUTE_FAVORITES, R.string.nav_favorites, Icons.Default.Favorite),
     SEARCH(ROUTE_SEARCH, R.string.nav_search, Icons.Default.Search),
@@ -533,8 +564,8 @@ private object AppSettingsIntent {
     }
 }
 
+private const val ROUTE_HOME = "home"
 private const val ROUTE_MAP = "map"
-private const val LEGACY_HOME_ROUTE = "home"
 private const val ROUTE_FAVORITES = "favorites"
 private const val ROUTE_SEARCH = "search"
 private const val ROUTE_SETTINGS = "settings"

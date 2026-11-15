@@ -823,10 +823,10 @@ class CanvasMapView @JvmOverloads constructor(
         val density = resources.displayMetrics.density
         val message = context.getString(R.string.coordinate_overlay_format, point.x, point.y)
         textPaint.textSize = 12f * resources.displayMetrics.scaledDensity
-        textPaint.color = Color.DKGRAY
+        textPaint.color = labelTextColor
         val padding = 8f * density
         val textWidth = textPaint.measureText(message)
-        labelPaint.color = 0xEEFFFFFF.toInt()
+        labelPaint.color = labelBackgroundColor
         canvas.drawRoundRect(12f * density, height - 42f * density, 12f * density + textWidth + padding * 2, height - 12f * density, 8f * density, 8f * density, labelPaint)
         canvas.drawText(message, 12f * density + padding, height - 22f * density, textPaint)
     }
