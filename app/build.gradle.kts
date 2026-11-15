@@ -67,7 +67,7 @@ android {
             if (releaseSigningConfigured) {
                 signingConfig = signingConfigs.getByName("release")
             }
-            buildConfigField("boolean", "OPEN_DOORS", "true")
+            buildConfigField("boolean", "OPEN_DOORS", "false")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",

@@ -21,7 +21,7 @@
 
 `debug` предназначен для разработки и локального тестирования. Он имеет application ID suffix `.debug`, version suffix `-debug`, автоматически создаваемую debug-подпись и `OPEN_DOORS = false`.
 
-`release` имеет `versionName = "1.1.0-release"`, `versionCode = 4` и `OPEN_DOORS = true`. Карточки пяти площадок Дня открытых дверей доступны в этом варианте. Минификация R8 отключена; конфигурация ProGuard сохраняет правила для моделей, обрабатываемых Gson.
+`release` имеет `versionName = "1.1.0-release"`, `versionCode = 4` и `OPEN_DOORS = false`. В `app/build.gradle.kts` нет product flavors; оба объявленных build type (`debug` и `release`) выключают карточки OpenDoors на этапе компиляции, поэтому их UI и маркеры недоступны пользователю в новых сборках. Изменение не перестраивает и не переподписывает уже существующий `app/release/app-release.apk`.
 
 Локальная подпись Release определяется конфигурацией Android Studio или Gradle-сборки. Keystore и его пароли не хранятся в репозитории. Workflow `.github/workflows/android-release.yml` собирает и публикует APK при отправке тега `v*`; он использует секреты репозитория `ANDROID_RELEASE_KEYSTORE_BASE64`, `ANDROID_RELEASE_KEYSTORE_PASSWORD`, `ANDROID_RELEASE_KEY_ALIAS` и `ANDROID_RELEASE_KEY_PASSWORD`. В release и workflow-сборках требуется один и тот же keystore. Задача `copyReleaseApk`, финализирующая `assembleRelease`, ищет APK в стандартном каталоге Gradle и в каталоге `app/release`, который может использовать мастер Android Studio. Самый новый найденный APK копируется в:
 
