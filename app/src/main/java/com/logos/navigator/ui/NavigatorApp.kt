@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -48,7 +49,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel as composeViewModel
@@ -171,6 +174,7 @@ fun NavigatorApp(viewModel: MainViewModel) {
                 updateViewModel = appUpdateViewModel,
                 updateState = appUpdateState,
                 favoriteIds = favoriteIds,
+                savedFavoriteRooms = savedFavoriteRooms,
                 quickFavorites = quickFavorites,
                 navController = navController,
                 currentRoute = currentRoute,
@@ -235,6 +239,7 @@ private fun MainNavigation(
     updateViewModel: AppUpdateViewModel,
     updateState: AppUpdateUiState,
     favoriteIds: Set<String>,
+    savedFavoriteRooms: List<com.logos.navigator.data.model.Room>,
     quickFavorites: List<com.logos.navigator.data.model.Room>,
     navController: NavHostController,
     currentRoute: String?,
@@ -243,7 +248,8 @@ private fun MainNavigation(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    val imeVisible = WindowInsets.isImeVisible
+    val density = LocalDensity.current
+    val imeVisible = WindowInsets.ime.getBottom(density) > 0
     var startupLocationHandled by remember { mutableStateOf(false) }
     val startupLocationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
