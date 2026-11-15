@@ -149,6 +149,9 @@ fun MapScreen(
     }
     val navigationNodes = remember(state.navigation) { state.navigation?.nodes.orEmpty() }
     val navigationEdges = remember(state.navigation) { state.navigation?.edges.orEmpty() }
+    val floorScales = remember(state.navigation) {
+        state.navigation?.floors.orEmpty().associate { it.number to it.metersPerUnit }
+    }
     val openDoorsPlaces = remember(state.rooms) {
         if (BuildConfig.OPEN_DOORS) OpenDoorsCatalog.roomsFor(state.rooms) else emptyList()
     }
@@ -342,6 +345,11 @@ fun MapScreen(
                                     isPlacingManualPosition = false
                                     if (state.destination != null) isRouteSheetVisible = true
                                 },
+                                hasCompassHeading = state.hasCompassHeading,
+                                mapOrientation = state.mapOrientations[state.selectedFloor],
+                                floorScales = floorScales,
+                                routeProgress = state.routeProgress,
+                                isNavigationStarted = state.isNavigationStarted,
                             )
                         },
                     )
@@ -547,6 +555,17 @@ fun MapScreen(
                                     .mapOverlayLabel()
                                     .padding(horizontal = 12.dp, vertical = 8.dp),
                                 style = MaterialTheme.typography.labelMedium,
+                            )
+                        }
+                        // GPS cannot tell floors apart, so let the user say which floor they are on
+                        // without having to build a route first.
+                        if (state.locationMode == LocationMode.GPS && state.gpsCoordinates != null &&
+                            state.userPosition?.floor != state.selectedFloor && state.destination == null
+                        ) {
+                            AssistChip(
+                                onClick = { viewModel.confirmGpsFloor(state.selectedFloor) },
+                                leadingIcon = { Icon(Icons.Default.LocationOn, contentDescription = null) },
+                                label = { Text(stringResource(R.string.gps_i_am_on_this_floor, state.selectedFloor)) },
                             )
                         }
                     }
@@ -958,8 +977,14 @@ private fun RoutePanel(
                         fontWeight = FontWeight.Bold,
                     )
                     if (state.isNavigationStarted && remainingMeters != null) {
+                        val speedMetersPerMinute = state.settings.walkingSpeedKmh * 1_000.0 / 60.0
+                        val remainingMinutes = kotlin.math.ceil(remainingMeters / speedMetersPerMinute).toInt().coerceAtLeast(0)
                         Text(
-                            stringResource(R.string.route_remaining, context.formatDistance(remainingMeters, distanceUnit)),
+                            stringResource(
+                                R.string.route_remaining_with_time,
+                                context.formatDistance(remainingMeters, distanceUnit),
+                                remainingMinutes,
+                            ),
                             modifier = Modifier.weight(1f),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,

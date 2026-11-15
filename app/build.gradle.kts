@@ -60,7 +60,10 @@ android {
             buildConfigField("boolean", "OPEN_DOORS", "false")
         }
         release {
-            isMinifyEnabled = false
+            // R8 drops unused code (notably most of material-icons-extended) and unused resources,
+            // which makes the release APK several times smaller.
+            isMinifyEnabled = true
+            isShrinkResources = true
             if (releaseSigningConfigured) {
                 signingConfig = signingConfigs.getByName("release")
             }

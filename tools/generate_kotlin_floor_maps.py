@@ -24,8 +24,8 @@ INHERITED_PAINT_ATTRIBUTES = {
 URL_REFERENCE = re.compile(r"^url\(#([^)]+)\)$")
 
 FLOORS = (
-    (1, REPO_ROOT / "app/src/main/assets/floors/floor_1.svg"),
-    (2, REPO_ROOT / "app/src/main/assets/floors/floor_2.svg"),
+    (1, REPO_ROOT / "maps_and_design/floors/floor_1.svg"),
+    (2, REPO_ROOT / "maps_and_design/floors/floor_2.svg"),
 )
 OUTPUT = REPO_ROOT / "app/src/main/java/com/logos/navigator/ui/map/GeneratedFloorMaps.kt"
 REFERENCE_SVGS = {

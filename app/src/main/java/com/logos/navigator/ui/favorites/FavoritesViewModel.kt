@@ -1,5 +1,7 @@
 package com.logos.navigator.ui.favorites
 
+import com.logos.navigator.utils.localizedContext
+
 import android.app.Application
 import android.net.Uri
 import androidx.annotation.StringRes
@@ -43,7 +45,8 @@ data class FavoritesUiState(
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class FavoritesViewModel(application: Application) : AndroidViewModel(application) {
-    private val appContext = application.applicationContext
+    private val appContext: android.content.Context
+        get() = getApplication<Application>().localizedContext()
     private val database = AppDatabase.getInstance(application)
     private val repository = FavoritesRepository(application, database)
     private val indoorRepository = IndoorRepository(application)

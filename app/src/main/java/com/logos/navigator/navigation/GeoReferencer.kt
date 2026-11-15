@@ -3,11 +3,69 @@ package com.logos.navigator.navigation
 import com.logos.navigator.data.model.GeoAnchor
 import kotlin.math.PI
 import kotlin.math.abs
+import kotlin.math.atan2
 import kotlin.math.cos
+import kotlin.math.hypot
+
+/**
+ * Orientation of a floor plan relative to the geographic frame: SVG offsets that correspond
+ * to one metre east and one metre north. Used to turn compass headings into plan directions.
+ */
+data class MapOrientation(
+    val eastX: Double,
+    val eastY: Double,
+    val northX: Double,
+    val northY: Double,
+) {
+    /** Compass bearing (degrees clockwise from north) of the plan's "up" direction (negative SVG y). */
+    val mapUpBearingDegrees: Double
+        get() {
+            // Solve a * east + b * north = (0, -1); (a, b) is the up direction in metres east/north.
+            val determinant = eastX * northY - eastY * northX
+            val a = (northX) / determinant
+            val b = (-eastX) / determinant
+            return normalizeDegrees(Math.toDegrees(atan2(a, b)))
+        }
+
+    /** Angle in SVG space (radians, atan2(y, x) convention) of the given compass bearing. */
+    fun svgAngleForBearing(bearingDegrees: Double): Double {
+        val radians = Math.toRadians(bearingDegrees)
+        val x = kotlin.math.sin(radians) * eastX + cos(radians) * northX
+        val y = kotlin.math.sin(radians) * eastY + cos(radians) * northY
+        return atan2(y, x)
+    }
+
+    private fun normalizeDegrees(value: Double): Double = ((value % 360.0) + 360.0) % 360.0
+}
 
 object GeoReferencer {
     private const val EARTH_RADIUS_METERS = 6_371_000.0
     private const val DEGREES_TO_RADIANS = PI / 180.0
+
+    /** Derives the plan orientation from the anchors, or null when they cannot define one. */
+    fun orientation(anchors: List<GeoAnchor>): MapOrientation? {
+        if (anchors.size < 2) return null
+        val latitude = anchors.map { it.latitude }.average()
+        val longitude = anchors.map { it.longitude }.average()
+        val latitudeScale = cos(latitude * DEGREES_TO_RADIANS)
+        if (abs(latitudeScale) < MIN_LATITUDE_SCALE) return null
+        val metreLatitude = 1.0 / (DEGREES_TO_RADIANS * EARTH_RADIUS_METERS)
+        val metreLongitude = metreLatitude / latitudeScale
+        val origin = toMapPoint(latitude, longitude, anchors) ?: return null
+        val east = toMapPoint(latitude, longitude + metreLongitude, anchors) ?: return null
+        val north = toMapPoint(latitude + metreLatitude, longitude, anchors) ?: return null
+        val result = MapOrientation(
+            eastX = east.first - origin.first,
+            eastY = east.second - origin.second,
+            northX = north.first - origin.first,
+            northY = north.second - origin.second,
+        )
+        val determinant = result.eastX * result.northY - result.eastY * result.northX
+        if (!determinant.isFinite() || abs(determinant) < MIN_BASELINE_SQUARED ||
+            hypot(result.eastX, result.eastY) < MIN_COORDINATE_SCALE
+        ) return null
+        return result
+    }
 
     fun toMapPoint(latitude: Double, longitude: Double, anchors: List<GeoAnchor>): Pair<Double, Double>? {
         if (!latitude.isFinite() || latitude !in -90.0..90.0 ||

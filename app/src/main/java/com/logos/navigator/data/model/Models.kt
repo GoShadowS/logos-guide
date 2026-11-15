@@ -1,6 +1,7 @@
 package com.logos.navigator.data.model
 
 import com.google.gson.annotations.SerializedName
+import com.logos.navigator.navigation.MapOrientation
 
 data class FloorPlan(
     val number: Int,
@@ -131,6 +132,8 @@ data class IndoorUiState(
     val gpsWarning: String? = null,
     val isGpsActive: Boolean = false,
     val compassHeadingDegrees: Float = 0f,
+    val hasCompassHeading: Boolean = false,
+    val mapOrientations: Map<Int, MapOrientation> = emptyMap(),
     val selectedRoom: Room? = null,
     val destination: Room? = null,
     val route: List<NavNode>? = null,

@@ -32,6 +32,8 @@ class SettingsDataStore(context: Context) {
 
     val settingsFlow: Flow<AppSettings> = store.data
         .onStart {
+            // Legacy keys only need removing once per process, not on every collection.
+            if (!legacyKeysCleaned.compareAndSet(false, true)) return@onStart
             store.edit { preferences ->
                 if (preferences[LEGACY_ROOM_LABELS] != null) preferences.remove(LEGACY_ROOM_LABELS)
                 if (preferences[LEGACY_ROOM_LABELS_DEFAULT_APPLIED] != null) {
@@ -79,6 +81,7 @@ class SettingsDataStore(context: Context) {
 
     internal companion object {
         const val LAST_FLOOR = "last"
+        private val legacyKeysCleaned = java.util.concurrent.atomic.AtomicBoolean(false)
 
         internal val THEME = stringPreferencesKey("theme_mode")
         internal val ACCENT = intPreferencesKey("accent_color_argb")

@@ -11,6 +11,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
@@ -250,7 +251,6 @@ private fun MainNavigation(
     val context = LocalContext.current
     val density = LocalDensity.current
     val imeVisible = WindowInsets.ime.getBottom(density) > 0
-    var startupLocationHandled by remember { mutableStateOf(false) }
     val startupLocationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
     ) { permissions ->
@@ -265,9 +265,8 @@ private fun MainNavigation(
             viewModel.showMessage(context.getString(R.string.gps_permission_denied))
         }
     }
-    LaunchedEffect(state.navigation, startupLocationHandled) {
-        if (state.navigation == null || startupLocationHandled) return@LaunchedEffect
-        startupLocationHandled = true
+    LaunchedEffect(state.navigation) {
+        if (state.navigation == null || !viewModel.consumeStartupLocationRequest()) return@LaunchedEffect
         val settings = state.settings
         val shouldStartGps = when (settings.startupLocationMode) {
             StartupLocationMode.GPS -> true
@@ -319,13 +318,12 @@ private fun MainNavigation(
             }
         },
     ) { innerPadding ->
-        // This Scaffold owns the system/cutout insets and navigation chrome. Consume its
-        // padding so each nested screen Scaffold doesn't apply the same insets again.
+        val contentPadding = navPadding(innerPadding, currentRoute)
         Row(
             Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
-                .consumeWindowInsets(innerPadding),
+                .padding(contentPadding)
+                .consumeWindowInsets(contentPadding),
         ) {
             if (isTablet && currentRoute != ROUTE_ABOUT) {
                 NavigationRail {
@@ -531,8 +529,8 @@ private fun saveRoute(
 private enum class MainTab(val route: String, val labelRes: Int, val icon: androidx.compose.ui.graphics.vector.ImageVector) {
     HOME(ROUTE_HOME, R.string.nav_home, Icons.Default.Home),
     MAP(ROUTE_MAP, R.string.nav_map, Icons.Default.Map),
-    SEARCH(ROUTE_SEARCH, R.string.nav_search, Icons.Default.Search),
     FAVORITES(ROUTE_FAVORITES, R.string.nav_favorites, Icons.Default.Favorite),
+    SEARCH(ROUTE_SEARCH, R.string.nav_search, Icons.Default.Search),
     SETTINGS(ROUTE_SETTINGS, R.string.nav_settings, Icons.Default.Settings),
 }
 
@@ -550,6 +548,9 @@ private fun navigateToTab(navController: NavHostController, route: String) {
         navigateTo(navController, route)
     }
 }
+
+private fun navPadding(padding: PaddingValues, route: String?): PaddingValues =
+    if (route == ROUTE_ABOUT) PaddingValues(0.dp) else padding
 
 private object AppSettingsIntent {
     fun openAppDetails(context: android.content.Context) {

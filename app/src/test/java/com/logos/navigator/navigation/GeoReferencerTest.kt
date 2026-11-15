@@ -49,6 +49,37 @@ class GeoReferencerTest {
         assertNull(GeoReferencer.toMapPoint(55.0, 37.0, samePointAnchors))
     }
 
+    @Test
+    fun northUpPlanHasZeroUpBearing() {
+        val anchors = planAnchors { east, north -> (100.0 + 4.0 * east) to (300.0 - 4.0 * north) }
+        val orientation = GeoReferencer.orientation(anchors) ?: error("Ориентация не определена.")
+
+        assertEquals(0.0, angleDistance(orientation.mapUpBearingDegrees, 0.0), 0.01)
+        assertEquals(0.0, orientation.svgAngleForBearing(90.0), 1e-6)
+        assertEquals(-PI / 2.0, orientation.svgAngleForBearing(0.0), 1e-6)
+    }
+
+    @Test
+    fun rotatedPlanReportsBearingOfItsUpDirection() {
+        // Плоскость повёрнута: ось x направлена на север, ось y — на восток, «верх» плана смотрит на запад.
+        val anchors = planAnchors { east, north -> (500.0 + 3.0 * north) to (200.0 + 3.0 * east) }
+        val orientation = GeoReferencer.orientation(anchors) ?: error("Ориентация не определена.")
+
+        assertEquals(0.0, angleDistance(orientation.mapUpBearingDegrees, 270.0), 0.01)
+        assertEquals(0.0, orientation.svgAngleForBearing(0.0), 1e-6)
+    }
+
+    private fun planAnchors(transform: (Double, Double) -> Pair<Double, Double>): List<GeoAnchor> =
+        listOf(-20.0 to -15.0, 20.0 to -15.0, -20.0 to 15.0, 20.0 to 15.0).mapIndexed { index, (east, north) ->
+            val (x, y) = transform(east, north)
+            GeoAnchor(floor = 1, id = "p$index", latitude = latitudeFor(north), longitude = longitudeFor(east), x = x, y = y)
+        }
+
+    private fun angleDistance(first: Double, second: Double): Double {
+        val delta = ((first - second) % 360.0 + 540.0) % 360.0 - 180.0
+        return kotlin.math.abs(delta)
+    }
+
     private fun anchor(id: String, east: Double, north: Double): GeoAnchor = GeoAnchor(
         floor = 1,
         id = id,

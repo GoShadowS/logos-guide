@@ -85,6 +85,12 @@ def fail(message: str) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Проверка локальных данных этажей и навигации")
     parser.add_argument("--assets", type=Path, default=Path("app/src/main/assets"), help="Каталог Android assets")
+    parser.add_argument(
+        "--plans",
+        type=Path,
+        default=Path("maps_and_design"),
+        help="Каталог эталонных SVG-планов (в APK не входят: карта рисуется из GeneratedFloorMaps.kt)",
+    )
     args = parser.parse_args()
     try:
         graph = json.loads((args.assets / "navigation_graph.json").read_text(encoding="utf-8"))
@@ -98,7 +104,7 @@ def main() -> int:
         for floor in floors:
             if not floor.get("title") or not floor.get("titleEn"):
                 fail(f"Нет RU/EN подписи у этажа {floor.get('number')}")
-            svg_path = args.assets / floor["mapAsset"]
+            svg_path = args.plans / floor["mapAsset"]
             root = ET.parse(svg_path).getroot()
             raw_view_box = root.get("viewBox", "")
             svg_view_box = [float(value) for value in NUMBER_RE.findall(raw_view_box)]
