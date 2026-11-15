@@ -33,6 +33,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.ImportExport
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
@@ -112,6 +113,7 @@ fun FavoritesScreen(
     onBack: () -> Unit,
     onOpenSearch: () -> Unit,
     onOpenRoom: (Room) -> Unit,
+    onBuildRoute: (Room) -> Unit,
     onRepeatRoute: (fromRoomId: String?, toRoomId: String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -317,6 +319,7 @@ fun FavoritesScreen(
                                     room = room,
                                     categories = state.categories,
                                     onClick = { onOpenRoom(room) },
+                                    onBuildRoute = { onBuildRoute(room) },
                                     onDelete = { removeFavorite(favorite.roomId) },
                                     onRename = { renameFavorite = favorite.roomId to (favorite.customName ?: room.localizedName(context)) },
                                     onAssignCategory = { categoryId -> viewModel.assignCategory(favorite.roomId, categoryId) },
@@ -522,6 +525,7 @@ private fun SwipeDeleteFavorite(
     room: Room,
     categories: List<FavoriteCategoryEntity>,
     onClick: () -> Unit,
+    onBuildRoute: () -> Unit,
     onDelete: () -> Unit,
     onRename: () -> Unit,
     onAssignCategory: (Long?) -> Unit,
@@ -531,6 +535,7 @@ private fun SwipeDeleteFavorite(
     var menuExpanded by remember { mutableStateOf(false) }
     var categoryMenuExpanded by remember { mutableStateOf(false) }
     val currentCategory = categories.firstOrNull { it.id == favorite.categoryId }
+    val routeAvailable = room.routeAvailable && !room.nodeId.isNullOrBlank()
     val context = LocalContext.current
     val cabinetLabel = room.number?.let { stringResource(R.string.cabinet_number_format, it) }
     val floorLabel = stringResource(R.string.floor_number_format, room.floor)
@@ -590,77 +595,89 @@ private fun SwipeDeleteFavorite(
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(start = 14.dp, end = 3.dp, top = 9.dp, bottom = 9.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Surface(
-                    modifier = Modifier.size(42.dp),
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.primaryContainer,
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(start = 14.dp, end = 3.dp, top = 9.dp, bottom = 9.dp),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Text(room.number?.filter(Char::isDigit)?.takeLast(3)?.ifBlank { "•" } ?: "•", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                    Surface(
+                        modifier = Modifier.size(42.dp),
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Text(room.number?.filter(Char::isDigit)?.takeLast(3)?.ifBlank { "•" } ?: "•", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+                        }
                     }
-                }
-                Spacer(Modifier.width(10.dp))
-                Column(Modifier.weight(1f)) {
-                    Text(
-                        favorite.customName?.takeIf(String::isNotBlank) ?: room.localizedName(context),
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.SemiBold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                    Text(
-                        metadata,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
-                IconButton(onClick = onClick) { Icon(Icons.Default.PlayArrow, contentDescription = stringResource(R.string.open_room)) }
-                Box {
-                    IconButton(onClick = { menuExpanded = true }) { Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.favorite_actions)) }
-                    DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.rename)) },
-                            leadingIcon = { Icon(Icons.Default.Edit, contentDescription = null) },
-                            onClick = { menuExpanded = false; onRename() },
+                    Spacer(Modifier.width(10.dp))
+                    Column(Modifier.weight(1f)) {
+                        Text(
+                            favorite.customName?.takeIf(String::isNotBlank) ?: room.localizedName(context),
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                         )
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.choose_folder)) },
-                            leadingIcon = { Icon(Icons.Default.Folder, contentDescription = null) },
-                            onClick = { menuExpanded = false; categoryMenuExpanded = true },
-                        )
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.move_up)) },
-                            leadingIcon = { Icon(Icons.Default.SwapVert, contentDescription = null) },
-                            onClick = { menuExpanded = false; onMove(-1) },
-                        )
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.move_down)) },
-                            leadingIcon = { Icon(Icons.Default.SwapVert, contentDescription = null) },
-                            onClick = { menuExpanded = false; onMove(1) },
-                        )
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.delete)) },
-                            leadingIcon = { Icon(Icons.Default.Delete, contentDescription = null) },
-                            onClick = { menuExpanded = false; onDelete() },
+                        Text(
+                            metadata,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                         )
                     }
-                    DropdownMenu(expanded = categoryMenuExpanded, onDismissRequest = { categoryMenuExpanded = false }) {
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.uncategorized)) },
-                            onClick = { categoryMenuExpanded = false; onAssignCategory(null) },
-                        )
-                        categories.forEach { category ->
+                    Box {
+                        IconButton(onClick = { menuExpanded = true }) { Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.favorite_actions)) }
+                        DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
                             DropdownMenuItem(
-                                text = { Text(category.name) },
-                                onClick = { categoryMenuExpanded = false; onAssignCategory(category.id) },
+                                text = { Text(stringResource(R.string.rename)) },
+                                leadingIcon = { Icon(Icons.Default.Edit, contentDescription = null) },
+                                onClick = { menuExpanded = false; onRename() },
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.choose_folder)) },
+                                leadingIcon = { Icon(Icons.Default.Folder, contentDescription = null) },
+                                onClick = { menuExpanded = false; categoryMenuExpanded = true },
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.move_up)) },
+                                leadingIcon = { Icon(Icons.Default.SwapVert, contentDescription = null) },
+                                onClick = { menuExpanded = false; onMove(-1) },
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.move_down)) },
+                                leadingIcon = { Icon(Icons.Default.SwapVert, contentDescription = null) },
+                                onClick = { menuExpanded = false; onMove(1) },
+                            )
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.delete)) },
+                                leadingIcon = { Icon(Icons.Default.Delete, contentDescription = null) },
+                                onClick = { menuExpanded = false; onDelete() },
                             )
                         }
+                        DropdownMenu(expanded = categoryMenuExpanded, onDismissRequest = { categoryMenuExpanded = false }) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.uncategorized)) },
+                                onClick = { categoryMenuExpanded = false; onAssignCategory(null) },
+                            )
+                            categories.forEach { category ->
+                                DropdownMenuItem(
+                                    text = { Text(category.name) },
+                                    onClick = { categoryMenuExpanded = false; onAssignCategory(category.id) },
+                                )
+                            }
+                        }
+                    }
+                }
+                if (routeAvailable) {
+                    TextButton(
+                        onClick = onBuildRoute,
+                        modifier = Modifier.align(Alignment.End).padding(end = 8.dp, bottom = 2.dp),
+                        contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp, vertical = 2.dp),
+                    ) {
+                        Icon(Icons.Default.Navigation, contentDescription = null, modifier = Modifier.size(17.dp))
+                        Spacer(Modifier.width(4.dp))
+                        Text(stringResource(R.string.search_build_route))
                     }
                 }
             }

@@ -623,4 +623,11 @@
     <string name="route_next_action_distance">Next action in %1$s</string>
     <string name="svg_loader_invalid_asset">Map files must use the SVG format.</string>
     <string name="svg_loader_error">Could not load SVG file %1$s: %2$s</string>
+    <string name="home_map_description">Browse the interactive floor maps.</string>
+    <string name="home_route_description">Choose a room that supports routing as your destination.</string>
+    <string name="route_destination_title">Choose a destination</string>
+    <string name="route_destination_description">Tap a room to build its route. Only rooms with routing support are shown; if no start point is set, mark your position on the map or turn on GPS.</string>
+    <string name="route_destination_empty_title">No rooms with routing support found</string>
+    <string name="route_destination_empty_body">Change the query or filters. Some rooms do not support route guidance yet.</string>
+    <string name="search_route_unavailable">Route unavailable</string>
 </resources>

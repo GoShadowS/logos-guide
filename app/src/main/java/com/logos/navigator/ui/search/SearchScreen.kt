@@ -29,6 +29,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
@@ -61,8 +63,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -95,13 +100,22 @@ fun SearchScreen(
     initialQuery: String = "",
     initialCategory: String = ALL_CATEGORIES,
     searchRequestVersion: Int = 0,
+    destinationSelectionMode: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
     var query by rememberSaveable { mutableStateOf(initialQuery) }
     var category by rememberSaveable { mutableStateOf(initialCategory) }
     var floorFilter by rememberSaveable { mutableStateOf<Int?>(null) }
     var appliedSearchRequestVersion by rememberSaveable { mutableIntStateOf(-1) }
+
+    fun dismissSearchKeyboard() {
+        keyboardController?.hide()
+        focusManager.clearFocus()
+    }
+
     val voiceSearchLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult(),
     ) { result ->
@@ -175,10 +189,11 @@ fun SearchScreen(
             CategoryFilter("entrance", R.string.category_entrance),
         )
     }
-    val matchingRooms = remember(rooms, query, category, floorFilter, context) {
+    val matchingRooms = remember(rooms, query, category, floorFilter, destinationSelectionMode, context) {
         rooms.asSequence()
             .filter { category == ALL_CATEGORIES || it.category.equals(category, ignoreCase = true) }
             .filter { floorFilter == null || it.floor == floorFilter }
+            .filter { !destinationSelectionMode || (it.routeAvailable && !it.nodeId.isNullOrBlank()) }
             .mapNotNull { room ->
                 val searchableValues = buildList {
                     add(room.localizedName(context))
@@ -265,10 +280,17 @@ fun SearchScreen(
                                 }
                             }
                         },
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                        keyboardActions = KeyboardActions(onSearch = { dismissSearchKeyboard() }),
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(
+                        onClick = {
+                            dismissSearchKeyboard()
+                            onBack()
+                        },
+                    ) {
                         Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.action_back))
                     }
                 },
@@ -278,6 +300,23 @@ fun SearchScreen(
         Column(
             modifier = Modifier.fillMaxSize().padding(padding).imePadding().padding(horizontal = 16.dp),
         ) {
+            if (destinationSelectionMode) {
+                Column(
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    Text(
+                        stringResource(R.string.route_destination_title),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                    )
+                    Text(
+                        stringResource(R.string.route_destination_description),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
             Spacer(Modifier.height(4.dp))
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(categoryFilters, key = CategoryFilter::id) { filter ->
@@ -320,9 +359,13 @@ fun SearchScreen(
                     modifier = Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState()).padding(top = 28.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    Text(stringResource(R.string.no_results_title), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
                     Text(
-                        stringResource(R.string.no_results_body),
+                        stringResource(if (destinationSelectionMode) R.string.route_destination_empty_title else R.string.no_results_title),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                    Text(
+                        stringResource(if (destinationSelectionMode) R.string.route_destination_empty_body else R.string.no_results_body),
                         modifier = Modifier.padding(top = 8.dp),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center,
@@ -337,9 +380,16 @@ fun SearchScreen(
                         RoomListCard(
                             room = room,
                             isFavorite = room.id in favoriteRoomIds,
-                            showRouteAction = true,
-                            onClick = { onSelectRoom(room) },
-                            onBuildRoute = { if (onBuildRoute != null) onBuildRoute(room) else onSelectRoom(room) },
+                            showRouteAction = !destinationSelectionMode,
+                            onClick = {
+                                dismissSearchKeyboard()
+                                if (destinationSelectionMode && onBuildRoute != null) onBuildRoute(room)
+                                else onSelectRoom(room)
+                            },
+                            onBuildRoute = {
+                                dismissSearchKeyboard()
+                                if (onBuildRoute != null) onBuildRoute(room) else onSelectRoom(room)
+                            },
                             onToggleFavorite = { onToggleFavorite(room) },
                         )
                     }
@@ -409,6 +459,7 @@ private fun RoomListCard(
             context.categoryLabel(room.category),
         )
     }
+    val routeAvailable = room.routeAvailable && !room.nodeId.isNullOrBlank()
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(18.dp),
@@ -458,6 +509,14 @@ private fun RoomListCard(
                             overflow = TextOverflow.Ellipsis,
                         )
                     }
+                    if (showRouteAction && !routeAvailable) {
+                        Text(
+                            stringResource(R.string.search_route_unavailable),
+                            modifier = Modifier.padding(top = 3.dp),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
                 }
                 IconButton(onClick = onToggleFavorite) {
                     Icon(
@@ -467,7 +526,7 @@ private fun RoomListCard(
                     )
                 }
             }
-            if (showRouteAction && room.routeAvailable && !room.nodeId.isNullOrBlank()) {
+            if (showRouteAction && routeAvailable) {
                 Button(
                     onClick = onBuildRoute,
                     modifier = Modifier.fillMaxWidth().padding(start = 14.dp, end = 14.dp, bottom = 12.dp),

@@ -2,6 +2,7 @@ package com.logos.navigator.ui
 
 import android.Manifest
 import android.content.pm.PackageManager
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -290,12 +291,31 @@ private fun MainNavigation(
     }
     var pendingSearchQuery by rememberSaveable { mutableStateOf("") }
     var pendingSearchCategory by rememberSaveable { mutableStateOf(SEARCH_ALL_CATEGORIES) }
+    var pendingSearchDestinationMode by rememberSaveable { mutableStateOf(false) }
+    var searchReturnRoute by rememberSaveable { mutableStateOf(ROUTE_MAP) }
     var searchRequestVersion by rememberSaveable { mutableIntStateOf(0) }
-    fun openSearch(query: String = "", category: String = SEARCH_ALL_CATEGORIES) {
+    fun openSearch(
+        query: String = "",
+        category: String = SEARCH_ALL_CATEGORIES,
+        chooseDestination: Boolean = false,
+        returnRoute: String = ROUTE_MAP,
+    ) {
         pendingSearchQuery = query
         pendingSearchCategory = category
+        pendingSearchDestinationMode = chooseDestination
+        searchReturnRoute = returnRoute
         searchRequestVersion += 1
         navigateTo(navController, ROUTE_SEARCH)
+    }
+    fun defaultSearchReturnRoute(): String = when (currentRoute) {
+        ROUTE_HOME -> ROUTE_HOME
+        ROUTE_FAVORITES -> ROUTE_FAVORITES
+        ROUTE_SEARCH -> searchReturnRoute
+        else -> ROUTE_MAP
+    }
+
+    BackHandler(enabled = currentRoute == ROUTE_SEARCH && !imeVisible) {
+        navigateToTab(navController, searchReturnRoute)
     }
 
     Scaffold(
@@ -307,7 +327,7 @@ private fun MainNavigation(
                         NavigationBarItem(
                             selected = currentRoute == tab.route,
                             onClick = {
-                                if (tab == MainTab.SEARCH) openSearch()
+                                if (tab == MainTab.SEARCH) openSearch(returnRoute = defaultSearchReturnRoute())
                                 else navigateToTab(navController, tab.route)
                             },
                             icon = { Icon(tab.icon, contentDescription = null) },
@@ -331,7 +351,7 @@ private fun MainNavigation(
                         NavigationRailItem(
                             selected = currentRoute == tab.route,
                             onClick = {
-                                if (tab == MainTab.SEARCH) openSearch()
+                                if (tab == MainTab.SEARCH) openSearch(returnRoute = defaultSearchReturnRoute())
                                 else navigateToTab(navController, tab.route)
                             },
                             icon = { Icon(tab.icon, contentDescription = null) },
@@ -349,7 +369,10 @@ private fun MainNavigation(
                 composable(ROUTE_HOME) {
                     HomeScreen(
                         favoriteRooms = savedFavoriteRooms,
-                        onSearch = { query -> openSearch(query) },
+                        onSearch = { query -> openSearch(query = query, returnRoute = ROUTE_HOME) },
+                        onChooseDestination = { query ->
+                            openSearch(query = query, chooseDestination = true, returnRoute = ROUTE_HOME)
+                        },
                         onOpenMap = { navigateToTab(navController, ROUTE_MAP) },
                         onOpenFavorites = { navigateToTab(navController, ROUTE_FAVORITES) },
                         onOpenRoom = { room ->
@@ -382,8 +405,9 @@ private fun MainNavigation(
                                 viewModel = favoritesViewModel,
                                 modifier = Modifier.weight(0.43f),
                                 onBack = { navigateToTab(navController, ROUTE_MAP) },
-                                onOpenSearch = { openSearch() },
+                                onOpenSearch = { openSearch(returnRoute = ROUTE_FAVORITES) },
                                 onOpenRoom = viewModel::selectRoomFromSearch,
+                                onBuildRoute = viewModel::navigateTo,
                                 onRepeatRoute = { fromId, toId -> viewModel.replaySavedRoute(fromId, toId) },
                             )
                             MapScreen(
@@ -403,9 +427,13 @@ private fun MainNavigation(
                             state = favoritesState,
                             viewModel = favoritesViewModel,
                             onBack = { navigateToTab(navController, ROUTE_MAP) },
-                            onOpenSearch = { openSearch() },
+                            onOpenSearch = { openSearch(returnRoute = ROUTE_FAVORITES) },
                             onOpenRoom = { room ->
                                 viewModel.selectRoomFromSearch(room)
+                                navigateToTab(navController, ROUTE_MAP)
+                            },
+                            onBuildRoute = { room ->
+                                viewModel.navigateTo(room)
                                 navigateToTab(navController, ROUTE_MAP)
                             },
                             onRepeatRoute = { fromRoomId, toRoomId ->
@@ -424,7 +452,7 @@ private fun MainNavigation(
                                 favoriteRoomIds = favoriteIds,
                                 modifier = Modifier.weight(0.43f),
                                 onToggleFavorite = favoritesViewModel::toggleFavorite,
-                                onBack = { navigateToTab(navController, ROUTE_MAP) },
+                                onBack = { navigateToTab(navController, searchReturnRoute) },
                                 onSelectRoom = viewModel::selectRoomFromSearch,
                                 onBuildRoute = viewModel::navigateTo,
                                 onVoiceQuickAction = { role ->
@@ -434,6 +462,7 @@ private fun MainNavigation(
                                 initialQuery = pendingSearchQuery,
                                 initialCategory = pendingSearchCategory,
                                 searchRequestVersion = searchRequestVersion,
+                                destinationSelectionMode = pendingSearchDestinationMode,
                             )
                             MapScreen(
                                 state = state,
@@ -453,7 +482,7 @@ private fun MainNavigation(
                             floors = state.navigation?.floors.orEmpty(),
                             favoriteRoomIds = favoriteIds,
                             onToggleFavorite = favoritesViewModel::toggleFavorite,
-                            onBack = { navigateToTab(navController, ROUTE_MAP) },
+                            onBack = { navigateToTab(navController, searchReturnRoute) },
                             onSelectRoom = { room ->
                                 viewModel.selectRoomFromSearch(room)
                                 navigateToTab(navController, ROUTE_MAP)
@@ -469,6 +498,7 @@ private fun MainNavigation(
                             initialQuery = pendingSearchQuery,
                             initialCategory = pendingSearchCategory,
                             searchRequestVersion = searchRequestVersion,
+                            destinationSelectionMode = pendingSearchDestinationMode,
                         )
                     }
                 }
