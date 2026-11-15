@@ -34,6 +34,32 @@ jobs:
           apk="app/build/outputs/apk/release/logos-guide-1.1.0-release.apk"
           test -f "$apk"
           "$ANDROID_HOME/build-tools/37.0.0/aapt" dump badging "$apk" | grep -F "versionName='1.1.0-release'"
+      - name: Verify OpenDoors is disabled in every generated variant
+        run: |
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+
+          root = Path("app/build/generated/source/buildConfig")
+          configs = sorted(root.glob("**/com/logos/navigator/BuildConfig.java"))
+          if not configs:
+              raise SystemExit(f"No generated BuildConfig files found under {root}")
+
+          variants = set()
+          for config in configs:
+              variant = config.relative_to(root).parts[0]
+              variants.add(variant)
+              match = re.search(r"\bOPEN_DOORS\s*=\s*(true|false)\s*;", config.read_text())
+              if match is None:
+                  raise SystemExit(f"OPEN_DOORS is missing from {config}")
+              if match.group(1) != "false":
+                  raise SystemExit(f"OPEN_DOORS must be false in {variant}: {config}")
+
+          missing = {"debug", "release"} - variants
+          if missing:
+              raise SystemExit(f"Expected Debug and Release BuildConfig files; missing {sorted(missing)}")
+          print(f"OPEN_DOORS=false in all {len(configs)} generated variants: {', '.join(sorted(variants))}")
+          PY
       - name: Summarize Gradle failure
         if: failure()
         shell: bash
