@@ -623,4 +623,11 @@
     <string name="route_next_action_distance">Следующее действие через %1$s</string>
     <string name="svg_loader_invalid_asset">Карты должны быть файлами SVG.</string>
     <string name="svg_loader_error">Не удалось загрузить SVG-файл %1$s: %2$s</string>
+    <string name="home_map_description">Откройте интерактивный план этажей.</string>
+    <string name="home_route_description">Выберите помещение, к которому можно построить маршрут.</string>
+    <string name="route_destination_title">Выберите помещение для маршрута</string>
+    <string name="route_destination_description">Нажмите на помещение, чтобы построить маршрут. Показаны только доступные помещения; если точка старта не задана, отметьте своё положение на карте или включите GPS.</string>
+    <string name="route_destination_empty_title">Подходящих помещений нет</string>
+    <string name="route_destination_empty_body">Измените запрос или фильтры. Для некоторых помещений маршрутизация пока недоступна.</string>
+    <string name="search_route_unavailable">Маршрут недоступен</string>
 </resources>
