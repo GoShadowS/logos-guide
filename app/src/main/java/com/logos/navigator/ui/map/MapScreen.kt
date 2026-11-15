@@ -604,7 +604,7 @@ fun MapScreen(
                             },
                             expanded = !(state.destination != null && isRouteSheetVisible && state.selectedRoom == null) ||
                                 isPlacingManualPosition,
-                            shape = RoundedCornerShape(14.dp),
+                            shape = RoundedCornerShape(18.dp),
                             containerColor = if (isPlacingManualPosition) {
                                 MaterialTheme.colorScheme.secondaryContainer
                             } else {
@@ -723,7 +723,7 @@ private fun ModeSwitch(
     onSelectManual: () -> Unit,
 ) {
     Surface(
-        shape = RoundedCornerShape(14.dp),
+        shape = RoundedCornerShape(18.dp),
         color = MaterialTheme.colorScheme.surface,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         shadowElevation = 3.dp,
@@ -854,7 +854,7 @@ private fun RoutePanel(
 
     Surface(
         modifier = modifier,
-        shape = RoundedCornerShape(14.dp),
+        shape = RoundedCornerShape(18.dp),
         color = MaterialTheme.colorScheme.surface,
         contentColor = MaterialTheme.colorScheme.onSurface,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
@@ -1074,7 +1074,7 @@ private fun RoutePanel(
                         state.route == null -> Button(
                             onClick = onSelectStartLocation,
                             modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(12.dp),
+                            shape = CircleShape,
                         ) {
                             Icon(Icons.Default.MyLocation, contentDescription = null)
                             Spacer(Modifier.width(6.dp))
@@ -1083,7 +1083,7 @@ private fun RoutePanel(
                         !state.isNavigationStarted -> Button(
                             onClick = onStartNavigation,
                             modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(12.dp),
+                            shape = CircleShape,
                         ) {
                             Icon(Icons.Default.PlayArrow, contentDescription = null)
                             Spacer(Modifier.width(6.dp))
@@ -1094,7 +1094,7 @@ private fun RoutePanel(
                                 onClick = onPreviousStep,
                                 enabled = state.currentRouteStepIndex > 0,
                                 modifier = Modifier.weight(1f),
-                                shape = RoundedCornerShape(12.dp),
+                                shape = CircleShape,
                             ) {
                                 Icon(Icons.Default.KeyboardArrowLeft, contentDescription = null)
                                 Text(stringResource(R.string.previous_step), maxLines = 1)
@@ -1103,7 +1103,7 @@ private fun RoutePanel(
                                 onClick = onNextStep,
                                 enabled = state.currentRouteStepIndex < state.routeSteps.lastIndex,
                                 modifier = Modifier.weight(1f),
-                                shape = RoundedCornerShape(12.dp),
+                                shape = CircleShape,
                             ) {
                                 Text(stringResource(R.string.next_step), maxLines = 1)
                                 Icon(Icons.Default.KeyboardArrowRight, contentDescription = null)
@@ -1113,7 +1113,7 @@ private fun RoutePanel(
                     }
                     OutlinedButton(
                         onClick = onCancelRoute,
-                        shape = RoundedCornerShape(12.dp),
+                        shape = CircleShape,
                         contentPadding = PaddingValues(horizontal = 12.dp),
                     ) {
                         Icon(Icons.Default.Close, contentDescription = stringResource(R.string.cancel_route))

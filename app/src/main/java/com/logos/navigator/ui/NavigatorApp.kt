@@ -11,14 +11,16 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
@@ -47,7 +49,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel as composeViewModel
@@ -104,9 +105,11 @@ fun NavigatorApp(viewModel: MainViewModel) {
     val favoriteIds = remember(favoritesState.favoriteRooms) {
         favoritesState.favoriteRooms.mapTo(mutableSetOf()) { it.roomId }
     }
-    val quickFavorites = remember(favoritesState.favoriteRooms, state.rooms) {
+    val savedFavoriteRooms = remember(favoritesState.favoriteRooms, state.rooms) {
         favoritesState.favoriteRooms.mapNotNull { favorite -> state.rooms.firstOrNull { it.id == favorite.roomId } }
-            .filter { it.routeAvailable && !it.nodeId.isNullOrBlank() }
+    }
+    val quickFavorites = remember(savedFavoriteRooms) {
+        savedFavoriteRooms.filter { it.routeAvailable && !it.nodeId.isNullOrBlank() }
     }
     LaunchedEffect(favoritesState.message, favoritesState.error, currentRoute) {
         val feedback = favoritesState.error ?: favoritesState.message ?: return@LaunchedEffect
@@ -240,6 +243,7 @@ private fun MainNavigation(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val imeVisible = WindowInsets.isImeVisible
     var startupLocationHandled by remember { mutableStateOf(false) }
     val startupLocationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
@@ -292,7 +296,7 @@ private fun MainNavigation(
     Scaffold(
         snackbarHost = { SnackbarHost(rootSnackbarHostState) },
         bottomBar = {
-            if (!isTablet && currentRoute != ROUTE_ABOUT) {
+            if (!isTablet && currentRoute != ROUTE_ABOUT && !imeVisible) {
                 NavigationBar {
                     MainTab.entries.forEach { tab ->
                         NavigationBarItem(
@@ -309,7 +313,14 @@ private fun MainNavigation(
             }
         },
     ) { innerPadding ->
-        Row(Modifier.fillMaxSize().padding(navPadding(innerPadding, currentRoute))) {
+        // This Scaffold owns the system/cutout insets and navigation chrome. Consume its
+        // padding so each nested screen Scaffold doesn't apply the same insets again.
+        Row(
+            Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .consumeWindowInsets(innerPadding),
+        ) {
             if (isTablet && currentRoute != ROUTE_ABOUT) {
                 NavigationRail {
                     MainTab.entries.forEach { tab ->
@@ -328,11 +339,24 @@ private fun MainNavigation(
             }
             NavHost(
                 navController = navController,
-                startDestination = ROUTE_MAP,
+                startDestination = ROUTE_HOME,
                 modifier = Modifier.weight(1f).fillMaxHeight(),
             ) {
-                composable(LEGACY_HOME_ROUTE) {
-                    LaunchedEffect(Unit) { navigateToTab(navController, ROUTE_MAP) }
+                composable(ROUTE_HOME) {
+                    HomeScreen(
+                        favoriteRooms = savedFavoriteRooms,
+                        onSearch = { query -> openSearch(query) },
+                        onOpenMap = { navigateToTab(navController, ROUTE_MAP) },
+                        onOpenFavorites = { navigateToTab(navController, ROUTE_FAVORITES) },
+                        onOpenRoom = { room ->
+                            viewModel.selectRoomFromSearch(room)
+                            navigateToTab(navController, ROUTE_MAP)
+                        },
+                        onBuildRoute = { room ->
+                            viewModel.navigateTo(room)
+                            navigateToTab(navController, ROUTE_MAP)
+                        },
+                    )
                 }
                 composable(ROUTE_MAP) {
                     MapScreen(
@@ -499,9 +523,10 @@ private fun saveRoute(
 }
 
 private enum class MainTab(val route: String, val labelRes: Int, val icon: androidx.compose.ui.graphics.vector.ImageVector) {
+    HOME(ROUTE_HOME, R.string.nav_home, Icons.Default.Home),
     MAP(ROUTE_MAP, R.string.nav_map, Icons.Default.Map),
-    FAVORITES(ROUTE_FAVORITES, R.string.nav_favorites, Icons.Default.Favorite),
     SEARCH(ROUTE_SEARCH, R.string.nav_search, Icons.Default.Search),
+    FAVORITES(ROUTE_FAVORITES, R.string.nav_favorites, Icons.Default.Favorite),
     SETTINGS(ROUTE_SETTINGS, R.string.nav_settings, Icons.Default.Settings),
 }
 
@@ -520,9 +545,6 @@ private fun navigateToTab(navController: NavHostController, route: String) {
     }
 }
 
-private fun navPadding(padding: PaddingValues, route: String?): PaddingValues =
-    if (route == ROUTE_ABOUT) PaddingValues(0.dp) else padding
-
 private object AppSettingsIntent {
     fun openAppDetails(context: android.content.Context) {
         runCatching {
@@ -535,8 +557,8 @@ private object AppSettingsIntent {
     }
 }
 
+private const val ROUTE_HOME = "home"
 private const val ROUTE_MAP = "map"
-private const val LEGACY_HOME_ROUTE = "home"
 private const val ROUTE_FAVORITES = "favorites"
 private const val ROUTE_SEARCH = "search"
 private const val ROUTE_SETTINGS = "settings"

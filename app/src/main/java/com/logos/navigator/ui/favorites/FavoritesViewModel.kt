@@ -12,6 +12,7 @@ import com.logos.navigator.data.database.entity.FavoriteRoomEntity
 import com.logos.navigator.data.database.entity.RouteHistoryEntity
 import com.logos.navigator.data.database.entity.SavedRouteEntity
 import com.logos.navigator.data.datastore.SettingsDataStore
+import com.logos.navigator.data.model.AppSettings
 import com.logos.navigator.data.model.LoadedIndoorData
 import com.logos.navigator.data.model.Room
 import com.logos.navigator.data.repository.FavoritesRepository
@@ -132,7 +133,7 @@ class FavoritesViewModel(application: Application) : AndroidViewModel(applicatio
         repository.moveFavorite(roomId, direction)
     }
 
-    fun createCategory(name: String, colorArgb: Int = 0xFF2158E0.toInt()) = launchOperation(R.string.category_created) {
+    fun createCategory(name: String, colorArgb: Int = AppSettings.BRAND_BLUE) = launchOperation(R.string.category_created) {
         repository.createCategory(name, "folder", colorArgb)
     }
 

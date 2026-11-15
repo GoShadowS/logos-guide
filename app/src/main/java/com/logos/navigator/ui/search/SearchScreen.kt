@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -244,7 +245,7 @@ fun SearchScreen(
                         onValueChange = { query = it },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
-                        shape = RoundedCornerShape(14.dp),
+                        shape = RoundedCornerShape(18.dp),
                         placeholder = {
                             Text(stringResource(R.string.search_hint), maxLines = 1, overflow = TextOverflow.Ellipsis)
                         },
@@ -275,7 +276,7 @@ fun SearchScreen(
         },
     ) { padding ->
         Column(
-            modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp),
+            modifier = Modifier.fillMaxSize().padding(padding).imePadding().padding(horizontal = 16.dp),
         ) {
             Spacer(Modifier.height(4.dp))
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -410,7 +411,7 @@ private fun RoomListCard(
     }
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(14.dp),
+        shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
     ) {
@@ -470,7 +471,7 @@ private fun RoomListCard(
                 Button(
                     onClick = onBuildRoute,
                     modifier = Modifier.fillMaxWidth().padding(start = 14.dp, end = 14.dp, bottom = 12.dp),
-                    shape = RoundedCornerShape(14.dp),
+                    shape = CircleShape,
                 ) {
                     Text(stringResource(R.string.search_build_route))
                     Spacer(Modifier.width(8.dp))
@@ -485,7 +486,7 @@ private fun RoomListCard(
 private fun RelatedQueryRow(query: String, onClick: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
-        shape = RoundedCornerShape(14.dp),
+        shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
     ) {

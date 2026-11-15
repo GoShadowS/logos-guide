@@ -83,6 +83,8 @@ class CanvasMapView @JvmOverloads constructor(
     private var animatedDashIntervals = FloatArray(2)
     private var lastFrameTime = 0L
     private var pendingCenter: MapPoint? = null
+    private var labelTextColor = 0xFF16233B.toInt()
+    private var labelBackgroundColor = 0xEEFFFFFF.toInt()
     private var dragPreview: PointF? = null
 
     var onManualPosition: ((Float, Float) -> Unit)? = null
@@ -257,14 +259,16 @@ class CanvasMapView @JvmOverloads constructor(
         val systemDark = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
         val darkTheme = settings.themeMode == ThemeMode.DARK || (settings.themeMode == ThemeMode.SYSTEM && systemDark)
         canvas.drawColor(if (darkTheme) MAP_BACKGROUND_DARK else MAP_BACKGROUND_LIGHT)
+        labelTextColor = if (darkTheme) 0xFFE9EBF4.toInt() else 0xFF16233B.toInt()
+        labelBackgroundColor = if (darkTheme) 0xE6191C27.toInt() else 0xEEFFFFFF.toInt()
         val currentFloor = floor
         if (currentFloor == null || width <= 0 || height <= 0) return
 
         val saveCount = canvas.save()
         canvas.setDrawFilter(drawFilterFor(settings.mapRenderQuality))
         canvas.concat(mapMatrix)
-        GeneratedFloorMaps.draw(canvas, currentFloor.number)
-        if (context.isEnglishLocale()) EnglishFloorMapLabels.draw(context, canvas, currentFloor.number)
+        GeneratedFloorMaps.draw(canvas, currentFloor.number, dark = darkTheme)
+        if (context.isEnglishLocale()) EnglishFloorMapLabels.draw(context, canvas, currentFloor.number, dark = darkTheme)
         val mapScale = fitScale * zoom
         if (settings.showCoordinateGrid) drawCoordinateGrid(canvas, currentFloor)
         if (settings.showNavigationEdges) drawDebugEdges(canvas, currentFloor)
@@ -683,7 +687,7 @@ class CanvasMapView @JvmOverloads constructor(
         val density = resources.displayMetrics.density
         val desiredScreenSize = (11f * resources.displayMetrics.scaledDensity * zoom).coerceIn(8f * density, 22f * density)
         textPaint.textSize = desiredScreenSize / max(mapScale, 0.0001f)
-        textPaint.color = 0xFF16233C.toInt()
+        textPaint.color = labelTextColor
         val padding = 3f * density / max(mapScale, 0.0001f)
         val textWidth = textPaint.measureText(text)
         val ascent = textPaint.ascent()
@@ -691,7 +695,7 @@ class CanvasMapView @JvmOverloads constructor(
         val left = x - textWidth / 2f - padding
         val top = y - (descent - ascent) / 2f - padding
         val bounds = RectF(left, top, left + textWidth + 2 * padding, top + descent - ascent + 2 * padding)
-        labelPaint.color = 0xDDF9FAFF.toInt()
+        labelPaint.color = labelBackgroundColor
         canvas.drawRoundRect(bounds, padding * 1.4f, padding * 1.4f, labelPaint)
         canvas.drawText(text, x - textWidth / 2f, y - (ascent + descent) / 2f, textPaint)
     }
@@ -702,10 +706,10 @@ class CanvasMapView @JvmOverloads constructor(
         val density = resources.displayMetrics.density
         val message = context.getString(R.string.coordinate_overlay_format, point.x, point.y)
         textPaint.textSize = 12f * resources.displayMetrics.scaledDensity
-        textPaint.color = Color.DKGRAY
+        textPaint.color = labelTextColor
         val padding = 8f * density
         val textWidth = textPaint.measureText(message)
-        labelPaint.color = 0xEEFFFFFF.toInt()
+        labelPaint.color = labelBackgroundColor
         canvas.drawRoundRect(12f * density, height - 42f * density, 12f * density + textWidth + padding * 2, height - 12f * density, 8f * density, 8f * density, labelPaint)
         canvas.drawText(message, 12f * density + padding, height - 22f * density, textPaint)
     }
@@ -809,13 +813,13 @@ class CanvasMapView @JvmOverloads constructor(
 
     private companion object {
         const val MARKER_DRAG_RADIUS_DP = 34f
-        const val MAP_BACKGROUND_LIGHT = 0xFFEEF2FA.toInt()
-        const val MAP_BACKGROUND_DARK = 0xFF040B1D.toInt()
-        const val GPS_MARKER_COLOR = 0xFF2158E0.toInt()
+        const val MAP_BACKGROUND_LIGHT = 0xFFF3F6FB.toInt()
+        const val MAP_BACKGROUND_DARK = 0xFF11131B.toInt()
+        const val GPS_MARKER_COLOR = 0xFF2F5FE8.toInt()
         const val APPROXIMATE_MARKER_COLOR = 0xFF7C8CA6.toInt()
         const val MANUAL_MARKER_COLOR = 0xFF12A76A.toInt()
-        const val ACCURACY_FILL = 0x2A2158E0
-        const val ACCURACY_STROKE = 0x772158E0
+        const val ACCURACY_FILL = 0x2A2F5FE8
+        const val ACCURACY_STROKE = 0x772F5FE8
         const val ROUTE_DIRECTION_EPSILON_SQUARED = 0.0001f
         val LOW_QUALITY_DRAW_FILTER = PaintFlagsDrawFilter(Paint.ANTI_ALIAS_FLAG, 0)
         val MEDIUM_QUALITY_DRAW_FILTER = PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG)
