@@ -86,7 +86,7 @@ Target APK `1.0.1-release` отсутствует; опубликованный 
 
 ### Выполнено локально и по GitHub
 
-- После повторного `git fetch --no-tags origin main`: `origin/main=1a3a04b6baaa3bc7ead446be62b6cedf2d8977dd`, текущий HEAD включает его; divergence `3/0` до PR. Сессия остаётся на `arena/e8197540-logos-guide`.
+- После повторного `git fetch --no-tags origin main`: `origin/main=1a3a04b6baaa3bc7ead446be62b6cedf2d8977dd`; при создании PR #28 ветка имела `HEAD=32d23965684af1ae988de28eb312b81dcd0d9f73`, divergence `4/0`, была запушена на `origin/arena/e8197540-logos-guide` и имела чистое рабочее дерево. Сессия осталась на этой ветке.
 - До PR `git diff --name-status origin/main...HEAD` содержал 13 путей, все с расширением `.md`; код, workflow, Gradle, version, APK и release-настройки не менялись.
 - `git diff --check origin/main...HEAD` — успешно; дополнительная Python-проверка прошла по всем 13 Markdown-файлам и 106 ссылкам: локальные пути/якоря существуют, trailing whitespace нет. `AGENTS.md` и `CLAUDE.md` совпадают кроме заголовка.
 - После последней правки инструкции перехода повторно проверено: `python3 tools/extract_svg_geometry.py ...floor_1.svg --strict` — 41 shape, `warnings=[]`; `...floor_2.svg --strict` — 46 shape, `warnings=[]`.
@@ -100,12 +100,14 @@ Target APK `1.0.1-release` отсутствует; опубликованный 
 
 - Android Gradle unit tests/Debug/Release build и `apksigner verify` локально недоступны: `java` отсутствует в PATH, `JAVA_HOME`, `ANDROID_HOME`, `ANDROID_SDK_ROOT` не заданы. Ранее Gradle останавливался до выполнения задач по причине отсутствия Java; в этой задаче сборка не запускалась.
 - Runtime на устройстве, импорт реального JSON, старый/целевой APK, подпись бинарника GitHub Release, updater/download/install не проверялись. Целевой `1.0.1` APK отсутствует.
-- Исторический CI #23/#26/#27 относится к тем PR и не является CI этого документационного diff. Статус checks нового PR будет записан после его создания; merge/release не выполняются.
+- Исторический CI #23/#26/#27 относится к тем PR и не является CI этого документационного diff. GitHub Actions PR #28 завершились `SUCCESS` (ссылки и head SHA приведены ниже); merge/release не выполнялись.
 
 ## PR, откат и оставшийся блокер
 
-На момент написания первоначального варианта отчёта документационный PR ещё не создан; новые изменения не слиты. После создания документационного PR сюда будет внесён его настоящий номер, статус, проверенный CI/review и merge SHA (если merge фактически произойдёт). Не публиковать APK/Release.
+- Документационный [PR #28](https://github.com/GoShadowS/logos-guide/pull/28) открыт из `arena/e8197540-logos-guide` в `main`. На момент проверки head был `32d23965684af1ae988de28eb312b81dcd0d9f73`, mergeability — `MERGEABLE`, review не зафиксирован, state — `OPEN`; merge commit отсутствует. PR не переоткрывает #26 и не дублирует #27.
+- Для head `32d23965684af1ae988de28eb312b81dcd0d9f73` GitHub Actions завершили успешно все четыре отображённые проверки: Android build runs [#43933838439](https://github.com/GoShadowS/logos-guide/actions/runs/43933838439/job/133533054783) и [#43933771306](https://github.com/GoShadowS/logos-guide/actions/runs/43933771306/job/133532817851); indoor validation runs [#43933838610](https://github.com/GoShadowS/logos-guide/actions/runs/43933838610/job/133533054618) и [#43933771569](https://github.com/GoShadowS/logos-guide/actions/runs/43933771569/job/133532818872). `gh pr checks 28 --watch` завершился с exit 0; API подтверждает `SUCCESS` у всех четырёх check runs. Это CI PR #28, отдельно от локальных проверок; merge не выполнялся.
+- Новый APK/Release не публиковался. Откат будущего squash-merge — `git revert <фактический-squash-merge-SHA>` в отдельной ветке с отдельным revert PR; пока merge SHA нет, команда не выполнялась.
 
-Updater code PR не включён и отдельной ветки в этой сессии не создано. Это оставшийся блокер для исправления versionCode comparison и некорректного latest tag; отдельный кодовый PR должен иметь собственные тесты и актуальный CI.
+Updater code PR не включён и отдельной ветки в этой сессии не создавалось. Это отдельная кодовая задача для versionCode comparison и некорректного latest tag; она требует собственных тестов и актуального CI.
 
-Откат уже слитых PR #23/#26/#27 указан выше в [отчёте аудита updater](2026-11-16-feature-catalog-updater-audit.md). Для будущего документационного squash-merge откатить только документальный commit командой `git revert <фактический-squash-merge-SHA>` в отдельной ветке и открыть revert PR; до merge фактического SHA нет. Команды отката не выполнялись.
+Откат уже слитых PR #23/#26/#27 указан выше в [отчёте аудита updater](2026-11-16-feature-catalog-updater-audit.md).

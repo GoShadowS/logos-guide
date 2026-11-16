@@ -65,4 +65,4 @@
 - #26: `git revert 56981a0e6e3b79b8b2cd6d83ba9cebea9ce7e32f`.
 - #27: `git revert b221912ba9023a8ce3c049b1cd60631a05612c46` — вернёт прежнее release-значение OpenDoors в исходниках/CI, но не изменит APK, уже распространённые пользователям.
 
-Команды не запускались. Датированный отчёт текущей ревизии всех Markdown, проверок и документационного PR находится в [`2026-11-16-release-transition-and-markdown-audit.md`](2026-11-16-release-transition-and-markdown-audit.md).
+Команды не запускались. Документационная ревизия оформлена в открытом [PR #28](https://github.com/GoShadowS/logos-guide/pull/28); его checks и полный отчёт текущей ревизии Markdown находятся в [`2026-11-16-release-transition-and-markdown-audit.md`](2026-11-16-release-transition-and-markdown-audit.md). PR не слит; updater code fix не входит в его scope.
