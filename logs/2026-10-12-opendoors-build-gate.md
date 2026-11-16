@@ -1,9 +1,18 @@
 # Отключение OpenDoors в пользовательских сборках
 
-- **Дата:** 2026-10-12
-- **Рабочая ветка:** `arena/94ce8164-logos-guide`
-- **База ветки:** `d8d099138c6b89325e88f0bf6ff877e6006b6a7d`
-- **Актуальная база изменений:** `origin/main` `56981a0e6e3b79b8b2cd6d83ba9cebea9ce7e32f` (после слияния PR #26)
+> **Исторический отчёт о PR #27.** Первоначальные дата, результаты и проверки ниже относятся к тому изменению и его CI, а не к целевой версии `1.0.1-release` или текущему документационному diff. Актуальные пояснения добавлены отдельно.
+
+## Текущий статус на 2026-11-16
+
+- В текущем `origin/main` `OPEN_DOORS=false` для новых Gradle-вариантов `debug` и `release`; это не меняет уже собранные APK. PR #27 остаётся слитым squash-коммитом `b221912ba9023a8ce3c049b1cd60631a05612c46`.
+- По плану проекта разрабатывается `1.0.1-release`, но APK/тег/Release этой версии не обнаружены. Фактический Gradle всё ещё задаёт `1.1.0-release` / code 4; см. [сборочное руководство](../docs/BUILD_APK_RU.md).
+- Текущий публичный Release tag `release` перечисляет asset `logos-guide-1.0.0-opendoors.apk`; бинарный asset не скачан и не проверен. Единственный локальный `app/release/app-release.apk` извлечённым манифестом сообщает `1.1.0-release` / code 4 и не является целевым APK `1.0.1`.
+
+- **Дата аудита (как указана в первоначальной версии отчёта):** `2026-10-12`
+- **Рабочая ветка PR #27:** `arena/94ce8164-logos-guide`
+- **Базовый commit ветки:** `d8d099138c6b89325e88f0bf6ff877e6006b6a7d`
+- **База PR #27:** `56981a0e6e3b79b8b2cd6d83ba9cebea9ce7e32f` (уже слитый PR #26)
+- **Проверенная дата PR #27:** GitHub сообщает merge `2026-11-15T22:35:06Z`; `origin/main` на момент merge — `b221912ba9023a8ce3c049b1cd60631a05612c46`. Текущий `origin/main` после отдельного README-only commit — `1a3a04b6baaa3bc7ead446be62b6cedf2d8977dd`; build configuration не менялась.
 - **Цель:** проверить все собираемые варианты OpenDoors и выключить каталог в новых пользовательских APK, не меняя версию, подпись и опубликованные артефакты.
 
 ## Результаты аудита
@@ -36,10 +45,10 @@
 - Встроенная Python-проверка Android workflow с синтетическими `debug`, `release`, `testDebug` подтвердила успех при `false` и ожидаемо завершилась ошибкой для `release=true`.
 - `git diff --check`.
 
-**Недоступно локально / ожидает CI:**
+**Локально недоступно; удалённый CI завершён:**
 
-- `./gradlew --no-daemon testDebugUnitTest assembleDebug assembleRelease` не стартовал: в окружении нет `java`, `JAVA_HOME`, `ANDROID_HOME` и `ANDROID_SDK_ROOT`. Поэтому сборка, Android unit-тесты и настоящие `BuildConfig`/APK не проверялись локально.
-- GitHub Actions для PR должны выполнить Android-тесты, обе сборки и новую проверку сгенерированных вариантов. До выполнения CI результат считается ожидающим подтверждения.
+- `./gradlew --no-daemon testDebugUnitTest assembleDebug assembleRelease` локально не стартовал: в окружении отсутствуют `java`, `JAVA_HOME`, `ANDROID_HOME` и `ANDROID_SDK_ROOT`.
+- GitHub Actions PR #27 выполнил Android unit tests, Debug/Release builds и проверку сгенерированных BuildConfig на head `694dc310f09e742f9d5d297686e2ad7bfb7ac2a3`: [`build` #43769509822](https://github.com/GoShadowS/logos-guide/actions/runs/43769509822/job/132982057609), [`build` #43769494299](https://github.com/GoShadowS/logos-guide/actions/runs/43769494299/job/132982008581), [`validate` #43769509846](https://github.com/GoShadowS/logos-guide/actions/runs/43769509846/job/132982057330), [`validate` #43769494238](https://github.com/GoShadowS/logos-guide/actions/runs/43769494238/job/132982008016) — все **success**. Это CI-проверка новых сборок, не runtime старого APK.
 
 ## Визуальная и runtime-проверка
 
@@ -48,6 +57,7 @@
 
 ## PR, итог и откат
 
-- Изменение подготовлено отдельной логической правкой в текущей ветке; PR и его проверки будут добавлены после публикации.
-- Итоговый SHA и merge-состояние будут записаны после завершения PR.
-- Откат после слияния: выполнить `git revert <squash-commit-SHA>` для коммита этого PR. Это вернёт предыдущее значение Release `OPEN_DOORS=true` и удалит сопровождающую CI-проверку/документацию; APK вручную не менять.
+- PR [#27](https://github.com/GoShadowS/logos-guide/pull/27) в `main` имеет статус **MERGED, squash**; GitHub `mergedAt=2026-11-15T22:35:06Z`.
+- PR head: `694dc310f09e742f9d5d297686e2ad7bfb7ac2a3`. Итоговый squash SHA: `b221912ba9023a8ce3c049b1cd60631a05612c46`; его единственный parent — merge commit PR #26 `56981a0e6e3b79b8b2cd6d83ba9cebea9ce7e32f`.
+- `build` и `validate` прошли; PR #27 не запускал release workflow, который запускается только при push тега `v*`.
+- Откат: из актуального `main` выполнить `git revert b221912ba9023a8ce3c049b1cd60631a05612c46`, затем отправить revert отдельным PR. Это вернёт прежнее Release-значение `OPEN_DOORS=true` и снимет соответствующую CI-проверку/документацию. Уже собранный или опубликованный APK вручную не менять.
