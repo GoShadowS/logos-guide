@@ -122,6 +122,7 @@ import com.logos.navigator.data.model.MapPoint
 import com.logos.navigator.data.model.RouteAction
 import com.logos.navigator.data.model.RouteInstruction
 import com.logos.navigator.data.model.Room
+import com.logos.navigator.navigation.GpsAccuracyPolicy
 import com.logos.navigator.ui.MainViewModel
 import com.logos.navigator.utils.categoryLabel
 import com.logos.navigator.utils.formatDistance
@@ -516,8 +517,12 @@ fun MapScreen(
                                 onRetryGps = if (state.isGpsActive) null else ::requestGpsPermissionOrStart,
                                 modifier = Modifier.width(290.dp),
                             )
-                            state.locationMode == LocationMode.GPS && state.gpsAccuracyMeters != null -> Text(
-                                stringResource(R.string.location_accuracy, state.gpsAccuracyMeters.toInt()),
+                            state.locationMode == LocationMode.GPS &&
+                                GpsAccuracyPolicy.displayRadiusMeters(state.gpsAccuracyMeters) != null -> Text(
+                                stringResource(
+                                    R.string.location_accuracy,
+                                    requireNotNull(GpsAccuracyPolicy.displayRadiusMeters(state.gpsAccuracyMeters)),
+                                ),
                                 modifier = Modifier
                                     .mapOverlayLabel()
                                     .padding(horizontal = 12.dp, vertical = 8.dp),
