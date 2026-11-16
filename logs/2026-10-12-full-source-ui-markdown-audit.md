@@ -34,7 +34,7 @@ GitHub tags API возвращает единственный тег `release` �
 
 Попытка получить опубликованный APK (`gh release download release --pattern 'logos-guide-1.0.0-opendoors.apk'`) завершилась `EOF` с `release-assets.githubusercontent.com`. Digest и размер — сведения GitHub API; бинарник локально не получен. Его manifest, certificate и подпись не анализировались, сертификаты опубликованного и локального APK не сравнивались.
 
-На момент проверки открытых PR не было. У текущей локальной ветки нет удалённого одноимённого ref; локальная ветка не переключалась. Pull request для этой ревизии будет указан отдельно только после фактического создания.
+До создания этого change-set `gh pr list --state open` вернул пустой список. После локального commit `5cfbb699974b5b22fc21bcd5bb8ea93fd236ebfc` ветка была отправлена только в `origin/arena/5f4d37f8-logos-guide`. Создан документационный [PR #29](https://github.com/GoShadowS/logos-guide/pull/29) в `main`; для первого head `5cfbb699974b5b22fc21bcd5bb8ea93fd236ebfc` оба CI check прошли. PR остаётся `OPEN`, `mergeStateStatus=CLEAN`, `reviewDecision` пустой, merge SHA нет. Этот отчётный commit фиксирует результаты и ссылки на PR; после его отправки CI запустится повторно для нового head, статус которого проверяется отдельно.
 
 ## Версии, локальный APK и OpenDoors
 
@@ -122,7 +122,7 @@ JSON не является полной резервной копией, а пе
 - `python3 tools/generate_kotlin_floor_maps.py --check` — успешно; Kotlin Canvas/Path синхронизированы с SVG.
 - `python3 tools/extract_svg_geometry.py maps_and_design/floors/floor_1.svg --strict` и аналогично для `floor_2.svg` — успешно, 41/46 shapes, `warnings=0`.
 - XML/resource static check — успешно: 630 одинаковых строковых ключей в `values`, `values-en`, `values-ru`; все 523 `R.string`-ссылки в Kotlin разрешаются.
-- Markdown link/anchor checker — успешно: 14 `.md` файлов проверены, все локальные пути и заголовочные якоря существуют.
+- Markdown link/anchor checker — успешно: 14 `.md` файлов и 86 локальных inline-ссылок проверены; все локальные пути и заголовочные якоря существуют.
 - `git diff --check` — успешно.
 - Статический подсчёт тестовых исходников — 8 JVM test-файлов, 33 `@Test`-аннотации; это не запуск тестов.
 - Повторно проверены GitHub API: PR #23/#25/#26/#27/#28; один Release/tag `release`; API-метаданные assets. Открытых PR на момент запроса не было.
@@ -133,7 +133,7 @@ JSON не является полной резервной копией, а пе
 - `./gradlew --no-daemon testDebugUnitTest` остановился до запуска Gradle: `JAVA_HOME is not set and no 'java' command could be found in your PATH.` `java`, `javac`, `apksigner`, `aapt`, `apkanalyzer`, `adb`, Android SDK и `JAVA_HOME` не найдены/не заданы. Debug/Release builds и Android unit tests поэтому в этой ревизии не выполнены.
 - APK из GitHub Release недоступен: download попытка завершилась `EOF`; манифест/сертификат и подписи двух APK сравнить невозможно.
 - UI на эмуляторе/устройстве, установленный APK, installer, JSON export/import и датчики не тестировались. Визуальная проверка сайта не выполнялась: домен вне сетевой allowlist среды.
-- CI текущей документационной ревизии не запускался до создания её PR. Успешные CI PR #23–#28 относятся к историческим change sets, не к этому diff.
+- CI PR #29 для первоначального head `5cfbb699974b5b22fc21bcd5bb8ea93fd236ebfc` прошёл: Android `build` [run 43956171932](https://github.com/GoShadowS/logos-guide/actions/runs/43956171932/job/133611185077) — **pass** (4m5s); indoor `validate` [run 43956171873](https://github.com/GoShadowS/logos-guide/actions/runs/43956171873/job/133611183967) — **pass** (7s). Этот отчётный commit изменяет только Markdown-лог; после отправки он запускает CI для нового head, статус которого проверяется отдельно. Успешные CI PR #23–#28 относятся к прежним change sets и не заменяют проверки PR #29.
 - Фактический Claude Code импорт не проверялся.
 
 ## Файлы, scope, PR и откат
@@ -142,6 +142,6 @@ JSON не является полной резервной копией, а пе
 
 Найденное ограничение updater документировано, но код и тесты не изменялись. Если потребуется updater fix, он должен быть отдельной согласованной кодовой задачей/PR. Изменения функций/данных/UI в этот набор не входили.
 
-На текущем этапе документационный PR ещё не создан; локальный commit/push не выполнялись. После создания PR в этот отчёт будут внесены фактические URL, head SHA и CI-статусы. Не объявлять работу опубликованной до такого подтверждения.
+Документационный PR #29 создан на текущей ветке `arena/5f4d37f8-logos-guide`; первый push содержал commit `5cfbb699974b5b22fc21bcd5bb8ea93fd236ebfc`. В отчёте зафиксирован его фактический URL/head и pending-check snapshot; изменения не слиты в `main`. Updater code fix не включён.
 
 Откат до merge: отменить документационные изменения в этой ветке обычным revert соответствующего локального commit и обновить PR. После merge — отдельный revert PR от актуального `main` с точным squash/merge SHA; прямо в `main` не коммитить. Старые отчёты сохранять без редактирования.
