@@ -110,7 +110,13 @@ JSON-export в проверенных исходниках включает ка
 - Нет `java`, `javac`, Android SDK, `adb` и `apksigner`; синтаксическую/Android сборку и подпись APK проверить локально нельзя.
 - UI приложения не запускался; скриншоты не создавались; сайт визуально не проверялся; GPS-полевые, indoor-accuracy, battery и map-matching измерения не проводились.
 - Markdown link/anchor check: до создания этого отчёта обнаружены две сломанные ссылки на него из `docs/BUILD_APK_RU.md` и `docs/FEATURES.md`; после добавления отчёта и записи в индекс повторная проверка **успешна**: 16 Markdown-файлов, 102 Markdown-ссылки, все локальные пути и заголовочные anchors существуют; изображений — 0, пустых alt-текстов нет.
-- PR этой ветки/CI/merge на момент написания пока нет. Если PR будет создан после проверки и будет слит обычным разрешённым путём, актуальный head/CI/merge SHA и точный откат необходимо указать в финальном сообщении; не использовать bypass.
+- На исходном состоянии отчёта PR ещё не существовал. Позднее создан PR #30; его первоначальная проверенная версия и CI зафиксированы ниже. Поскольку после фиксации этого статуса добавляется сам отчётный commit, для нового head требуется повторная проверка CI. Branch-protection endpoint недоступен (`HTTP 403`); review/bypass не обходить.
+
+## PR и CI (снимок первоначального push)
+
+- PR [#30](https://github.com/GoShadowS/logos-guide/pull/30) открыт из `arena/f716361c-logos-guide` в `main`; первоначальный head — `f90670b96e9827eab3508ff8e20dceacdd534e2c`. На этом снимке PR был `OPEN`, `reviewDecision` пуст, GitHub Reviews отсутствовали; merge SHA ещё не было.
+- Для первоначального head GitHub Actions завершил `build` успешно (run [#43969337444](https://github.com/GoShadowS/logos-guide/actions/runs/43969337444/job/133657037012), 2m36s) и `validate` успешно (run [#43969337448](https://github.com/GoShadowS/logos-guide/actions/runs/43969337448/job/133657036229), 6s). Это удалённый CI первого PR-head, не локальные JVM tests и не device/field test.
+- Branch-protection endpoint `/branches/main/protection` вернул `HTTP 403 Resource not accessible by integration`, поэтому обязательность ревью нельзя проверить напрямую. Обычный PR merge не выполнять в обход требуемого review/protection. Конечный статус PR и merge SHA после повторного CI сообщаются в итоговом ответе; изменение этого отчёта требует CI для нового head.
 
 ## Откат и пользовательский выпуск
 
