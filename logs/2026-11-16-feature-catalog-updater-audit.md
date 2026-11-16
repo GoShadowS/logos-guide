@@ -3,7 +3,7 @@
 - **Дата аудита:** `2026-11-16` (исправленная дата; предыдущая версия этого нового отчёта ошибочно называлась `2026-10-12-feature-catalog-updater-audit.md`).
 - **Ветка:** `arena/e8197540-logos-guide`.
 - **База:** `origin/main` `b221912ba9023a8ce3c049b1cd60631a05612c46`.
-- **Состояние при возобновлении задачи:** `HEAD` совпадает с актуальным `origin/main`; локальных коммитов сверх базы и staged diff не было. До продолжения находились 6 изменённых tracked Markdown-файлов и 2 untracked Markdown-файла. Изменения сохранены и пересмотрены; это не было чистым рабочим деревом.
+- **Состояние при возобновлении задачи:** `HEAD` совпадал с первоначальным `origin/main` `b221912ba9023a8ce3c049b1cd60631a05612c46`; локальных коммитов сверх базы и staged diff не было. Workspace snapshot показал 10 изменённых tracked Markdown-файлов и 3 untracked Markdown-файла; изменений кода не было. Изменения сохранены и пересмотрены; это не было чистым рабочим деревом.
 - **Цель:** проверить PR #23/#26/#27, фактическую версию и публикацию, каталог функций, экспорт/импорт пользовательских данных, updater и OpenDoors; не менять код, версии, workflow, подпись, APK или Release.
 
 ## PR и GitHub Releases
@@ -16,7 +16,7 @@
 | [#26](https://github.com/GoShadowS/logos-guide/pull/26) — Compose UI | `MERGED`, squash, `mergedAt=2026-11-15T22:13:43Z` | `56981a0e6e3b79b8b2cd6d83ba9cebea9ce7e32f`; исторические `build`/`validate` runs приведены в [отчёте UI](2026-10-12-ui-review.md). #26 входит в базу #27; не переоткрывать. |
 | [#27](https://github.com/GoShadowS/logos-guide/pull/27) — OpenDoors | `MERGED`, squash, `mergedAt=2026-11-15T22:35:06Z` | `b221912ba9023a8ce3c049b1cd60631a05612c46`; исторические `build`/`validate` runs приведены в [отчёте OpenDoors](2026-10-12-opendoors-build-gate.md). |
 
-`git fetch --no-tags origin main` завершился успешно; после обновления `HEAD=origin/main=b221912ba9023a8ce3c049b1cd60631a05612c46`, расхождение `0/0`. Удалённый список tags содержит только `release`. `gh release list --limit 100` и GitHub Releases API содержат один опубликованный (не draft, не prerelease) Release: tag `release`, asset `logos-guide-1.0.0-opendoors.apk` и provenance asset; записи для `1.0.1-release` нет. API сообщает APK asset размером `19,311,922` bytes и digest `sha256:1f41d0ae85c653f6989237830c9d8b921f529af3ec61fd36b01c2e077a3f0c41`; digest сообщён API и локально не пересчитан, binary не скачан.
+Первичный `git fetch --no-tags origin main` завершился успешно; на момент этого снимка `HEAD=origin/main=b221912ba9023a8ce3c049b1cd60631a05612c46`, расхождение `0/0`. Перед push обнаружился README-only commit `1a3a04b6baaa3bc7ead446be62b6cedf2d8977dd`; он включён в рабочую ветку безопасным merge и не меняет приведённые build facts. Последний повторный запрос tags и Releases API по-прежнему показал только tag/Release `release`, asset `logos-guide-1.0.0-opendoors.apk` и provenance asset; записи для `1.0.1-release` нет. API сообщает APK asset размером `19,311,922` bytes и digest `sha256:1f41d0ae85c653f6989237830c9d8b921f529af3ec61fd36b01c2e077a3f0c41`; digest сообщён API и локально не пересчитан, binary не скачан.
 
 ## Планируемая версия и доступные APK
 
@@ -37,7 +37,7 @@
 - Старый tag содержит JSON-export/import в `FavoritesRepository`, UI-кнопки в `FavoritesScreen` и document picker `CreateDocument("application/json")` / `OpenDocument`; предлагается имя `logos-favorites.json`. Сам Release APK не скачивался и UI установленного APK не запускался, поэтому наличие потока в конкретной бинарной копии проверено только по source tree.
 - Legacy exporter пишет `schemaVersion=2` и сериализует категории/папки, избранное, историю, сохранённые маршруты. Ни настройки DataStore, ни onboarding, ни состояние updater, ни кэш в этом payload не входят.
 - Current `origin/main` importer принимает schema 1–2; source-level логика сопоставляет категории по имени, избранное по `roomId`, историю по `toRoomId`/timestamp, маршруты по endpoints/`createdAt`, и объединяет отсутствующие записи. У importer/exporter нет тестов.
-- Поэтому подтверждены действия source-level для резервной копии и совместимость legacy schema 2 с **текущим исходником**. Совместимость именно будущего APK `1.0.1-release` и фактическое восстановление на устройстве не проверены: APK отсутствует. Инструкция требует сохранять файл во внешнем для приложения месте, удалять старую версию только после проверки backup, а импортировать только после проверки target importer. Android Manifest имеет `allowBackup=true`, но системный backup/restore при uninstall/reinstall не тестировался и не обещан.
+- Поэтому подтверждены действия source-level для резервной копии и совместимость legacy schema 2 с **текущим исходником**. Совместимость именно будущего APK `1.0.1-release` и фактическое восстановление на устройстве не проверены: APK отсутствует. Инструкция требует до удаления экспортировать JSON, проверить его существование/открываемость вне закрытых данных приложения, не удалять старую версию при невозможности такой проверки, а импортировать только после проверки target importer. Android Manifest имеет `allowBackup=true`, но системный backup/restore при uninstall/reinstall не тестировался и не обещан.
 
 ## Встроенный updater: фактическое поведение и выявленная проблема
 

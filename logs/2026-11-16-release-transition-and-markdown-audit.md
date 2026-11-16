@@ -37,7 +37,7 @@ Target APK `1.0.1-release` отсутствует; опубликованный 
 - В старом source tag предусмотрены кнопки экспорта/импорта, системный `CreateDocument("application/json")` с предлагаемым именем `logos-favorites.json` и `OpenDocument`.
 - Export schema 2 включает категории/папки, избранное, историю и сохранённые маршруты. Настройки, onboarding, updater preferences и кэш в JSON не входят.
 - Current `origin/main` importer принимает schema 1–2 и сливает отсутствующие записи по категориям/именам, `roomId`, `toRoomId`/timestamp и endpoints/`createdAt` маршрута.
-- Это source-level проверка, не запуск установленного старого APK и не подтверждение конкретного импортёра APK `1.0.1`. Экспорт/импорт и перенос на устройстве не тестировались. JSON необходимо сохранить в Documents/Downloads или другом хранилище вне private data приложения; удаление может стереть остальные Room/DataStore/SharedPreferences данные. `allowBackup=true` в манифесте не трактуется как гарантия системного восстановления.
+- Это source-level проверка, не запуск установленного старого APK и не подтверждение конкретного импортёра APK `1.0.1`. Экспорт/импорт и перенос на устройстве не тестировались. До удаления JSON необходимо экспортировать и проверить (файл существует и открывается) в Documents/Downloads или другом хранилище вне private data приложения; если это невозможно, удалять старую версию не следует. Удаление может стереть остальные Room/DataStore/SharedPreferences данные. `allowBackup=true` в манифесте не трактуется как гарантия системного восстановления.
 
 В README и сборочном руководстве добавлены обязательная последовательность «экспорт → удалить старую версию → установить официальный APK после выпуска → импорт при подтверждённой совместимости», заметное предупреждение о возможной потере данных и отсутствие ссылки на будущий APK.
 
@@ -62,7 +62,7 @@ Target APK `1.0.1-release` отсутствует; опубликованный 
 
 ## Полный Markdown-инвентарь и итог
 
-В начале продолжения `git ls-files '*.md' '**/*.md'` показал 10 tracked файлов, а `find` — 12 Markdown в рабочем дереве, включая 2 untracked. После добавления текущего task report найдено 13 проектных Markdown; `.git`, build/cache, dependencies и generated files в инвентарь не входят. По каждому файлу:
+При возобновлении этой сессии в рабочем дереве было 10 tracked Markdown-файлов и 3 новых Markdown-файла (всего 13); после коммита PR-diff также содержит 13 Markdown-файлов. `.git`, build/cache, dependencies и generated files в инвентарь не входят. По каждому файлу:
 
 | Путь | Итоговый статус |
 |---|---|
@@ -84,25 +84,23 @@ Target APK `1.0.1-release` отсутствует; опубликованный 
 
 ## Проверки
 
-### Выполнено в этой рабочей копии
+### Выполнено локально и по GitHub
 
-- `git fetch --no-tags origin main`; сравнение `HEAD` и `origin/main` — один SHA, diverge `0/0`.
-- `gh pr view 23/26/27` по отдельности — все три PR имеют `MERGED`; `gh release list --limit 100`, `gh api repos/GoShadowS/logos-guide/releases?per_page=100`, `gh api repos/GoShadowS/logos-guide/tags?per_page=100`, `git ls-remote --tags origin` — один опубликованный release/tag `release`, никакой `1.0.1-release` не найден.
-- `python3 -m compileall -q tools` — успешно.
-- `python3 tools/validate_indoor_data.py` — успешно: 2 этажа, 47 помещений, 101 узел, 105 рёбер, 3 закрытые области; проверены 34 официальных номера; перечислены 5 недоступных по геометрии записей.
-- `python3 tools/generate_kotlin_floor_maps.py --check` — успешно; карты синхронизированы с SVG.
-- `python3 tools/extract_svg_geometry.py maps_and_design/floors/floor_1.svg --strict` и аналогично для `floor_2.svg` — обе команды завершились с code 0 и `warnings: []`.
-- XML/localization Python-проверка: три файла по 630 одинаковых строковых ключей, все 523 использованные `R.string` существуют.
-- Статическая Python-сверка Gradle/workflow: версия `1.1.0-release` / code 4, `applicationId`, ровно два `OPEN_DOORS=false`, product flavors нет; Android CI хардкодит `1.1.0`; release workflow использует `v*`, вызывает `apksigner`, не содержит проверки возрастания `versionCode`.
+- После повторного `git fetch --no-tags origin main`: `origin/main=1a3a04b6baaa3bc7ead446be62b6cedf2d8977dd`, текущий HEAD включает его; divergence `3/0` до PR. Сессия остаётся на `arena/e8197540-logos-guide`.
+- До PR `git diff --name-status origin/main...HEAD` содержал 13 путей, все с расширением `.md`; код, workflow, Gradle, version, APK и release-настройки не менялись.
+- `git diff --check origin/main...HEAD` — успешно; дополнительная Python-проверка прошла по всем 13 Markdown-файлам и 106 ссылкам: локальные пути/якоря существуют, trailing whitespace нет. `AGENTS.md` и `CLAUDE.md` совпадают кроме заголовка.
+- После последней правки инструкции перехода повторно проверено: `python3 tools/extract_svg_geometry.py ...floor_1.svg --strict` — 41 shape, `warnings=[]`; `...floor_2.svg --strict` — 46 shape, `warnings=[]`.
+- В более ранней части этой же рабочей проверки успешно завершились `python3 -m compileall -q tools`; `python3 tools/validate_indoor_data.py` (2 этажа, 47 помещений, 101 узел, 105 рёбер, 3 закрытые области, 34 официальных номера, 5 недоступных по геометрии записей); `python3 tools/generate_kotlin_floor_maps.py --check`; XML/localization Python-аудит (630 ключей, все 523 используемых `R.string` найдены).
+- Статическая сверка Gradle/workflow: `1.1.0-release` / code 4, `applicationId=com.logos.navigator`, ровно два `OPEN_DOORS=false`, product flavors отсутствуют; CI ожидает `1.1.0-release`, release workflow использует `v*`, вызывает `apksigner`, не проверяет монотонность `versionCode`.
 - APK metadata parse локального `app/release/app-release.apk`: сведения приведены выше; это извлечение метаданных, не Android build, `apksigner verify` или device test.
-- Экспорт/импорт: статический просмотр source tag `release` и current `origin/main`; перенос на реальном устройстве не запускался.
+- Экспорт/импорт проверен статически по source tag `release` и текущему `origin/main`; перенос на реальном устройстве не запускался.
+- Повторные GitHub проверки: PR #23/#26/#27 всё ещё `MERGED`; API Tags/Latest Release перечисляет единственный tag/Release `release` и assets `logos-guide-1.0.0-opendoors.apk` и provenance, `1.0.1-release` не опубликован. Перед созданием документационного PR `githubstatus.com` показывал **All Systems Operational**; GitHub API и `gh` отвечали.
 
-### Требует повторения/недоступно
+### Недоступно/не запускалось
 
-- `git diff --check`, Markdown-ссылки/форматирование, финальная проверка всех Markdown и Git status выполняются после последней правки отчёта; результат будет внесён по факту.
-- Android Gradle unit tests/Debug/Release build и `apksigner verify` локально недоступны: `command -v java` ничего не вернул, `JAVA_HOME`, `ANDROID_HOME`, `ANDROID_SDK_ROOT` не заданы; ранее `./gradlew --no-daemon testDebugUnitTest` прекращался до запуска Gradle по причине отсутствия Java. В этой задаче Gradle повторно не запускался, потому что среда не изменилась.
-- Runtime/устройство, импорт реального backup, старый/целевой APK, подпись GitHub Release binary, автообновление/скачивание/установка не проверялись. Целевой `1.0.1` APK отсутствует.
-- На момент этой сверки документационный PR ещё не создан; его CI/review и merge SHA отсутствуют. После PR будут указаны реальные результаты; CI старых #23/#26/#27 не используется как результат нового diff.
+- Android Gradle unit tests/Debug/Release build и `apksigner verify` локально недоступны: `java` отсутствует в PATH, `JAVA_HOME`, `ANDROID_HOME`, `ANDROID_SDK_ROOT` не заданы. Ранее Gradle останавливался до выполнения задач по причине отсутствия Java; в этой задаче сборка не запускалась.
+- Runtime на устройстве, импорт реального JSON, старый/целевой APK, подпись бинарника GitHub Release, updater/download/install не проверялись. Целевой `1.0.1` APK отсутствует.
+- Исторический CI #23/#26/#27 относится к тем PR и не является CI этого документационного diff. Статус checks нового PR будет записан после его создания; merge/release не выполняются.
 
 ## PR, откат и оставшийся блокер
 
