@@ -34,6 +34,7 @@ import com.logos.navigator.data.model.SvgPoint
 import com.logos.navigator.data.repository.FavoritesRepository
 import com.logos.navigator.data.repository.IndoorRepository
 import com.logos.navigator.navigation.GeoReferencer
+import com.logos.navigator.navigation.GpsAccuracyPolicy
 import com.logos.navigator.navigation.PositionSmoother
 import com.logos.navigator.navigation.RouteProgressCalculator
 import com.logos.navigator.navigation.RouteStepGenerator
@@ -83,6 +84,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private var gpsFloorNumber: Int? = null
     private var dataLoadJob: Job? = null
     private var gpsTimeoutJob: Job? = null
+    private var gpsFixExpiryJob: Job? = null
     private var gpsAttempt = 0
     private var arrivalRoomId: String? = null
     private var manualStartRoomId: String? = null
@@ -144,7 +146,29 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         if (gpsPausedInBackground && _state.value.locationMode == LocationMode.GPS) {
             gpsPausedInBackground = false
             positionSmoother.reset()
-            _state.update { it.copy(isGpsActive = true) }
+            lastGpsLocation = null
+            gpsFixExpiryJob?.cancel()
+            gpsFixExpiryJob = null
+            consecutiveOffRouteFixes = 0
+            stopRouteSpeech()
+            announcedRouteSession = -1L
+            _state.update {
+                it.copy(
+                    isGpsActive = true,
+                    userPosition = null,
+                    gpsCoordinates = null,
+                    gpsAccuracyMeters = null,
+                    gpsWarning = appContext.getString(R.string.gps_determining),
+                    route = null,
+                    routeOriginPosition = null,
+                    isNavigationStarted = false,
+                    routeSteps = emptyList(),
+                    currentRouteStepIndex = 0,
+                    routeProgress = 0f,
+                    routeDistanceMeters = null,
+                    routeMinutes = null,
+                )
+            }
             armGpsFirstFixTimeout(gpsAttempt)
             startGpsTracking()
         }
@@ -159,6 +183,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             gpsPausedInBackground = true
             gpsTimeoutJob?.cancel()
             gpsTimeoutJob = null
+            gpsFixExpiryJob?.cancel()
+            gpsFixExpiryJob = null
             locationTracker.stop()
         }
         updateCompassTracking()
@@ -355,6 +381,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         updateSettings { it.copy(lastLocationMode = mode) }
         positionSmoother.reset()
         consecutiveOffRouteFixes = 0
+        gpsFixExpiryJob?.cancel()
+        gpsFixExpiryJob = null
         if (mode == LocationMode.MANUAL) {
             gpsTimeoutJob?.cancel()
             gpsTimeoutJob = null
@@ -455,6 +483,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
             return
         }
+        val previousLocation = lastGpsLocation
+        if (previousLocation != null && !GpsAccuracyPolicy.isNotOlderThan(
+                candidateElapsedRealtimeNanos = location.elapsedRealtimeNanos,
+                previousElapsedRealtimeNanos = previousLocation.elapsedRealtimeNanos,
+                candidateWallClockMillis = location.time,
+                previousWallClockMillis = previousLocation.time,
+            )
+        ) {
+            return
+        }
 
         val acceptedLocation = Location(location)
         lastGpsLocation = acceptedLocation
@@ -466,16 +504,101 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val current = _state.value
         val currentFloor = gpsFloorNumber ?: current.userPosition?.floor ?: lastPositionFloor ?: current.selectedFloor
         updateGpsPosition(acceptedLocation, currentFloor)
+        if (_state.value.locationMode == LocationMode.GPS && lastGpsLocation === acceptedLocation) {
+            scheduleGpsFixExpiry(acceptedLocation)
+        }
     }
 
     private fun isFreshLocation(location: Location): Boolean {
         val fixElapsedNanos = location.elapsedRealtimeNanos
         if (fixElapsedNanos > 0L) {
             val ageNanos = SystemClock.elapsedRealtimeNanos() - fixElapsedNanos
-            return ageNanos in -MAX_FUTURE_FIX_SKEW_NANOS..MAX_LOCATION_AGE_NANOS
+            return GpsAccuracyPolicy.isAgeWithinBounds(
+                age = ageNanos,
+                maximumAge = MAX_LOCATION_AGE_NANOS,
+                maximumFutureSkew = MAX_FUTURE_FIX_SKEW_NANOS,
+            )
         }
         val ageMillis = System.currentTimeMillis() - location.time
-        return ageMillis in -MAX_FUTURE_FIX_SKEW_MS..MAX_LOCATION_AGE_MS
+        return GpsAccuracyPolicy.isAgeWithinBounds(
+            age = ageMillis,
+            maximumAge = MAX_LOCATION_AGE_MS,
+            maximumFutureSkew = MAX_FUTURE_FIX_SKEW_MS,
+        )
+    }
+
+    private fun hasFreshGpsFixWithinThreshold(settings: AppSettings): Boolean {
+        val location = lastGpsLocation ?: return false
+        val fixElapsedNanos = location.elapsedRealtimeNanos
+        return if (fixElapsedNanos > 0L) {
+            GpsAccuracyPolicy.isEligibleForAutomaticGuidance(
+                accuracyMeters = locationAccuracy(location),
+                thresholdMeters = settings.minimumAccuracyMeters,
+                fixAge = SystemClock.elapsedRealtimeNanos() - fixElapsedNanos,
+                maximumAge = MAX_LOCATION_AGE_NANOS,
+                maximumFutureSkew = MAX_FUTURE_FIX_SKEW_NANOS,
+            )
+        } else {
+            GpsAccuracyPolicy.isEligibleForAutomaticGuidance(
+                accuracyMeters = locationAccuracy(location),
+                thresholdMeters = settings.minimumAccuracyMeters,
+                fixAge = System.currentTimeMillis() - location.time,
+                maximumAge = MAX_LOCATION_AGE_MS,
+                maximumFutureSkew = MAX_FUTURE_FIX_SKEW_MS,
+            )
+        }
+    }
+
+    private fun scheduleGpsFixExpiry(location: Location) {
+        if (_state.value.locationMode != LocationMode.GPS || !isInForeground || lastGpsLocation !== location) return
+        val fixElapsedNanos = location.elapsedRealtimeNanos
+        val delayMillis = if (fixElapsedNanos > 0L) {
+            GpsAccuracyPolicy.millisecondsUntilStale(
+                age = SystemClock.elapsedRealtimeNanos() - fixElapsedNanos,
+                maximumAge = MAX_LOCATION_AGE_NANOS,
+                unitsPerMillisecond = NANOS_PER_MILLISECOND,
+            )
+        } else {
+            GpsAccuracyPolicy.millisecondsUntilStale(
+                age = System.currentTimeMillis() - location.time,
+                maximumAge = MAX_LOCATION_AGE_MS,
+                unitsPerMillisecond = 1L,
+            )
+        } ?: return
+
+        gpsFixExpiryJob?.cancel()
+        gpsFixExpiryJob = viewModelScope.launch {
+            delay(delayMillis)
+            if (_state.value.locationMode != LocationMode.GPS || !isInForeground || lastGpsLocation !== location) return@launch
+            if (isFreshLocation(location)) {
+                scheduleGpsFixExpiry(location)
+                return@launch
+            }
+
+            gpsFixExpiryJob = null
+            lastGpsLocation = null
+            positionSmoother.reset()
+            consecutiveOffRouteFixes = 0
+            stopRouteSpeech()
+            announcedRouteSession = -1L
+            _state.update { current ->
+                if (current.locationMode != LocationMode.GPS) current else current.copy(
+                    userPosition = null,
+                    gpsCoordinates = null,
+                    gpsAccuracyMeters = null,
+                    isManualPositionConfirmed = false,
+                    route = null,
+                    routeOriginPosition = null,
+                    isNavigationStarted = false,
+                    routeSteps = emptyList(),
+                    currentRouteStepIndex = 0,
+                    routeProgress = 0f,
+                    routeDistanceMeters = null,
+                    routeMinutes = null,
+                    gpsWarning = appContext.getString(R.string.gps_stale_fix),
+                )
+            }
+        }
     }
 
     private fun locationAccuracy(location: Location): Float? {
@@ -509,13 +632,20 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             return
         }
         val settings = _state.value.settings
-        val isPrecise = accuracy == null || accuracy <= settings.minimumAccuracyMeters
-        if (!isPrecise && settings.switchToManualOnPoorGps) {
-            val warning = appContext.getString(
-                R.string.gps_accuracy_too_low,
-                accuracy?.toInt() ?: 0,
-                settings.minimumAccuracyMeters.toInt(),
-            )
+        val hasSufficientAccuracy = GpsAccuracyPolicy.isWithinThreshold(accuracy, settings.minimumAccuracyMeters)
+        val displayedAccuracy = GpsAccuracyPolicy.displayRadiusMeters(accuracy)
+        val displayedThreshold = GpsAccuracyPolicy.displayRadiusMeters(settings.minimumAccuracyMeters)
+            ?: settings.minimumAccuracyMeters.toInt()
+        if (!hasSufficientAccuracy && settings.switchToManualOnPoorGps) {
+            val warning = if (displayedAccuracy == null) {
+                appContext.getString(R.string.gps_accuracy_missing)
+            } else {
+                appContext.getString(
+                    R.string.gps_accuracy_too_low,
+                    displayedAccuracy,
+                    displayedThreshold,
+                )
+            }
             _state.update { it.copy(userPosition = null, gpsAccuracyMeters = accuracy, gpsWarning = warning, isGpsActive = true) }
             setLocationMode(LocationMode.MANUAL)
             showMessage(
@@ -532,8 +662,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             positionSmoother.reset()
             val warning = appContext.getString(
                 R.string.gps_accuracy_too_low,
-                accuracy.toInt(),
-                settings.minimumAccuracyMeters.toInt(),
+                displayedAccuracy ?: 0,
+                displayedThreshold,
             )
             _state.update { it.copy(userPosition = null, gpsAccuracyMeters = accuracy, gpsWarning = warning, isGpsActive = true) }
             return
@@ -562,10 +692,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         lastPositionFloor = floorNumber
         val warning = when {
             accuracy == null -> appContext.getString(R.string.gps_accuracy_missing)
-            !isPrecise -> appContext.getString(
+            !hasSufficientAccuracy -> appContext.getString(
                 R.string.gps_accuracy_approximate,
-                accuracy?.toInt() ?: 0,
-                settings.minimumAccuracyMeters.toInt(),
+                displayedAccuracy ?: 0,
+                displayedThreshold,
             )
             else -> null
         }
@@ -578,7 +708,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 isGpsActive = true,
             )
         }
-        if (!isPrecise) return
+        if (!hasSufficientAccuracy) return
         _state.value.destination?.let { destination ->
             val latest = _state.value
             when {
@@ -593,6 +723,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         if (isAvailable || _state.value.locationMode != LocationMode.GPS) return
         val hasFreshFix = lastGpsLocation?.let(::isFreshLocation) == true
         if (!hasFreshFix) {
+            gpsFixExpiryJob?.cancel()
+            gpsTimeoutJob?.cancel()
+            gpsTimeoutJob = null
+            gpsFixExpiryJob = null
+            lastGpsLocation = null
+            positionSmoother.reset()
+            consecutiveOffRouteFixes = 0
+            stopRouteSpeech()
+            announcedRouteSession = -1L
             _state.update {
                 it.copy(
                     userPosition = null,
@@ -600,6 +739,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     isManualPositionConfirmed = false,
                     isGpsActive = false,
                     gpsWarning = appContext.getString(R.string.gps_unavailable),
+                    gpsAccuracyMeters = null,
+                    route = null,
+                    routeOriginPosition = null,
+                    isNavigationStarted = false,
+                    routeSteps = emptyList(),
+                    currentRouteStepIndex = 0,
+                    routeProgress = 0f,
+                    routeDistanceMeters = null,
+                    routeMinutes = null,
                 )
             }
         }
@@ -771,6 +919,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     message = message,
                 )
             }
+        }
+
+        if (current.locationMode == LocationMode.GPS && !hasFreshGpsFixWithinThreshold(current.settings)) {
+            failRoute(appContext.getString(R.string.gps_route_fix_required))
+            return
         }
 
         if (!SiteIndoorRouter.isInsideCollege(position.floor, position.x.toDouble(), position.y.toDouble(), current.rooms)) {
@@ -1023,8 +1176,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     ): Boolean {
         if (current.locationMode != LocationMode.GPS) return false
         val location = lastGpsLocation?.takeIf(::isFreshLocation) ?: return false
-        val accuracy = locationAccuracy(location) ?: return false
-        if (accuracy > current.settings.minimumAccuracyMeters) return false
+        val accuracy = locationAccuracy(location)
+        if (!GpsAccuracyPolicy.isWithinThreshold(accuracy, current.settings.minimumAccuracyMeters)) return false
 
         val (from, to) = path.zipWithNext().firstOrNull { (start, end) ->
             start.floor == point.floor && start.floor != end.floor &&
@@ -1244,8 +1397,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun maybeNotifyArrival(point: MapPoint, accuracy: Float?) {
         val destination = _state.value.destination ?: return
-        if (_state.value.locationMode != LocationMode.GPS || accuracy == null ||
-            !accuracy.isFinite() || accuracy > _state.value.settings.minimumAccuracyMeters
+        if (_state.value.locationMode != LocationMode.GPS ||
+            !GpsAccuracyPolicy.isWithinThreshold(accuracy, _state.value.settings.minimumAccuracyMeters)
         ) return
         if (point.floor != destination.floor) return
         val routeEndpoint = _state.value.route?.lastOrNull()?.takeIf { it.floor == point.floor }
@@ -1329,7 +1482,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val point = current.userPosition
         val mayNameNearbyRoom = (current.locationMode == LocationMode.MANUAL && current.isManualPositionConfirmed) ||
             (current.locationMode == LocationMode.GPS &&
-                current.gpsAccuracyMeters?.let { it.isFinite() && it <= current.settings.minimumAccuracyMeters } == true)
+                GpsAccuracyPolicy.isWithinThreshold(current.gpsAccuracyMeters, current.settings.minimumAccuracyMeters))
         val nearby = point?.takeIf { mayNameNearbyRoom }?.let { location ->
             val metersPerUnit = current.navigation?.floors
                 ?.firstOrNull { it.number == location.floor }
@@ -1499,6 +1652,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         textToSpeech?.shutdown()
         textToSpeech = null
         gpsTimeoutJob?.cancel()
+        gpsFixExpiryJob?.cancel()
         dataLoadJob?.cancel()
         super.onCleared()
     }
@@ -1510,6 +1664,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         const val GPS_FIRST_FIX_TIMEOUT_MS = 12_000L
         const val MAX_LOCATION_AGE_MS = 120_000L
         const val MAX_FUTURE_FIX_SKEW_MS = 5_000L
+        const val NANOS_PER_MILLISECOND = 1_000_000L
         const val MAX_LOCATION_AGE_NANOS = 120_000_000_000L
         const val MAX_FUTURE_FIX_SKEW_NANOS = 5_000_000_000L
         const val SHARE_NEARBY_LIMIT_METERS = 20.0

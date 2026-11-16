@@ -28,6 +28,7 @@ import com.logos.navigator.data.model.Room
 import com.logos.navigator.data.model.RouteLineStyle
 import com.logos.navigator.data.model.MapRenderQuality
 import com.logos.navigator.data.model.ThemeMode
+import com.logos.navigator.navigation.GpsAccuracyPolicy
 import com.logos.navigator.navigation.MapOrientation
 import com.logos.navigator.navigation.RouteDirectionCalculator
 import com.logos.navigator.svg.SvgCoordinateConverter
@@ -719,7 +720,8 @@ class CanvasMapView @JvmOverloads constructor(
             userPosition?.takeIf { it.floor == floor.number } ?: return
         }
         val accuracy = accuracyMeters?.takeIf { it.isFinite() && it > 0f }
-        val isApproximate = locationMode == LocationMode.GPS && accuracy != null && accuracy > settings.minimumAccuracyMeters
+        val isApproximate = locationMode == LocationMode.GPS &&
+            !GpsAccuracyPolicy.isWithinThreshold(accuracyMeters, settings.minimumAccuracyMeters)
         if (settings.showAccuracyCircle && locationMode == LocationMode.GPS && accuracy != null) {
             val radius = accuracy / floor.metersPerUnit.toFloat()
             if (radius > 0f) {
