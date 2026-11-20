@@ -74,7 +74,7 @@
 - `python3 tools/generate_kotlin_floor_maps.py --check` — успешно; Kotlin Canvas/Path синхронизированы с SVG (этаж 1: 77 контуров, 41 room-полигон; этаж 2: 91 контур, 46 room-полигонов).
 - `python3 tools/extract_svg_geometry.py maps_and_design/floors/floor_1.svg --strict` и аналогично для `floor_2.svg` — успешно: 41/46 shapes, `warnings=[]`.
 - Все 6 пользовательских SVG существуют, XML разбирается, каждый связан с непустым alt text, явно называющим изображение схемой, а не скриншотом; PNG-рендеры всех шести схем визуально просмотрены.
-- Python-проверка Markdown нашла 17 проектных файлов и 156 inline-ссылок/изображений (включая 6 схем); все локальные пути и заголовочные якоря существуют, пустых alt text нет. `git diff --check` завершился успешно.
+- Python-проверка Markdown нашла 17 проектных файлов и 161 inline-ссылку/изображение (включая 6 схем и ссылки на PR/checks); все локальные пути и заголовочные якоря существуют, пустых alt text нет. `git diff --check` завершился успешно.
 - Source-level проверены Compose search/home/map, `SiteIndoorRouter`, `MainViewModel`, `FusedLocationTracker`, `CanvasMapView`, `FavoritesRepository`, `SettingsDataStore`, updater и ресурсы; приложение не запускалось.
 - `app_name` совпадает с точным именем **«ЛОГОС: Путеводитель»** в `values`, `values-en`, `values-ru`; `applicationId` остался `com.logos.navigator`. `CLAUDE.md` состоит ровно из `@AGENTS.md` и завершающего newline; подтверждённой Claude Code-сессии нет.
 - Статически найдено 9 JVM test-файлов и 41 `@Test`-аннотация. Это инвентаризация тестов, не их запуск.
@@ -88,6 +88,10 @@
 
 ## PR, проверки GitHub и откат
 
-Перед созданием PR `gh pr list --state open` вернул пустой список. Запрос GitHub REST API к защите `main` завершился `HTTP 403 Resource not accessible by integration`; обязательные правила/ревью напрямую подтвердить не удалось. Эта работа выполняется только в назначенной ветке `arena/f009fc52-logos-guide`, от `main` `394361783557c5e578ec05b6a20fe40541bcf436`; в `main` напрямую не коммитить и защиту/ревью не обходить. PR этой работы и его проверки будут указаны в финальном handoff после их фактического создания/запуска. Слияние и APK-релиз в эту задачу не входят.
+Перед созданием PR `gh pr list --state open` вернул пустой список. Запрос GitHub REST API к защите `main` завершился `HTTP 403 Resource not accessible by integration`; обязательные правила напрямую подтвердить не удалось, обход не выполнялся.
+
+Документационный PR [#31](https://github.com/GoShadowS/logos-guide/pull/31) создан из `arena/f009fc52-logos-guide` в `main`, от базы `394361783557c5e578ec05b6a20fe40541bcf436`. На проверенном head `108ded3db3339662c08a23971b34fd017686fd43` PR оставался `OPEN`, merge SHA отсутствовал, `reviewDecision` пуст; GitHub API не перечислял reviews или review requests. `gh pr checks 31` показал `build` **pass** (run [44789783518](https://github.com/GoShadowS/logos-guide/actions/runs/44789783518/job/136474076752), 4m24s) и `validate` **pass** (run [44789783561](https://github.com/GoShadowS/logos-guide/actions/runs/44789783561/job/136474075814), 7s). Дополнительные push-event check runs для того же SHA также завершились успешно: `build` [44789743901](https://github.com/GoShadowS/logos-guide/actions/runs/44789743901/job/136473936026) и `validate` [44789744037](https://github.com/GoShadowS/logos-guide/actions/runs/44789744037/job/136473936309). GitHub API проставил этим checks даты `2026-11-20`, позднее даты среды `2026-10-12`; они приведены как полученные метаданные, без изменения даты отчёта.
+
+Эта строка фиксирует проверку head `108ded3…` до следующего отчётного коммита; последний push создаст новый head и запустит новые checks, их текущий результат сообщается отдельно в handoff. PR не слит; APK-релиз не выполнялся. В `main` напрямую не коммитить и ревью/защиту не обходить.
 
 Для отката до merge — обычный `git revert <фактический commit>` только в текущей ветке и обновление PR. После merge — отдельный revert PR от актуального `main` по фактическому merge SHA. Исторические отчёты и исходный APK вручную не переписывать/не заменять.
