@@ -6,5 +6,6 @@
 - [2026-10-12 — отключение OpenDoors (исторический отчёт PR #27, с текущей оговоркой)](2026-10-12-opendoors-build-gate.md)
 - [2026-10-12 — сверка исходников, функций, переноса данных и Markdown](2026-10-12-full-source-ui-markdown-audit.md)
 - [2026-10-12 — GPS, имя приложения и source-аудит функций](2026-10-12-gps-location-branding-audit.md)
+- [2026-10-12 — схемы пользовательского руководства и полный Markdown-аудит](2026-10-12-user-guide-diagrams-markdown-audit.md)
 - [2026-11-16 — каталог функций, версия и аудит встроенного updater](2026-11-16-feature-catalog-updater-audit.md)
 - [2026-11-16 — план перехода на APK и ревизия всех Markdown](2026-11-16-release-transition-and-markdown-audit.md)
