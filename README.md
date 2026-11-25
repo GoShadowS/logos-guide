@@ -12,7 +12,7 @@
 
 | Что сверено | Фактическое состояние |
 |---|---|
-| Конфигурация проверенного `origin/main` (`394361783557c5e578ec05b6a20fe40541bcf436`; сверено 2026-10-12) | `app/build.gradle.kts` задаёт `versionName = "1.1.0-release"`, `versionCode = 4`, `applicationId = "com.logos.navigator"`. Это значение исходников, а не подтверждение выпуска `1.1.0`. |
+| Конфигурация снимка исходников `394361783557c5e578ec05b6a20fe40541bcf436` | `app/build.gradle.kts` задаёт `versionName = "1.1.0-release"`, `versionCode = 4`, `applicationId = "com.logos.navigator"`. Это значения указанного снимка, а не подтверждение текущего состояния `main` или выпуска `1.1.0`. |
 | Публикация GitHub | В API есть один Release с тегом `release` и asset `logos-guide-1.0.0-opendoors.apk`; исходники этого тега задают `1.0.0-opendoors` / code 3. Удалённый APK не удалось скачать, поэтому его бинарные метаданные и сертификат не подтверждены. [Страница Release](https://github.com/GoShadowS/logos-guide/releases/tag/release) ведёт на этот старый выпуск, а не на `1.0.1-release`. |
 | APK, отслеживаемый в репозитории | Локальный `app/release/app-release.apk` и `output-metadata.json` указывают `com.logos.navigator`, `1.1.0-release` / code 4; это не APK целевой версии `1.0.1`. Сертификат извлечён сторонним парсером, но криптографическая проверка `apksigner verify` не выполнена. |
 | Конфигурация выпуска `1.0.1-release` | Текущий Gradle/workflow пока не согласован с целевой версией; `versionCode` для `1.0.1-release` не подтверждён. |
