@@ -9,3 +9,4 @@
 - [2026-11-16 — каталог функций, версия и аудит встроенного updater](2026-11-16-feature-catalog-updater-audit.md)
 - [2026-11-16 — план перехода на APK и ревизия всех Markdown](2026-11-16-release-transition-and-markdown-audit.md)
 - [2026-11-21 — схемы пользовательского руководства и полный Markdown-аудит](2026-11-21-user-guide-diagrams-markdown-audit.md)
+- [2026-11-25 — исправление датировки ревизии и полный Markdown-аудит](2026-11-25-revision-date-correction.md)
